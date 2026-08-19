@@ -1,37 +1,26 @@
 # Latest Security Audit
 **Date:** 2026-08-19
 
-## CSO Report: SecureDocs Demo
+## CSO Report: Gemstack CLI v0.2 Installer
 
-### 1. IDOR (Insecure Direct Object Reference)
+### 1. Path Traversal & Symlinks
 - **Status:** [Fixed]
 - **Severity:** Critical
-- **Detail:** Verificado por test automatizado `smoke-test.js`. Endpoint `/api/docs/:id` devuelve 404 al intentar cruzar scopes. Además, se validó que inyectar explícitamente `{"user_id": 1}` en el body de POST `/api/docs` es ignorado a favor del user extraído del header mock.
+- **Detail:** Verificado en `src/lib/filesystem-safe.js`. `resolveSafe` verifica con `startsWith()` que el directorio resultante nunca escape la carpeta target, bloqueando `../../` payloads o configuraciones ambiguas.
 
-### 2. SQL Injection
+### 2. Supply Chain Risks
 - **Status:** [Fixed]
 - **Severity:** High
-- **Detail:** Se utilizan sentencias preparadas de `sqlite3` (`db.run(..., [params])`).
+- **Detail:** Se decidió implementar CLI con **cero dependencias**. `package.json` está libre de packages externos en runtime. Elimina 100% ataques de cadena de suministro vía NPM sobre Gemstack CLI actual.
 
-### 3. Headers & XSS
+### 3. Ejecución de código arbitrario
+- **Status:** [Fixed]
+- **Severity:** High
+- **Detail:** El comando `init` realiza operaciones FS puras de lectura y escritura. No emite llamadas a `child_process.exec`, impidiendo Remote Code Execution en el target.
+
+### 4. Overwrite de data y backups sin secretos
 - **Status:** [Fixed]
 - **Severity:** Medium
-- **Detail:** Middleware in-line aplica `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, y `Content-Security-Policy`. Uso de `textContent` en Vanilla JS neutraliza XSS reflejado/almacenado probado.
+- **Detail:** `src/lib/backup.js` realiza el traslado físico en caso de colisión. El logging de backup fue revisado para sólo imprimir en consola el *path* y no el contenido del archivo, lo que protege contra fugas de credenciales locales hacia CI/CD logs. 
 
-### 4. Database File Handling
-- **Status:** [Fixed]
-- **Severity:** High
-- **Detail:** `securedocs.sqlite` explícitamente añadido a `.gitignore`. Previene fuga de datos en Git.
-
-### 5. Authentication Mock
-- **Status:** [Manual review required]
-- **Severity:** Informational
-- **Detail:** Se usa un header `X-Mock-User-Id` en texto plano.
-- **Decisión:** Riesgo documentado y aceptado (by design) en el alcance de la demo.
-
-### 6. CORS / Rate Limiting
-- **Status:** [Not applicable]
-- **Severity:** Low
-- **Detail:** No hay librerías de CORS habilitadas lo cual restringe el dominio cruzado por defecto a *same-origin*. No hay Rate Limiting pero siendo una demo local no presenta superficie de ataque expuesta a internet.
-
-**Decisión General**: APPROVED. Smoke tests automatizados garantizan mitigación de los riesgos top reportados.
+**Decisión General**: APPROVED. El diseño priorizó defensibilidad por encima de comodidad, resultando en un instalador aséptico.

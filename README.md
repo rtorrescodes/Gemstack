@@ -4,12 +4,6 @@
 
 It turns your AI coding environment into a structured product and engineering workflow with reusable roles, safety guardrails, spec-driven planning, practical security review, QA, release discipline, and clean handoffs between sessions.
 
-Gemstack is conceptually inspired by the workflow philosophy of `gstack`, but it is **not a Claude Code port** and does not depend on `.claude/`, `CLAUDE.md`, or Claude-specific runtime behavior. It is built around Antigravity’s `.agents/rules/` and `.agents/skills/` model, with portable fallbacks through `.gemstack/`, `specs/`, `docs/`, and CLI scripts.
-
----
-
-## Why Gemstack exists
-
 AI coding assistants are powerful, but raw prompting often leads to messy outcomes:
 
 - vague requirements,
@@ -49,7 +43,20 @@ Typical flow:
 /handoff
 ```
 
-Recommended project lifecycle:
+## Installation (v0.2.0 Draft)
+
+Currently, Gemstack v0.2 is in draft and is designed to be installed globally or via `npx` into any project.
+
+**To try it locally without publishing:**
+```bash
+git clone https://github.com/rtorrescodes/Gemstack.git
+cd Gemstack
+npm link
+cd ../your-target-project
+gemstack init
+```
+
+## Recommended project lifecycle:
 
 1. Clarify the idea with `/office-hours`
 2. Write the spec with `/specify`
