@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [v0.1.0] - 2026-08-19
 ### Added
-- Initial Gemstack structure with Spec-Driven templates.
-- 26 pseudo-commands mapped in `.agents/rules/01-gemstack-core.md`.
-- 13 progressive skills including SDD, CSO, Investigate, Guard, and Learn.
-- `bin/gemstack` and `bin/gemstack-doctor` for Unix initialization.
-- Soporte inicial nativo para PowerShell (`bin/gemstack.ps1`, `bin/gemstack-doctor.ps1`).
-- Documentación multiplataforma Windows/PowerShell y Unix/Bash.
-- Auto-review and security audits available in `docs/`.
+- framework Gemstack base (local-first, agent-centric).
+- Antigravity-native `.agents/rules` and `.agents/skills` structure.
+- Spec-Driven Development workflow templates (`specs/current`).
+- Handoff and resume memory system (`handoff.md`).
+- Security/CSO checklist and workflows.
+- SecureDocs demo app (`demo-app/`) to test methodologies.
+- Anti-IDOR smoke tests via `npm run smoke`.
+- PowerShell encoding fix and robust cross-platform CLI helpers (`bin/gemstack`, `bin/gemstack.ps1`).
