@@ -1,5 +1,7 @@
 # Gemstack
 
+[![Main CI](https://github.com/rtorrescodes/Gemstack/actions/workflows/main-ci.yml/badge.svg)](https://github.com/rtorrescodes/Gemstack/actions/workflows/main-ci.yml)
+
 **Gemstack** is a local-first, agent-centric software delivery framework for **Google Antigravity** and **Gemini Pro**.
 
 It turns your AI coding environment into a structured product and engineering workflow with reusable roles, safety guardrails, spec-driven planning, practical security review, QA, release discipline, and clean handoffs between sessions.

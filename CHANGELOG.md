@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.3.0] - Unreleased
+### Added
+- GitHub Actions CI/CD workflows (`pr-ci.yml`, `main-ci.yml`, `release-readiness.yml`).
+- Zero-dependency Node.js CI scripts (`check-frontmatter.js`, `check-template-clean.js`, `check-mojibake.js`, `check-package-contents.js`, `smoke-cli.js`).
+- Strict repository hygiene validation ensuring `template/` cleanliness before any release.
+- Tarball artifact generation workflow for manual validation.
+
 ## [Unreleased]
 ### Added
 - Zero-dependency Node.js CLI (`src/cli.js`) to install and update Gemstack via `npx gemstack init` or `gemstack update`.

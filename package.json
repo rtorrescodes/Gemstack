@@ -11,7 +11,14 @@
   },
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "pack:dry": "npm pack --dry-run"
+    "pack:dry": "npm pack --dry-run",
+    "ci:frontmatter": "node scripts/ci/check-frontmatter.js",
+    "ci:template": "node scripts/ci/check-template-clean.js",
+    "ci:mojibake": "node scripts/ci/check-mojibake.js",
+    "ci:package": "node scripts/ci/check-package-contents.js",
+    "ci:smoke": "node scripts/ci/smoke-cli.js",
+    "ci:demo": "npm --prefix demo-app install && npm --prefix demo-app run smoke",
+    "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:smoke"
   },
   "dependencies": {},
   "devDependencies": {}
