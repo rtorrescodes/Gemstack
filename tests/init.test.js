@@ -12,11 +12,23 @@ function createTempDir() {
 }
 
 test('Filesystem safe blocks traversal', (t) => {
-    assert.throws(() => {
-        // Need absolute paths for resolve to work correctly on Windows tests
-        const safeTarget = path.resolve('C:\\safe\\target');
-        fssafe.resolveSafe(safeTarget, '../malicious/path');
-    }, /Path Traversal blocked/);
+    const safeTarget = path.resolve('C:\\tmp\\app');
+    
+    // Attempt to escape
+    assert.throws(() => fssafe.resolveSafe(safeTarget, '../malicious'), /Path Traversal blocked/);
+    assert.throws(() => fssafe.resolveSafe(safeTarget, '..\\malicious'), /Path Traversal blocked/);
+    
+    // Absolute paths pointing outside
+    assert.throws(() => fssafe.resolveSafe(safeTarget, '/etc/passwd'), /Path Traversal blocked/);
+    assert.throws(() => fssafe.resolveSafe(safeTarget, 'D:\\malicious'), /Path Traversal blocked/);
+    
+    // Sibling directory with similar prefix (e.g. app-evil)
+    assert.throws(() => fssafe.resolveSafe(safeTarget, '../app-evil/file'), /Path Traversal blocked/);
+
+    // Allowed paths
+    assert.doesNotThrow(() => fssafe.resolveSafe(safeTarget, 'normal/file.txt'));
+    assert.doesNotThrow(() => fssafe.resolveSafe(safeTarget, 'folder/with spaces/file.txt'));
+    assert.doesNotThrow(() => fssafe.resolveSafe(safeTarget, '')); // The target itself
 });
 
 test('Init command copies scaffolding into empty directory', async (t) => {

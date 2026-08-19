@@ -3,12 +3,16 @@ const fs = require('fs');
 
 module.exports = {
     resolveSafe: (targetDir, relativePath) => {
-        const resolved = path.resolve(targetDir, relativePath);
-        const targetResolved = path.resolve(targetDir);
-        if (!resolved.startsWith(targetResolved)) {
+        const target = path.resolve(targetDir);
+        const candidate = path.resolve(targetDir, relativePath);
+        const rel = path.relative(target, candidate);
+        
+        const isInside = rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+        
+        if (!isInside) {
             throw new Error(`Path Traversal blocked: ${relativePath}`);
         }
-        return resolved;
+        return candidate;
     },
     ensureDir: (dirPath) => {
         if (!fs.existsSync(dirPath)) {
