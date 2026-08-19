@@ -4,15 +4,14 @@
 Completar la fase de construcción (Build) de Gemstack v0.2.0, transicionando la herramienta desde un template de copiado y pegado local hacia un CLI en Node.js de 0 dependencias con lógica defensiva.
 
 ## 2. Estado actual
-V0.2.0 desarrollada con éxito. Se movieron copias asépticas de los assets a `template/`, se introdujeron las funciones de manifest, path-safety y backup seguro con crypto hash en `src/lib/`. Los comandos `init` y `update` ahora detectan variaciones de usuario abortando limpiamente para no pisar código. La suite de pruebas de `node:test` pasa positivamente y el paquete NPM seco ignora archivos de basura. Todo respaldado a main.
+V0.2.0 finalizada, endurecida y etiquetada en GitHub. Se aplicó hardening crítico contra path-traversal en `src/lib/filesystem-safe.js` utilizando matemática de rutas con `path.relative()`, logrando un aislamiento confiable incluso ante symlinks y rutas absolutas confusas. Las validaciones de los paquetes mediante `npm link` y `npm pack` (vía tarball) resultaron exitosas localmente en directorios dummy `gemstack-v02-link-test`. El proyecto ya tiene el tag `v0.2.0` publicado.
 
 ## 3. Archivos y cambios
-- **Creados (CLI):** `src/cli.js`, `src/commands/*.js` y `src/lib/*.js` (parser manual, fs recursivo seguro).
-- **Creados (Empaquetado):** `package.json`, `.npmignore`.
-- **Creados (Template):** `template/` con clon de la arquitectura sin historiales ni estados de sesión sucios.
-- **Creados (QA):** `tests/init.test.js`.
-- **Modificados:** `README.md`, `CHANGELOG.md` (Unreleased), `.gitignore`. 
-- **Modificados (Documentación):** `docs/reviews/latest-review.md` y `docs/security/latest-security-audit.md` con las auditorías arquitectónicas del CLI.
+- **Hardening:** `src/lib/filesystem-safe.js` refactorizado.
+- **QA:** `tests/init.test.js` ampliado con tests maliciosos para path-traversal.
+- **Docs:** `RELEASE_NOTES.md` completado con Highlights y Limitaciones.
+- **Config:** `package.json` estandarizado como release version `0.2.0`.
+- **Handoff:** Actualizado pos-lanzamiento v0.2.0.
 
 ## 4. Intentos fallidos
 <!-- NUNCA BORRES ESTA SECCIÓN. Si crece mucho, mueve entradas antiguas a handoff_archive.md. -->
@@ -23,4 +22,8 @@ V0.2.0 desarrollada con éxito. Se movieron copias asépticas de los assets a `t
 - Parser manual de `--help` no captaba globalmente si se ponía como segundo o primer argumento tras Node (`argv[2]`). Solución: Parser refactorizado para inferencia temprana.
 
 ## 5. Próximos pasos
-El CLI base y la lógica "safety-first" están construidos y respaldados con tests nativos. Gemstack v0.2.0 está listo para la validación final del Release Candidate (probando el symlink local con un test-drive si el usuario desea), para posteriormente preparar y disparar el deployment de publicación hacia el registro NPM y GitHub Tags.
+El framework Gemstack v0.2.0 está implementado, sellado con checksum SHA-256 seguro anti-traversal y probado localmente. NO hay distribución activa en el repositorio NPM público todavía.
+El próximo ciclo (v0.3 o posterior) involucrará:
+1. Publicación automatizada en NPM (`npm publish`) si es autorizada.
+2. Configuración de GitHub Actions para CI/CD de los tests nativos creados.
+3. Posible mejora de UX en el proceso de desajustes/conflictos al ejecutar `gemstack update`.
