@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Gemstack CLI
+
+COMMAND=$1
+
+case $COMMAND in
+  init)
+    echo "🚀 Iniciando Gemstack v0.1..."
+    mkdir -p .agents/rules .agents/skills .gemstack specs/current specs/templates docs bin
+    echo "✅ Estructura creada."
+    ;;
+  list)
+    echo "📂 Skills instalados:"
+    ls -1 .agents/skills/
+    ;;
+  show)
+    cat ".agents/skills/$2/SKILL.md" 2>/dev/null || echo "❌ Skill no encontrado"
+    ;;
+  doctor)
+    bash ./bin/gemstack-doctor
+    ;;
+  handoff)
+    cat handoff.md
+    ;;
+  security-audit)
+    echo "Para correr un audit real, invoca /cso en tu chat con Antigravity."
+    ;;
+  *)
+    echo "Uso: gemstack {init|list|show <skill>|doctor|handoff|security-audit}"
+    ;;
+esac

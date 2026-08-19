@@ -1,0 +1,11 @@
+{
+  "version": "0.1",
+  "current_phase": "idle",
+  "active_spec": null,
+  "guard_mode": {
+    "careful": false,
+    "freeze": false,
+    "allowed_paths": []
+  },
+  "last_update": null
+}

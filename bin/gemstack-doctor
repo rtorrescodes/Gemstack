@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Gemstack Doctor CLI
+echo "🩺 Gemstack Doctor"
+if command -v git >/dev/null 2>&1; then echo "✅ Git instalado"; else echo "❌ Git no instalado"; exit 1; fi
+if [ -d ".git" ]; then echo "✅ Repositorio Git detectado"; else echo "❌ No es un repositorio Git"; exit 1; fi
+if [ -d ".agents/rules" ]; then echo "✅ .agents/rules existe"; else echo "❌ Falta .agents/rules"; exit 1; fi
+if [ -d ".agents/skills" ]; then echo "✅ .agents/skills existe"; else echo "❌ Falta .agents/skills"; exit 1; fi
+if [ -d ".gemstack" ]; then echo "✅ .gemstack existe"; else echo "❌ Falta .gemstack"; exit 1; fi
+if [ -d "specs/current" ]; then echo "✅ specs/current existe"; else echo "❌ Falta specs/current"; exit 1; fi
+
+if [ -f "handoff.md" ]; then echo "✅ handoff.md existe"; else touch handoff.md && echo "✅ handoff.md creado"; fi
+if [ -f "handoff_archive.md" ]; then echo "✅ handoff_archive.md existe"; else touch handoff_archive.md && echo "✅ handoff_archive.md creado"; fi
+
+if command -v node >/dev/null 2>&1; then echo "✅ Node detectado"; else echo "⚠️ Node no detectado (opcional)"; fi
+echo "💡 Antigravity Browser nativo: Usa /browser en Antigravity, o instala Playwright si ejecutas headless."
+echo "✅ Diagnóstico completado."
