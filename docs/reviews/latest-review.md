@@ -1,19 +1,17 @@
-# Última Revisión de Gemstack (Auto-Review)
-**Fecha:** 2026-08-19
-**Tipo:** Dogfooding /review
+# Latest Review
+**Date:** 2026-08-19
 
-## Consistencia de Nombres
-- ✅ Todos los skills siguen el formato `gemstack-<nombre>`.
-- ✅ Los comandos del CLI coinciden con la documentación (`init`, `list`, `show`, `doctor`, `handoff`, `security-audit`).
+## Overview
+Revisión de la implementación de `demo-app/` (SecureDocs).
 
-## Documentación vs Skills
-- ✅ `docs/skills.md` lista todos los 26 pseudo-comandos y los enruta correctamente.
-- ✅ Los comandos en el README coinciden con los disponibles.
+## Archivos Revisados
+- `demo-app/server.js`: Código estructurado correctamente. Middleware modularizado y Express usado apropiadamente. Uso de endpoints RESTful.
+- `demo-app/database.js`: Inicialización correcta con tabla `users` y `documents`, usando pattern asíncrono para el seed.
+- `demo-app/public/app.js`: Clean code usando `async/await` y separación en funciones para recargar componentes de UI.
 
-## Errores Obvios Corregidos
-- **YAML Frontmatter:** Se corrigió el key de `trigger` a `triggers` como array en todos los archivos `.agents/skills/*/SKILL.md` y `01-gemstack-core.md`.
-- **Bash Scripts en Windows:** Al ejecutar `bin/gemstack-doctor` a través de WSL, el entorno actual arroja un error (`execvpe failed`). Se documenta que en Windows nativo sin WSL se debe depender de PowerShell o inspección manual por ahora, pero la lógica del script está saneada para prevenir falsos positivos (ej. "✅ Git no instalado").
+## Recomendaciones Técnicas
+- **Database Connection**: SQLite se está abriendo directamente en `database.js`. Para producción o apps más escalables se requeriría pooling o refactor. Aceptable para demo.
+- **Express Error Handling**: Se captura error en base de datos devolviendo estatus 500. Se recomienda middleware global de captura de errores para no repetir el control asíncrono.
+- **Data Validation**: Existe validación manual de tamaño en `req.body`. Recomendable librería como `zod` o `express-validator` en futuras iteraciones.
 
-## Gaps para v0.2
-- Añadir versiones en PowerShell (`.ps1`) para los scripts de inicialización nativos en Windows.
-- Tests automatizados del ruteador de Antigravity.
+**Decisión**: APPROVED para v0.1 de demo.

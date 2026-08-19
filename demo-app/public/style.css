@@ -1,0 +1,5 @@
+body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+header { background: #eee; padding: 10px; margin-bottom: 20px; }
+.docs-section, .test-section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
+pre { background: #333; color: lime; padding: 10px; }
+input, textarea, button { display: block; margin: 10px 0; width: 100%; max-width: 400px; padding: 8px; }

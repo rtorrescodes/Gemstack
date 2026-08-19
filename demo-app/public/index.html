@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SecureDocs Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>SecureDocs</h1>
+        <label for="user-select">Logged in as:</label>
+        <select id="user-select"></select>
+    </header>
+
+    <main>
+        <section class="docs-section">
+            <h2>My Documents</h2>
+            <ul id="doc-list"></ul>
+            
+            <h3>Create New</h3>
+            <form id="create-form">
+                <input type="text" id="title" placeholder="Title" required>
+                <textarea id="content" placeholder="Content" required></textarea>
+                <button type="submit">Create</button>
+            </form>
+        </section>
+
+        <section class="test-section">
+            <h2>Test Direct Access (IDOR QA)</h2>
+            <input type="number" id="test-id" placeholder="Doc ID">
+            <button id="btn-read">Read</button>
+            <button id="btn-delete">Delete</button>
+            <pre id="test-output"></pre>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
