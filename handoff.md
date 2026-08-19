@@ -1,15 +1,14 @@
 # Handoff
 
 ## 1. Objetivo
-Validar automatizadamente la seguridad IDOR de SecureDocs mediante la adición de scripts "zero-dependency" y health checks.
+Preparar y liberar la versión `v0.1.0` de Gemstack asegurando la integridad del framework a través de un clon limpio (release check) y la correcta publicación de tags en origin.
 
 ## 2. Estado actual
-Completado exitosamente. Se añadió un smoke-test script nativo (`npm run smoke`) que valida en fondo el aislamiento de sesiones entre los mocks de Alice y Bob sin intervención manual. La suite `/review`, `/cso` y `/qa` reflejan la evidencia final generada y testeada en Node. Todo versionado en origen.
+Completado exitosamente. Se realizó un release-check clonando en `C:\CODES\Gemstack-release-check`, se validaron todos los flujos de CLI sin mojibakes y la suite anti-IDOR ejecutó exitosamente. Se publicaron las `RELEASE_NOTES.md`, se actualizó el `CHANGELOG.md` y se empujó el tag `v0.1.0`.
 
 ## 3. Archivos y cambios
-- **Modificados:** `demo-app/server.js` (añadió endpoint de /health), `demo-app/package.json` (nuevo script), `demo-app/README.md`.
-- **Creado:** `demo-app/scripts/smoke-test.js` (Lógica de testeo e instanciación del backend).
-- **Actualizados (Docs):** `docs/qa/latest-qa.md`, `docs/reviews/latest-review.md`, `docs/security/latest-security-audit.md` documentando hallazgos reales.
+- **Creados:** `RELEASE_NOTES.md` resumiendo highlights de v0.1.0.
+- **Modificados:** `CHANGELOG.md` (refinando lista), `bin/gemstack-doctor.ps1` (removiendo acento para blindaje ASCII), `handoff.md`.
 
 ## 4. Intentos fallidos
 <!-- NUNCA BORRES ESTA SECCIÓN. Si crece mucho, mueve entradas antiguas a handoff_archive.md. -->
@@ -18,5 +17,8 @@ Completado exitosamente. Se añadió un smoke-test script nativo (`npm run smoke
 - Caracteres de codificación (DiagnÃ³stico) persistieron en PowerShell console a pesar del reemplazo UTF-8 automatizado. Solución: reescritura directa del archivo usando las herramientas nativas del agente y ASCII labels por seguridad.
 
 ## 5. Próximos pasos
-1. La aplicación v0.1.0 (Demo Core) está validada, securizada y estable.
-2. Explorar y empezar el roadmap planificado de v0.2.0 (por ejemplo, tests unitarios reales y refactor para CI).
+La versión `v0.1.0` está en firme. Para la v0.2.0:
+1. Diseñar el spec.
+2. Añadir tests automatizados integrales para el ruteo interno (simulando Antigravity triggers).
+3. Añadir distribuciones instalables (npm package / scripts de instalación remota).
+4. Configurar flujos de CI (GitHub Actions).
