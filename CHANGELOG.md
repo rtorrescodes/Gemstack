@@ -2,12 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.3.0] - Unreleased
+## [v0.3.0] - 2026-08-19
 ### Added
 - GitHub Actions CI/CD workflows (`pr-ci.yml`, `main-ci.yml`, `release-readiness.yml`).
-- Zero-dependency Node.js CI scripts (`check-frontmatter.js`, `check-template-clean.js`, `check-mojibake.js`, `check-package-contents.js`, `smoke-cli.js`).
+- Zero-dependency Node.js CI scripts under `scripts/ci/` (`check-frontmatter.js`, `check-template-clean.js`, `check-mojibake.js`, `check-package-contents.js`, `smoke-cli.js`).
 - Strict repository hygiene validation ensuring `template/` cleanliness before any release.
 - Tarball artifact generation workflow for manual validation.
+- SecureDocs smoke testing embedded in CI (`ci:demo`).
+- `.gitattributes` to enforce consistent EOL globally.
+- README CI badge.
+- Added package artifact validation ensuring no publish secrets.
+- explicitly prevented any npm publish automation for safety.
 
 ## [Unreleased]
 ### Added

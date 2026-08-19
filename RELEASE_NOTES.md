@@ -1,5 +1,54 @@
 # Gemstack Release Notes
 
+# Gemstack v0.3.0
+
+## Highlights
+- GitHub Actions CI
+- PR CI on Ubuntu with Node 18/20
+- Main CI cross-platform matrix on Ubuntu, Windows, macOS with Node 18/20
+- Manual release-readiness workflow
+- Zero-dependency CI scripts under scripts/ci/
+- Frontmatter validation
+- Template cleanliness validation
+- Mojibake detection
+- Package content validation
+- CLI smoke tests
+- SecureDocs smoke tests
+- Artifact generation for npm tarball
+- No npm publish automation
+
+## Validation
+- `npm test`: PASS
+- `npm run ci:all`: PASS
+- `npm run ci:demo`: PASS
+- `npm run pack:dry`: PASS
+- `main-ci` result: SUCCESS (expected)
+- `release-readiness` result: SUCCESS (expected)
+- artifact generated: `gemstack-npm-tarball`
+
+## Safety
+- no npm publish
+- no automatic GitHub Release
+- no automatic tag creation by workflow
+- no secrets printed in logs
+- package contents checked
+- template cleanliness checked
+
+## Known limitations
+- npm publish still manual/future
+- GitHub Release still manual/future
+- CI scripts are custom zero-deps, not full linters
+- release artifact downloads from GitHub UI may be zipped by GitHub
+
+## Next
+- v0.4 or future: npm publish planning
+- GitHub Release automation planning
+- better update diff UX
+- deeper symlink/path tests
+- optional browser QA automation
+
+---
+
 # Gemstack v0.2.0
 
 ## Highlights
