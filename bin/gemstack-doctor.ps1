@@ -35,4 +35,4 @@ try {
 Write-Host "[OK] PowerShell funcional"
 
 Write-Host "[INFO] Antigravity Browser nativo: Usa /browser en Antigravity, o instala Playwright si ejecutas headless."
-Write-Host "[OK] Diagnóstico completado."
+Write-Host "[OK] Diagnostico completado."
