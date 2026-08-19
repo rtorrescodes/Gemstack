@@ -4,14 +4,14 @@
 Completar la fase de construcción (Build) de Gemstack v0.2.0, transicionando la herramienta desde un template de copiado y pegado local hacia un CLI en Node.js de 0 dependencias con lógica defensiva.
 
 ## 2. Estado actual
-V0.2.0 finalizada, endurecida y etiquetada en GitHub. Se aplicó hardening crítico contra path-traversal en `src/lib/filesystem-safe.js` utilizando matemática de rutas con `path.relative()`, logrando un aislamiento confiable incluso ante symlinks y rutas absolutas confusas. Las validaciones de los paquetes mediante `npm link` y `npm pack` (vía tarball) resultaron exitosas localmente en directorios dummy `gemstack-v02-link-test`. El proyecto ya tiene el tag `v0.2.0` publicado.
+V0.3.0 finalizada e implementada. Se añadieron flujos exhaustivos de GitHub Actions (`pr-ci.yml`, `main-ci.yml`, `release-readiness.yml`) para asegurar protección anti-regresiones, line-ending normativos y limpieza estricta. Todo el CI core fue construido usando Zero-Dependencies (nativo en Node) y validado cross-platform localmente antes de empujar los workflows a GitHub.
 
 ## 3. Archivos y cambios
-- **Hardening:** `src/lib/filesystem-safe.js` refactorizado.
-- **QA:** `tests/init.test.js` ampliado con tests maliciosos para path-traversal.
-- **Docs:** `RELEASE_NOTES.md` completado con Highlights y Limitaciones.
-- **Config:** `package.json` estandarizado como release version `0.2.0`.
-- **Handoff:** Actualizado pos-lanzamiento v0.2.0.
+- **CI Workflows:** Creados `.github/workflows/` (pr, main, release).
+- **Scripts:** `scripts/ci/*` (validadores de mojibake, frontmatter, package, clean template, smoke tests).
+- **Git:** `.gitattributes` conservador asegurando CR/LF sano.
+- **Config:** `package.json` actualizado con battery de aliases `ci:*`.
+- **Docs:** `README.md` incluye el Badge, sumado a `CHANGELOG.md` y `docs/release.md`.
 
 ## 4. Intentos fallidos
 <!-- NUNCA BORRES ESTA SECCIÓN. Si crece mucho, mueve entradas antiguas a handoff_archive.md. -->
@@ -22,8 +22,4 @@ V0.2.0 finalizada, endurecida y etiquetada en GitHub. Se aplicó hardening crít
 - Parser manual de `--help` no captaba globalmente si se ponía como segundo o primer argumento tras Node (`argv[2]`). Solución: Parser refactorizado para inferencia temprana.
 
 ## 5. Próximos pasos
-El framework Gemstack v0.2.0 está implementado, sellado con checksum SHA-256 seguro anti-traversal y probado localmente. NO hay distribución activa en el repositorio NPM público todavía.
-El próximo ciclo (v0.3 o posterior) involucrará:
-1. Publicación automatizada en NPM (`npm publish`) si es autorizada.
-2. Configuración de GitHub Actions para CI/CD de los tests nativos creados.
-3. Posible mejora de UX en el proceso de desajustes/conflictos al ejecutar `gemstack update`.
+El próximo paso será confirmar si el `main-ci.yml` acaba de correr exitosamente en el dashboard de GitHub Actions tras este empuje. Si pasa verde, la release candidate `v0.3.0` estará formalmente lista para un Tag final de Github. Posibles tareas futuras incluyen habilitar un paso oficial de automatización para `npm publish` y GitHub Release a través de tokens, o empezar la `v0.4.0` orientada a extender las capabilities de las skills de testing/QA automático de browser.
