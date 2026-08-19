@@ -1,10 +1,10 @@
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
-$OutputEncoding = [System.Text.UTF8Encoding]::new()
-
 param(
     [string]$Command = "",
     [string]$Arg1 = ""
 )
+
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
 
 $ErrorActionPreference = "Stop"
 
