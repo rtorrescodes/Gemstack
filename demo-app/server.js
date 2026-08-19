@@ -14,6 +14,10 @@ app.use((req, res, next) => {
 
 app.use(express.static('public'));
 
+app.get('/api/health', (req, res) => {
+    res.json({ ok: true, app: 'SecureDocs' });
+});
+
 app.get('/api/users', (req, res) => {
     db.all(`SELECT * FROM users`, [], (err, rows) => res.json(rows));
 });

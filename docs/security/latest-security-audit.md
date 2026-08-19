@@ -5,23 +5,33 @@
 
 ### 1. IDOR (Insecure Direct Object Reference)
 - **Status:** [Fixed]
-- **Detail:** Verificado en `demo-app/server.js`. Los endpoints `/api/docs/:id` (GET, PUT, DELETE) incluyen la restricción `AND user_id = ?` usando `req.user.id`. El servidor interceptará cualquier intento de acceso cruzado entre Alice y Bob devolviendo HTTP 404.
+- **Severity:** Critical
+- **Detail:** Verificado por test automatizado `smoke-test.js`. Endpoint `/api/docs/:id` devuelve 404 al intentar cruzar scopes. Además, se validó que inyectar explícitamente `{"user_id": 1}` en el body de POST `/api/docs` es ignorado a favor del user extraído del header mock.
 
 ### 2. SQL Injection
 - **Status:** [Fixed]
-- **Detail:** Se utilizan sentencias preparadas de `sqlite3` (`db.run(..., [params])`). Los datos del usuario nunca se concatenan directamente en la query.
+- **Severity:** High
+- **Detail:** Se utilizan sentencias preparadas de `sqlite3` (`db.run(..., [params])`).
 
-### 3. Headers
+### 3. Headers & XSS
 - **Status:** [Fixed]
-- **Detail:** Se implementó middleware in-line que aplica cabeceras clave: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, y un `Content-Security-Policy` básico que solo permite self-source. 
+- **Severity:** Medium
+- **Detail:** Middleware in-line aplica `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, y `Content-Security-Policy`. Uso de `textContent` en Vanilla JS neutraliza XSS reflejado/almacenado probado.
 
-### 4. XSS (Cross-Site Scripting)
+### 4. Database File Handling
 - **Status:** [Fixed]
-- **Detail:** En el frontend (`demo-app/public/app.js`), los valores se inyectan en el DOM usando la propiedad `textContent` durante la iteración en `loadDocs()` y `document.createElement()`. Esto neutraliza ataques de script almacenado.
+- **Severity:** High
+- **Detail:** `securedocs.sqlite` explícitamente añadido a `.gitignore`. Previene fuga de datos en Git.
 
-### 5. Falta de Auth Real
+### 5. Authentication Mock
 - **Status:** [Manual review required]
-- **Detail:** Se usa un header `X-Mock-User-Id` en texto plano sin validación de firma o criptografía (ej. JWT o Sessions).
-- **Decisión:** Riesgo documentado y aceptado en el alcance de la demo para aislar pruebas exclusivas de IDOR. 
+- **Severity:** Informational
+- **Detail:** Se usa un header `X-Mock-User-Id` en texto plano.
+- **Decisión:** Riesgo documentado y aceptado (by design) en el alcance de la demo.
 
-**Decisión General**: APPROVED. La demo cuenta con estándares superiores a la media de PoCs y el código vulnerable ha sido blindado intencionalmente.
+### 6. CORS / Rate Limiting
+- **Status:** [Not applicable]
+- **Severity:** Low
+- **Detail:** No hay librerías de CORS habilitadas lo cual restringe el dominio cruzado por defecto a *same-origin*. No hay Rate Limiting pero siendo una demo local no presenta superficie de ataque expuesta a internet.
+
+**Decisión General**: APPROVED. Smoke tests automatizados garantizan mitigación de los riesgos top reportados.

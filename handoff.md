@@ -1,14 +1,15 @@
 # Handoff
 
 ## 1. Objetivo
-Completar Gemstack v0.1: reemplazar el README.md completo con la guía definitiva, solventar los problemas de encoding de PowerShell (mojibake) de forma robusta y alinear el control de versiones con el repositorio remoto.
+Completar el dogfooding de Gemstack construyendo "SecureDocs", una app demo con Express, SQLite y Vanilla JS enfocada en testear Spec-Driven Development, protección contra IDOR y flujos QA/CSO.
 
 ## 2. Estado actual
-Completado exitosamente. Los scripts PowerShell ahora usan tags ASCII seguros (`[OK]`, `[ERROR]`, `[INFO]`) y configuran su salida en UTF-8 nativo. El README describe a la perfección el flujo de desarrollo, compatibilidad dual y comandos CLI. Todo está commiteado y respaldado en origin.
+SecureDocs construido e implementado. Servidor y UI funcionales con validaciones estables de auth y anti-IDOR. Las revisiones automáticas (Review, CSO, QA) fueron generadas y validadas con éxito. Dependencias instaladas y control de versiones (incluyendo ignore de SQLite y node_modules) asegurado.
 
 ## 3. Archivos y cambios
-- Modificados: `bin/gemstack.ps1` y `bin/gemstack-doctor.ps1` (Corrección de codificación y param blocks).
-- Modificado: `README.md` (Reemplazo con la versión detallada del usuario).
+- **Creados en demo-app/**: `package.json`, `.gitignore`, `database.js` (con seed de Alice/Bob y documentos), `server.js` (Express + headers + IDOR logic), `public/index.html`, `public/app.js` (Fetch asíncrono anti-XSS), `public/style.css`, y `README.md`.
+- **Modificados (Docs Gemstack)**: `specs/current/*` (spec, plan, tasks) para documentar y orquestar el feature.
+- **Creados (Auditorías Gemstack)**: `docs/reviews/latest-review.md`, `docs/security/latest-security-audit.md`, `docs/qa/latest-qa.md`.
 
 ## 4. Intentos fallidos
 <!-- NUNCA BORRES ESTA SECCIÓN. Si crece mucho, mueve entradas antiguas a handoff_archive.md. -->
@@ -17,6 +18,6 @@ Completado exitosamente. Los scripts PowerShell ahora usan tags ASCII seguros (`
 - Caracteres de codificación (DiagnÃ³stico) persistieron en PowerShell console a pesar del reemplazo UTF-8 automatizado. Solución: reescritura directa del archivo usando las herramientas nativas del agente y ASCII labels por seguridad.
 
 ## 5. Próximos pasos
-El entorno base v0.1.0 está validado y disponible en el remoto. La siguiente sesión empezará usando Gemstack de manera real, por ejemplo para:
-1. Validar el uso construyendo una pequeña aplicación Demo para confirmar el SDD flow.
-2. Iniciar con `/office-hours I want to build a small app to test Gemstack.`
+La demo está versionada en remoto y lista para correr localmente (`cd demo-app && npm start`).
+El ciclo de dogfooding validó positivamente el workflow `/office-hours` -> `/specify` -> `/plan` -> `/tasks` -> `/build` -> `/qa` -> `/cso` -> `/ship`.
+- Próximo paso: Probar manualmente SecureDocs desde el navegador en `http://localhost:3000` si lo deseas, o continuar extendiendo el ecosistema de skills de Antigravity.

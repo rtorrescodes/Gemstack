@@ -2,16 +2,18 @@
 **Date:** 2026-08-19
 
 ## Overview
-Revisión de la implementación de `demo-app/` (SecureDocs).
+Revisión de la implementación de `demo-app/` (SecureDocs) incluyendo los nuevos Smoke Tests.
 
 ## Archivos Revisados
-- `demo-app/server.js`: Código estructurado correctamente. Middleware modularizado y Express usado apropiadamente. Uso de endpoints RESTful.
-- `demo-app/database.js`: Inicialización correcta con tabla `users` y `documents`, usando pattern asíncrono para el seed.
-- `demo-app/public/app.js`: Clean code usando `async/await` y separación en funciones para recargar componentes de UI.
+- `smoke-test.js`: Script Node nativo impecable. Utiliza `child_process.spawn` para ciclo de vida de servidor y `http.request` emulando fetch para evitar dependencias.
+- `server.js`: Se añadió `/api/health`. Mantiene la robustez en validación de `user_id`.
+- `database.js`: Estable.
+- `package.json`: Actualizado correctamente con script `smoke`.
+- `.gitignore`: Confirmado. Ignora `node_modules/` y `*.sqlite`.
 
-## Recomendaciones Técnicas
-- **Database Connection**: SQLite se está abriendo directamente en `database.js`. Para producción o apps más escalables se requeriría pooling o refactor. Aceptable para demo.
-- **Express Error Handling**: Se captura error en base de datos devolviendo estatus 500. Se recomienda middleware global de captura de errores para no repetir el control asíncrono.
-- **Data Validation**: Existe validación manual de tamaño en `req.body`. Recomendable librería como `zod` o `express-validator` en futuras iteraciones.
+## Hallazgos
+- **Fixed:** El script `smoke-test.js` no usa dependencias de terceros ni emojis, previniendo mojibakes en consola.
+- **Not blocking:** No se añadió librería externa de testeo como Jest/Mocha. Aceptable dado el requerimiento de zero-deps y ser una demo simple.
+- **Follow-up for v0.2:** Desacoplar la DB y el Server en la inicialización para permitir testeo en memoria sin levantar un puerto real (Supertest-like nativo).
 
-**Decisión**: APPROVED para v0.1 de demo.
+**Decisión**: APPROVED para v0.1 release.

@@ -5,30 +5,34 @@ SecureDocs es una aplicación de prueba mínima diseñada para auditar el workfl
 ## Instrucciones de Instalación
 ```bash
 npm install
+```
+
+## Ejecución de Smoke Tests (Automático)
+Incluye una suite de validación zero-dependency que levanta el server, testea la seguridad anti-IDOR y finaliza:
+```bash
+npm run smoke
+```
+
+## Ejecución (Manual)
+```bash
 npm start
 ```
-El servidor escuchará en `http://localhost:3000`.
+El servidor escuchará en `http://localhost:3000`. Abre en tu navegador nativo o vía `/browser`.
 
-## Endpoints
-- `GET /api/users`: Lista de usuarios de prueba.
-- `GET /api/docs`: Lista de documentos del usuario actual.
-- `POST /api/docs`: Crear documento.
-- `GET|PUT|DELETE /api/docs/:id`: Modificar o leer documento por ID.
+## Probando IDOR
+Todos los endpoints están protegidos contra **IDOR** ya que validan `user_id = ?` contra el header `X-Mock-User-Id`.
+Para probar la protección manualmente:
+1. Selecciona a **Alice** en la UI.
+2. Fíjate en el ID de un documento suyo (ej. ID = 1).
+3. Selecciona a **Bob**.
+4. Escribe el ID `1` en la sección **Test Direct Access (IDOR QA)** y haz click en "Read".
+5. Recibirás un error `Not found or forbidden`.
 
-## Testing de Vulnerabilidades
-Todos los endpoints están protegidos contra **IDOR** (Insecure Direct Object Reference) ya que validan `user_id = ?` contra el header `X-Mock-User-Id`.
-
-Para probar la protección:
-1. Entra como Alice. La consola cargará sus documentos (ej. ID 1 y 2).
-2. Entra como Bob. La consola cargará sus documentos (ej. ID 3 y 4).
-3. Estando como Bob, escribe el ID "1" en la sección **Test Direct Access (IDOR QA)** y dale a "Read" o "Delete".
-4. Recibirás un error `404 Not found or forbidden`.
-
-Para probar la prevención **XSS**:
-Crea un documento con título `<script>alert(1)</script>`. Al renderizarse, el navegador lo mostrará como texto y no lo ejecutará, dado que usamos `textContent` en lugar de `innerHTML`.
-
-## Gemstack Workflows
-Puedes usar esta demo para probar:
-- `/review`: Revisa la calidad de `server.js` y `app.js`.
-- `/cso`: El Agente te dará el visto bueno o reportará hallazgos en headers e inyecciones.
-- `/qa`: Validará el formulario y los controles.
+## Gemstack Workflows Compatibles
+- `/review`
+- `/cso`
+- `/security-idor`
+- `/security-sql`
+- `/security-headers`
+- `/qa`
+- `/ship`
