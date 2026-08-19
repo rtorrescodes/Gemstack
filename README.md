@@ -1,52 +1,27 @@
-# Gemstack v0.1
+# Gemstack
 
-Gemstack es un framework agent-centric y local-first para **Google Antigravity y Gemini Pro**. Está inspirado en metodologías de Spec-Driven Development, auditorías de seguridad prácticas y handoffs estructurados.
+**Gemstack** is a local-first, agent-centric software delivery framework for **Google Antigravity** and **Gemini Pro**.
 
-## Instalación
+It turns your AI coding environment into a structured product and engineering workflow with reusable roles, safety guardrails, spec-driven planning, practical security review, QA, release discipline, and clean handoffs between sessions.
 
-**Unix / Git Bash:**
-```bash
-./bin/gemstack init
-```
+Gemstack is conceptually inspired by the workflow philosophy of `gstack`, but it is **not a Claude Code port** and does not depend on `.claude/`, `CLAUDE.md`, or Claude-specific runtime behavior. It is built around Antigravity’s `.agents/rules/` and `.agents/skills/` model, with portable fallbacks through `.gemstack/`, `specs/`, `docs/`, and CLI scripts.
 
-**Windows / PowerShell:**
-```powershell
-.\bin\gemstack.ps1 init
-```
+---
 
-## CLI Básico
+## Why Gemstack exists
 
-**Unix / Git Bash:**
-```bash
-./bin/gemstack doctor
-./bin/gemstack list
-./bin/gemstack show gemstack-handoff
-./bin/gemstack security-audit
-./bin/gemstack handoff
-```
+AI coding assistants are powerful, but raw prompting often leads to messy outcomes:
 
-**Windows / PowerShell:**
-```powershell
-.\bin\gemstack-doctor.ps1
-.\bin\gemstack.ps1 list
-.\bin\gemstack.ps1 show gemstack-handoff
-.\bin\gemstack.ps1 security-audit
-.\bin\gemstack.ps1 handoff
-```
-*(Nota: Si obtienes un error de ExecutionPolicy en Windows, ejecuta: `powershell -ExecutionPolicy Bypass -File .\bin\gemstack-doctor.ps1`)*
+- vague requirements,
+- weak planning,
+- repeated mistakes across sessions,
+- unsafe changes,
+- skipped security checks,
+- untested UI flows,
+- poor release discipline,
+- and context decay over time.
 
-## Flujo Recomendado (Pseudo-comandos)
-Inicia un chat con Antigravity y utiliza la siguiente secuencia natural:
-1. `/office-hours` (Alineación de arquitectura)
-2. `/specify` (Definición formal)
-3. `/plan` (Diseño técnico)
-4. `/tasks` (Desglose ejecutable)
-5. `/review` (Revisión de código)
-6. `/cso` (Auditoría de seguridad)
-7. `/qa` (Pruebas)
-8. `/ship` (Preparación para release)
-9. `/handoff` (Guardado de memoria)
+Gemstack solves this by giving your agent a repeatable operating system:
 
-## Cómo Retomar una Sesión
-Abre una sesión limpia (o usa `/clear`) y escribe:
-> "Lee handoff.md y continúa desde los próximos pasos"
+```text
+Office Hours → Specify → Plan → Tasks → Build → Review → Security → QA → Ship → Handoff

@@ -1,3 +1,6 @@
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+
 param(
     [string]$Command = "",
     [string]$Arg1 = ""
@@ -19,7 +22,7 @@ switch ($Command) {
         if (-not [string]::IsNullOrWhiteSpace($Arg1)) {
             $path = ".agents/skills\$Arg1\SKILL.md"
             if (Test-Path $path) {
-                Get-Content $path
+                Get-Content $path -Encoding UTF8
             } else {
                 Write-Host "[ERROR] Skill no encontrado: $Arg1"
             }
@@ -32,7 +35,7 @@ switch ($Command) {
     }
     "handoff" {
         if (Test-Path "handoff.md") {
-            Get-Content "handoff.md"
+            Get-Content "handoff.md" -Encoding UTF8
         } else {
             Write-Host "[ERROR] handoff.md no existe aun."
         }
