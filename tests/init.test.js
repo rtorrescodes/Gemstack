@@ -12,15 +12,19 @@ function createTempDir() {
 }
 
 test('Filesystem safe blocks traversal', (t) => {
-    const safeTarget = path.resolve('C:\\tmp\\app');
+    const safeTarget = path.resolve(process.cwd(), 'tmp', 'app');
     
-    // Attempt to escape
+    // Attempt to escape (using native path separator logic)
     assert.throws(() => fssafe.resolveSafe(safeTarget, '../malicious'), /Path Traversal blocked/);
-    assert.throws(() => fssafe.resolveSafe(safeTarget, '..\\malicious'), /Path Traversal blocked/);
     
     // Absolute paths pointing outside
     assert.throws(() => fssafe.resolveSafe(safeTarget, '/etc/passwd'), /Path Traversal blocked/);
-    assert.throws(() => fssafe.resolveSafe(safeTarget, 'D:\\malicious'), /Path Traversal blocked/);
+    
+    // Test Windows-specific paths only on Windows, else they are considered safe relative paths
+    if (path.sep === '\\') {
+        assert.throws(() => fssafe.resolveSafe(safeTarget, '..\\malicious'), /Path Traversal blocked/);
+        assert.throws(() => fssafe.resolveSafe(safeTarget, 'D:\\malicious'), /Path Traversal blocked/);
+    }
     
     // Sibling directory with similar prefix (e.g. app-evil)
     assert.throws(() => fssafe.resolveSafe(safeTarget, '../app-evil/file'), /Path Traversal blocked/);
