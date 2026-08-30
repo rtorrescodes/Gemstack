@@ -6,6 +6,7 @@ module.exports = {
         const args = [];
         const flags = { dryRun: false, yes: false, force: false, help: false, target: process.cwd() };
 
+        const path = require('path');
         for (let i = 2; i < argv.length; i++) {
             const arg = argv[i];
             if (arg === '--dry-run') flags.dryRun = true;
@@ -13,7 +14,11 @@ module.exports = {
             else if (arg === '--force') flags.force = true;
             else if (arg === '--help' || arg === '-h') flags.help = true;
             else if (arg === '--target' && i + 1 < argv.length) {
-                flags.target = argv[++i];
+                const targetPath = argv[++i];
+                if (!targetPath || targetPath.trim() === '') {
+                    throw new Error('--target cannot be empty');
+                }
+                flags.target = path.resolve(targetPath);
             }
             else if (i > 2 && !arg.startsWith('--')) args.push(arg);
         }

@@ -55,9 +55,11 @@ module.exports = async (flags) => {
         process.exit(1);
     }
 
+    const sessionTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
     if (flags.yes) {
         for (const rel of conflicts) {
-            backupLib.backupFile(targetDir, rel, flags.dryRun);
+            backupLib.backupFile(targetDir, rel, flags.dryRun, sessionTimestamp);
             toCopy.push(rel);
         }
     }

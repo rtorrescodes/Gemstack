@@ -4,11 +4,11 @@ const fssafe = require('./filesystem-safe');
 const logger = require('./logger');
 
 module.exports = {
-    backupFile: (targetDir, relativeFilePath, dryRun) => {
+    backupFile: (targetDir, relativeFilePath, dryRun, sessionTimestamp) => {
         const fullPath = fssafe.resolveSafe(targetDir, relativeFilePath);
         if (!fs.existsSync(fullPath)) return;
 
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = sessionTimestamp || new Date().toISOString().replace(/[:.]/g, '-');
         const backupDir = fssafe.resolveSafe(targetDir, `.gemstack/backups/${timestamp}`);
         const backupDest = fssafe.resolveSafe(backupDir, relativeFilePath);
 

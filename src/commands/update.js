@@ -5,6 +5,14 @@ const logger = require('../lib/logger');
 const manifestLib = require('../lib/manifest');
 const backupLib = require('../lib/backup');
 
+function walkDir(dir, callback) {
+    fs.readdirSync(dir).forEach(f => {
+        const dirPath = path.join(dir, f);
+        if (fs.statSync(dirPath).isDirectory()) walkDir(dirPath, callback);
+        else callback(dirPath);
+    });
+}
+
 module.exports = async (flags) => {
     const targetDir = flags.target;
     const templateDir = path.resolve(__dirname, '../../template');
@@ -14,28 +22,31 @@ module.exports = async (flags) => {
     if (!manifest.files) manifest.files = [];
     let toUpdate = [];
 
-    manifest.files.forEach(f => {
-        const destPath = fssafe.resolveSafe(targetDir, f.path);
-        const tmplPath = path.join(templateDir, f.path);
-        if (!fs.existsSync(tmplPath)) return;
+    walkDir(templateDir, (filePath) => {
+        const relativePath = path.relative(templateDir, filePath).replace(/\\/g, '/');
+        const destPath = fssafe.resolveSafe(targetDir, relativePath);
         
-        const tmplContent = fs.readFileSync(tmplPath);
+        const tmplContent = fs.readFileSync(filePath);
         const tmplCheck = manifestLib.getChecksum(tmplContent);
         
+        const exManifest = manifest.files.find(f => f.path === relativePath);
+
         if (fs.existsSync(destPath)) {
             const destContent = fs.readFileSync(destPath);
             const destCheck = manifestLib.getChecksum(destContent);
-            if (destCheck !== f.checksum && destCheck !== tmplCheck) {
+            
+            if (exManifest && destCheck !== exManifest.checksum && destCheck !== tmplCheck) {
                 if (!flags.force) {
-                    logger.warn(`User modified ${f.path}. Skipping. Use --force to override.`);
+                    logger.warn(`User modified ${relativePath}. Skipping. Use --force to override.`);
                     return;
                 }
             }
             if (tmplCheck !== destCheck) {
-                toUpdate.push(f.path);
+                toUpdate.push(relativePath);
             }
         } else {
-            toUpdate.push(f.path);
+            // File exists in template but not in target (new skill/file)
+            toUpdate.push(relativePath);
         }
     });
 
@@ -56,8 +67,10 @@ module.exports = async (flags) => {
         process.exit(1);
     }
 
+    const sessionTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
     for (const rel of toUpdate) {
-        backupLib.backupFile(targetDir, rel, flags.dryRun);
+        backupLib.backupFile(targetDir, rel, flags.dryRun, sessionTimestamp);
         const src = path.join(templateDir, rel);
         const dest = fssafe.resolveSafe(targetDir, rel);
         fssafe.ensureDir(path.dirname(dest));
@@ -65,7 +78,9 @@ module.exports = async (flags) => {
         logger.ok(`Updated ${rel}`);
         
         const ex = manifest.files.find(f => f.path === rel);
-        if (ex) ex.checksum = manifestLib.getChecksum(fs.readFileSync(dest));
+        const newChecksum = manifestLib.getChecksum(fs.readFileSync(dest));
+        if (ex) ex.checksum = newChecksum;
+        else manifest.files.push({ path: rel, checksum: newChecksum });
     }
 
     manifestLib.saveManifest(targetDir, manifest, flags.dryRun);

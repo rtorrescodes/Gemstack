@@ -16,16 +16,28 @@ module.exports = async (flags) => {
     logger.ok(`Manifest version: ${manifest.version}`);
     
     let missing = 0;
+    let modified = 0;
+    const manifestLib = require('../lib/manifest');
+
     (manifest.files || []).forEach(f => {
         const p = fssafe.resolveSafe(targetDir, f.path);
         if (!fs.existsSync(p)) {
             logger.error(`Missing owned file: ${f.path}`);
             missing++;
+        } else {
+            const destContent = fs.readFileSync(p);
+            const destCheck = manifestLib.getChecksum(destContent);
+            if (destCheck !== f.checksum) {
+                logger.warn(`Modified owned file: ${f.path}`);
+                modified++;
+            }
         }
     });
 
-    if (missing === 0) {
-        logger.ok('All owned files are present.');
+    if (missing === 0 && modified === 0) {
+        logger.ok('All owned files are present and unmodified.');
+    } else {
+        logger.info(`Summary: ${missing} missing, ${modified} modified. Use 'gemstack update' if you want to restore defaults.`);
     }
 
     const giPath = fssafe.resolveSafe(targetDir, '.gitignore');

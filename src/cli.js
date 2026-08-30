@@ -18,6 +18,7 @@ Commands:
   doctor    Check health of the installation
   list      List available skills
   show      Show content of a skill
+  handoff   Show content of handoff.md
 Options:
   --dry-run Show changes without writing
   --yes     Skip confirmations
@@ -33,6 +34,15 @@ Options:
             case 'doctor': await doctorCommand(flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
+            case 'handoff': {
+                const fs = require('fs');
+                const path = require('path');
+                const fssafe = require('./lib/filesystem-safe');
+                const p = fssafe.resolveSafe(flags.target, 'handoff.md');
+                if (fs.existsSync(p)) console.log(fs.readFileSync(p, 'utf8'));
+                else logger.error('handoff.md not found');
+                break;
+            }
             default:
                 logger.error(`Unknown command: ${command}`);
                 process.exit(1);

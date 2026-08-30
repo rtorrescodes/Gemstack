@@ -1,6 +1,6 @@
 {
   "name": "gemstack",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Agentic Spec-Driven Development framework for Gemini/Antigravity",
   "main": "src/cli.js",
   "bin": {
@@ -18,7 +18,7 @@
     "ci:package": "node scripts/ci/check-package-contents.js",
     "ci:smoke": "node scripts/ci/smoke-cli.js",
     "ci:demo": "npm --prefix demo-app install && npm --prefix demo-app run smoke",
-    "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:smoke"
+    "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:smoke && npm run ci:demo"
   },
   "dependencies": {},
   "devDependencies": {}

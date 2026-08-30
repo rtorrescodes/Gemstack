@@ -101,9 +101,9 @@ Each skill uses YAML frontmatter for progressive disclosure.
 Gemstack separates the what from the how:
 
 ```text
-specs/current/spec.md
-specs/current/plan.md
-specs/current/tasks.md
+specs/[feature-branch]/spec.md
+specs/[feature-branch]/plan.md
+specs/[feature-branch]/tasks.md
 ```
 This keeps the agent from jumping into implementation before the product intent, acceptance criteria, risks, and task sequence are clear.
 
@@ -221,9 +221,9 @@ State is stored in:
 | `/handoff` | gemstack-handoff | Close the session with a clean handoff |
 | `/resume` | gemstack-resume | Continue from handoff.md |
 | `/office-hours` | gemstack-office-hours | Validate idea, user, pain, wedge, and MVP |
-| `/specify` | gemstack-spec | Create specs/current/spec.md |
-| `/plan` | gemstack-plan | Create specs/current/plan.md |
-| `/tasks` | gemstack-tasks | Create specs/current/tasks.md |
+| `/specify` | gemstack-spec | Create specs/[feature-branch]/spec.md |
+| `/plan` | gemstack-plan | Create specs/[feature-branch]/plan.md |
+| `/tasks` | gemstack-tasks | Create specs/[feature-branch]/tasks.md |
 | `/review` | gemstack-review | Review current diff like a staff engineer |
 | `/investigate` | gemstack-investigate | Debug with “no fixes before investigation” |
 | `/qa` | gemstack-qa | QA with browser or manual flow |
@@ -394,9 +394,9 @@ The CLI is intentionally simple in v0.1. If a command does not execute a full ag
 ## Working with specs
 Gemstack keeps the active feature spec here:
 ```text
-specs/current/spec.md
-specs/current/plan.md
-specs/current/tasks.md
+specs/[feature-branch]/spec.md
+specs/[feature-branch]/plan.md
+specs/[feature-branch]/tasks.md
 ```
 Recommended flow:
 ```text

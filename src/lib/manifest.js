@@ -12,7 +12,8 @@ module.exports = {
     loadManifest: (targetDir) => {
         const mPath = fssafe.resolveSafe(targetDir, '.gemstack/manifest.json');
         if (fs.existsSync(mPath)) return JSON.parse(fs.readFileSync(mPath, 'utf8'));
-        return { version: '0.2.0', files: [] };
+        const pkgVersion = require('../../package.json').version;
+        return { version: pkgVersion, files: [] };
     },
     saveManifest: (targetDir, manifest, dryRun) => {
         if (dryRun) return;
