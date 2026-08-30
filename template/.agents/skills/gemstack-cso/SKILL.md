@@ -18,6 +18,18 @@ Invocado mediante `/cso` o sus subcomandos:
 - `/security-webhooks`: Validación de firmas.
 - `/security-headers`: XSS, CSP.
 
+## Proceso:
+1. Analiza el código actual en busca de vulnerabilidades de seguridad (OWASP Top 10).
+2. VERIFICACIÓN CRÍTICA: Lee y aplica todas las leyes de `.agents/rules/03-gemstack-security.md`.
+3. Presta especial atención a:
+   - Inyección de dependencias y scripts (XSS, SQLi).
+   - Manejo de secretos (¿Hay tokens hardcodeados?).
+   - Verificación de IDOR (Aislamiento de contexto y Multi-Tenant).
+   - Firmas criptográficas en Webhooks.
+   - Autenticación y cifrado de contraseñas.
+4. Genera un reporte exhaustivo y guárdalo en `docs/security/latest-security-audit.md`.
+5. Si encuentras brechas, no ofrezcas sugerencias pasivas: INICIA UNA ALERTA y propón el código corregido de inmediato.
+
 ## Generación de Reporte:
 Cada reporte de seguridad debe agrupar los hallazgos por severidad:
 - **Critical**
