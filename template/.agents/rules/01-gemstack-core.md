@@ -37,6 +37,10 @@ Si el usuario empieza su mensaje con uno de estos comandos, **NO improvises. DEB
 - `/security-headers` -> Invoca `gemstack-cso`
 - `/qa` -> Invoca `gemstack-qa`
 - `/qa-only` -> Invoca `gemstack-qa`
+- `/qa-visual` -> Invoca `gemstack-qa-visual`
+- `/swarm` -> Invoca `gemstack-swarm`
+- `/heal` -> Invoca `gemstack-heal`
+- `/sandbox` -> Invoca `gemstack-sandbox`
 - `/ship` -> Invoca `gemstack-ship`
 - `/learn` -> Invoca `gemstack-learn`
 - `/careful` -> Invoca `gemstack-guard`
