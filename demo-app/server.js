@@ -72,5 +72,7 @@ app.delete('/api/docs/:id', (req, res) => {
     });
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`SecureDocs listening on http://localhost:${PORT}`));
+const PORT = 3001;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

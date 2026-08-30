@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 const http = require('http');
 
-const PORT = 3000;
+const PORT = 3001;
 const API_URL = `http://localhost:${PORT}/api`;
 
 async function fetchApi(path, options = {}) {
