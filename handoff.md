@@ -1,31 +1,27 @@
 # Handoff
 
 ## 1. Objetivo
-**[Fin de Jornada]** Consolidar la distribución segura de Gemstack como un CLI nativo de Node.js (v0.2.0) e implementar la automatización multiplataforma de CI/CD en GitHub Actions (v0.3.0). El objetivo general del día se ha cumplido con éxito y la jornada ha sido cerrada.
+**[Fin de Jornada]** Integrar las metodologías y entregables de Spec-Driven Development (SDD) dentro del motor de agentes de Gemstack, formalizando la creación de especificaciones inmutables, Test-First Development y arquitecturas orientadas a interfaces.
 
 ## 2. Estado actual
-V0.3.0 finalizada e implementada. Se añadieron flujos exhaustivos de GitHub Actions (`pr-ci.yml`, `main-ci.yml`, `release-readiness.yml`) para asegurar protección anti-regresiones, line-ending normativos y limpieza estricta.
-**Update Final v0.3.0**: `main-ci` y `release-readiness` pasaron a verde en GitHub Actions tras un hotfix de paths multiplataforma en tests. El artifact `gemstack-npm-tarball` fue generado exitosamente. Se comprobó que **NO** se ejecutara `npm publish` ni se crearan Releases de GitHub automáticamente por seguridad. Se ha subido el tag Git `v0.3.0`!
+Hemos analizado el repositorio de referencia de `spec-kit` y actualizado todas nuestras habilidades y plantillas base de Gemstack para alinear los pseudo-comandos `/specify`, `/plan` y `/tasks`. 
+Se implementó la **Constitución de Gemstack (The 9 Articles)** para prevenir alucinaciones de LLM (`[NEEDS CLARIFICATION]`), forzar implementaciones modulares (Library-First) y establecer la filosofía TDD (Test-First Imperative). Además, el flujo ha migrado de una sola carpeta `current` hacia el uso de **Feature Branches** (ej. `specs/004-nueva-feature/`) junto a artefactos satélites (modelos de datos, contratos, y quickstarts). Todo el trabajo ha sido pusheado a `main`.
 
 ## 3. Archivos y cambios
-- **CI Workflows:** Creados `.github/workflows/` (pr, main, release).
-- **Scripts:** `scripts/ci/*` (validadores de mojibake, frontmatter, package, clean template, smoke tests).
-- **Git:** `.gitattributes` conservador asegurando CR/LF sano.
-- **Config:** `package.json` actualizado con battery de aliases `ci:*` y path fixes.
-- **Docs:** `RELEASE_NOTES.md` y `CHANGELOG.md` actualizados con metadata exhaustiva.
+- **Reglas (Constitution):** Creado `.agents/rules/02-gemstack-constitution.md`.
+- **Plantillas (Templates):** Refactorizados fuertemente `specs/templates/spec.md`, `specs/templates/plan.md`, y `specs/templates/tasks.md` introduciendo prioridades (P1, P2), Constitution Checks y métricas de éxito (Measurable Outcomes).
+- **Skills:** Actualizados `gemstack-spec`, `gemstack-plan` y `gemstack-tasks` para reconocer la constitución, forzar el uso de `[NEEDS CLARIFICATION]`, soportar entregables satélites y soportar tareas paralelizables con el marcador `[P]`.
 
 ## 4. Intentos fallidos
 <!-- NUNCA BORRES ESTA SECCIÓN. Si crece mucho, mueve entradas antiguas a handoff_archive.md. -->
 - Ejecución directa de scripts bash a través de Antigravity `run_command` (WSL execvpe failed). El CLI fue saneado para que al menos funcione correctamente en bash/git-bash nativo o entornos Unix y se previno el falso positivo en la detección de git.
 - PowerShell arrojó error de "Expresión de asignación no válida" en el bloque `param()` de `gemstack.ps1` al inyectar líneas antes de dicho bloque. Solución: Se corrigió dejando el bloque `param()` obligatoriamente como lo primero en el script.
-- Caracteres de codificación (DiagnÃ³stico) persistieron en PowerShell console a pesar del reemplazo UTF-8 automatizado. Solución: reescritura directa del archivo usando las herramientas nativas del agente y ASCII labels por seguridad.
+- Caracteres de codificación (Diagnóstico) persistieron en PowerShell console a pesar del reemplazo UTF-8 automatizado. Solución: reescritura directa del archivo usando las herramientas nativas del agente y ASCII labels por seguridad.
 - Conflicto en el globbing de la test suite predeterminada (`node --test`). Ejecutaba involuntariamente el servidor de SecureDocs (`smoke-test.js`) lo que bloqueaba la suite. Solución: Se restringió explícitamente en el `package.json` a correr sobre la ruta `tests/*.test.js`.
 - Parser manual de `--help` no captaba globalmente si se ponía como segundo o primer argumento tras Node (`argv[2]`). Solución: Parser refactorizado para inferencia temprana.
 
 ## 5. Próximos pasos
-El framework Gemstack v0.3.0 está completamente implementado y cuenta con flujos robustos de CI/CD que blindan la seguridad y estabilidad multiplataforma. NO hay automatización para `npm publish` o GitHub Release por reglas de seguridad de este ciclo.
-El próximo ciclo (v0.4 o posterior) involucrará:
-1. Planificación de publicación automatizada oficial a NPM si así se requiere.
-2. Automatización de GitHub Releases mediante tokens seguros.
-3. Posibles refinamientos en pruebas de CI para symlinks.
-4. Explorar QA automatizado de navegadores (Browser testing skills).
+El framework interno de agentes de Gemstack ahora es capaz de desarrollar con rigor bajo Spec-Driven Development. El próximo paso natural es:
+1. Poner a prueba la nueva arquitectura de plantillas creando una nueva funcionalidad (Feature 004) utilizando `/specify`.
+2. Continuar con el roadmap oficial hacia v0.4, abordando la publicación de NPM y la automatización de GitHub Releases.
+3. Explorar la automatización de QA Testing de navegadores ahora que las tareas soportan el desglose satelital de `[P]` (Paralelización) y la validación MVP temprana.
