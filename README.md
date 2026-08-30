@@ -59,10 +59,10 @@ Gemstack works by providing an **Operating System** for your LLM via markdown fi
 
 ## 🛡️ Military-Grade Security Shield
 
-Gemstack ships with `03-gemstack-security.md`, a rulebook extracted from high-compliance SaaS environments. When you run `/cso` or `/review`, the AI strictly checks for:
+Gemstack ships with `03-gemstack-security.md` and `04-gemstack-infrastructure.md`, rulebooks extracted from high-compliance SaaS and Cloud Native environments (OWASP, NIST). When you run `/cso` or `/review`, the AI strictly checks for:
+- **AppSec (Level 2)**: IDOR Protection, Race Condition prevention, CSRF/SSRF blocking, Rate Limiting, and Audit Trails.
 - **Zero Trust Secrets**: Hardcoded keys are blocked.
-- **IDOR Protection**: Database queries must have tenant/user isolation.
-- **PCI-DSS Mindset**: Financial data delegation.
+- **DevSecOps & Infra**: Enforces Immutable Infrastructure (Docker/Terraform), Private Subnets (VPC), IAM Least Privilege, and Cloud Secret Managers.
 - **Server-Side Validation**: Complete distrust of frontend state.
 
 ## 🐝 Advanced Autonomy (The WOW Update)

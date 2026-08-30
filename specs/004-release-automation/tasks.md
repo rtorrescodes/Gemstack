@@ -21,5 +21,5 @@
 
 ## Fase 3: Integración y Validación
 - [x] 3.1 Revisar permisos del token de GitHub (asegurar que el GITHUB_TOKEN tenga permisos de escritura `contents: write` para crear releases).
-- [ ] 3.2 Marcar los cambios, hacer commit bajo la rama actual y fusionar a main.
-- [ ] 3.3 Revisión de seguridad y dependencias (CSO).
+- [x] 3.2 Marcar los cambios, hacer commit bajo la rama actual y fusionar a main.
+- [x] 3.3 Revisión de seguridad y dependencias (CSO).
