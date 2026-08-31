@@ -1,6 +1,6 @@
 {
-  "name": "gemstack",
-  "version": "1.0.0",
+  "name": "gemstack-ai",
+  "version": "1.0.1",
   "description": "Agentic Spec-Driven Development framework for Gemini/Antigravity",
   "main": "src/cli.js",
   "bin": {
