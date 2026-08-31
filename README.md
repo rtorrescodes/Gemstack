@@ -73,6 +73,7 @@ Gemstack isn't just passive documents; it actively orchestrates agentic capabili
 |---------|--------|
 | `/swarm` | Orchestrates parallel subagents for tasks marked `[P]` |
 | `/qa-visual` | Spawns sandbox browsers to visually assert Acceptance Criteria |
+| `/dashboard` | Generates a rich, interactive inline UI of your project's progress |
 | `/heal` | Hooks into GitHub CLI (`gh`) to read failing CI logs and auto-push fixes |
 | `/sandbox` | Wraps risky AI execution inside an ephemeral Docker container |
 
@@ -88,6 +89,22 @@ Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack hooks` 
 You can install agent skills created by the community directly into your project using the `install` command. Gemstack will fetch the `SKILL.md`, parse its metadata, and integrate it into your AI's brain automatically:
 ```bash
 npx gemstack install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
+```
+
+## 🤖 MCP Server (Model Context Protocol)
+
+Gemstack ships with a built-in MCP server that exposes the SDD state of your project to any MCP-compliant AI client (like Claude Desktop or Cursor). 
+
+Add the following to your MCP client configuration:
+```json
+{
+  "mcpServers": {
+    "gemstack": {
+      "command": "npx",
+      "args": ["gemstack", "mcp"]
+    }
+  }
+}
 ```
 
 ## 📚 Documentation

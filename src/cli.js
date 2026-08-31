@@ -23,6 +23,7 @@ Commands:
   handoff   Show content of handoff.md
   hooks     Install native Git pre-commit hooks for active security
   install   Install a remote skill via URL
+  mcp       Start the Gemstack MCP (Model Context Protocol) server over stdio
 Options:
   --dry-run Show changes without writing
   --yes     Skip confirmations
@@ -40,6 +41,7 @@ Options:
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;
             case 'install': await installCommand(args[0], flags); break;
+            case 'mcp': require('./mcp-server'); break;
             case 'handoff': {
                 const fs = require('fs');
                 const path = require('path');

@@ -38,6 +38,7 @@ Si el usuario empieza su mensaje con uno de estos comandos, **NO improvises. DEB
 - `/qa` -> Invoca `gemstack-qa`
 - `/qa-only` -> Invoca `gemstack-qa`
 - `/qa-visual` -> Invoca `gemstack-qa-visual`
+- `/dashboard` -> Invoca `gemstack-dashboard`
 - `/swarm` -> Invoca `gemstack-swarm`
 - `/heal` -> Invoca `gemstack-heal`
 - `/sandbox` -> Invoca `gemstack-sandbox`
