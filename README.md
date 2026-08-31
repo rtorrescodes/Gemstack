@@ -33,19 +33,19 @@ Start a new project or upgrade an existing one in seconds:
 
 ```bash
 # Initialize Gemstack in your current repository
-npx gemstack init
+npx gemstack-ai init
 ```
 
 This will generate the `.agents/`, `.gemstack/`, and `specs/` directories.
 
 To ensure your framework is healthy or to check for manual tampering:
 ```bash
-npx gemstack doctor
+npx gemstack-ai doctor
 ```
 
 To update your project when Gemstack releases new Agent Skills:
 ```bash
-npx gemstack update
+npx gemstack-ai update
 ```
 
 ## 🧠 How it Works
@@ -82,7 +82,7 @@ Gemstack isn't just passive documents; it actively orchestrates agentic capabili
 
 ## 🪝 Active Security (Git Hooks)
 
-Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack hooks` (or just `npx gemstack init`) to install a local `pre-commit` hook that automatically blocks commits containing:
+Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack-ai hooks` (or just `npx gemstack-ai init`) to install a local `pre-commit` hook that automatically blocks commits containing:
 - Exposed `.env` files.
 - Hardcoded secrets (Stripe, AWS, JWT keys).
 - Unresolved merge conflict markers (`<<<<<<< HEAD`).
@@ -91,7 +91,7 @@ Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack hooks` 
 
 You can install agent skills created by the community directly into your project using the `install` command. Gemstack will fetch the `SKILL.md`, parse its metadata, and integrate it into your AI's brain automatically:
 ```bash
-npx gemstack install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
+npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
 ```
 
 ## 🤖 MCP Server (Model Context Protocol)
@@ -104,7 +104,7 @@ Add the following to your MCP client configuration:
   "mcpServers": {
     "gemstack": {
       "command": "npx",
-      "args": ["gemstack", "mcp"]
+      "args": ["gemstack-ai", "mcp"]
     }
   }
 }

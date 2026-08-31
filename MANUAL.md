@@ -20,7 +20,7 @@ Es una herramienta de cero dependencias (funciona en cualquier lenguaje y comput
 No necesitas instalar librerías pesadas. En cualquier proyecto (sea nuevo o uno que ya lleve meses de desarrollo), abre tu terminal y ejecuta:
 
 ```bash
-npx gemstack init
+npx gemstack-ai init
 ```
 
 **¿Qué hace esto?**
@@ -60,7 +60,7 @@ Gemstack viene con funcionalidades avanzadas (Skills) que puedes invocar como co
 Dile a la IA: *"Ejecuta `/cso`"*. El Chief Security Officer auditará tu código. Gemstack tiene leyes estrictas implantadas en su núcleo (AppSec Nivel 2 y DevOps). Si tienes una contraseña expuesta, o tu base de datos es vulnerable a un ataque de fuerza bruta, el agente detendrá todo y te obligará a parcharlo.
 
 ### 🪝 Prevención Activa (Git Hooks)
-Gemstack se asegura de que tú, como humano, tampoco cometas errores. Al hacer `npx gemstack init`, se instala un guardián invisible. Si intentas hacer un `git commit` y por error incluiste una llave de Amazon Web Services (AWS) o un archivo `.env`, Gemstack bloqueará el commit en tu terminal y te regañará.
+Gemstack se asegura de que tú, como humano, tampoco cometas errores. Al hacer `npx gemstack-ai init`, se instala un guardián invisible. Si intentas hacer un `git commit` y por error incluiste una llave de Amazon Web Services (AWS) o un archivo `.env`, Gemstack bloqueará el commit en tu terminal y te regañará.
 
 ### 📊 Dashboard Interactivo (`/dashboard`)
 ¿Perdido en el código? Dile a tu chat de IA (si usas Antigravity):
@@ -71,11 +71,11 @@ La IA leerá tu lista de tareas y generará una interfaz gráfica incrustada en 
 ### 🔌 Instalación de Skills Externos
 Gemstack es extensible. Si alguien en internet creó un súper agente especialista en Python, puedes descargarlo a tu proyecto directamente desde la terminal:
 ```bash
-npx gemstack install https://raw.githubusercontent.com/usuario/repo/main/SKILL.md
+npx gemstack-ai install https://raw.githubusercontent.com/usuario/repo/main/SKILL.md
 ```
 
 ### 🤖 Servidor MCP (Para IAs Externas)
-Si usas Claude Desktop u otro cliente que soporte **Model Context Protocol (MCP)**, puedes configurar Gemstack como una de sus herramientas nativas. Simplemente configura el servidor ejecutando en tu cliente: `npx gemstack mcp`. La IA podrá "llamar" a Gemstack directamente por debajo de la mesa para preguntarle cuáles son tus tareas actuales y reglas de seguridad sin que tengas que decirle nada.
+Si usas Claude Desktop u otro cliente que soporte **Model Context Protocol (MCP)**, puedes configurar Gemstack como una de sus herramientas nativas. Simplemente configura el servidor ejecutando en tu cliente: `npx gemstack-ai mcp`. La IA podrá "llamar" a Gemstack directamente por debajo de la mesa para preguntarle cuáles son tus tareas actuales y reglas de seguridad sin que tengas que decirle nada.
 
 ---
 
