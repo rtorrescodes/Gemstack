@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150/1a1a2e/ffffff?text=GS" alt="Gemstack Logo" width="120" height="120" />
+  <img src="assets/logo.jpg" alt="Gemstack Logo" width="200" style="border-radius: 20px" />
   <h1>Gemstack</h1>
   <p><b>The Local-First Agentic Framework for Spec-Driven Development</b></p>
 
-  [![npm version](https://img.shields.io/npm/v/gemstack.svg?style=flat-square)](https://www.npmjs.com/package/gemstack)
+  [![npm version](https://img.shields.io/npm/v/gemstack-ai.svg?style=flat-square)](https://www.npmjs.com/package/gemstack-ai)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Military--Grade-red.svg?style=flat-square)](#military-grade-security-shield)
