@@ -58,9 +58,16 @@ async function runTests() {
     try {
         console.log('[INFO] Starting Smoke Tests...');
         
-        // 1. Get users
-        const users = await fetchApi('/users');
+        // 1. Get users (with retry for sqlite seeding race condition)
+        let users;
+        for (let i = 0; i < 10; i++) {
+            users = await fetchApi('/users');
+            if (users.status === 200 && Array.isArray(users.data) && users.data.length >= 2) break;
+            await wait(500);
+        }
+        
         assert(users.status === 200 && users.data.length >= 2, 'Users fetched correctly');
+        if (!users.data || users.data.length < 2) throw new Error('Database seeding failed or delayed');
         
         const aliceId = users.data.find(u => u.name === 'Alice').id;
         const bobId = users.data.find(u => u.name === 'Bob').id;
