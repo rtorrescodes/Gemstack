@@ -76,6 +76,13 @@ Gemstack isn't just passive documents; it actively orchestrates agentic capabili
 | `/heal` | Hooks into GitHub CLI (`gh`) to read failing CI logs and auto-push fixes |
 | `/sandbox` | Wraps risky AI execution inside an ephemeral Docker container |
 
+## 🪝 Active Security (Git Hooks)
+
+Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack hooks` (or just `npx gemstack init`) to install a local `pre-commit` hook that automatically blocks commits containing:
+- Exposed `.env` files.
+- Hardcoded secrets (Stripe, AWS, JWT keys).
+- Unresolved merge conflict markers (`<<<<<<< HEAD`).
+
 ## 📚 Documentation
 
 Dive deeper into the Gemstack architecture:

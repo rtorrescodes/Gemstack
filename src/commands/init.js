@@ -5,6 +5,7 @@ const logger = require('../lib/logger');
 const manifestLib = require('../lib/manifest');
 const backupLib = require('../lib/backup');
 const gitignoreLib = require('../lib/gitignore');
+const hooks = require('./hooks');
 
 function walkDir(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
@@ -79,5 +80,11 @@ module.exports = async (flags) => {
 
     gitignoreLib.patchGitignore(targetDir, flags.dryRun);
     manifestLib.saveManifest(targetDir, manifest, flags.dryRun);
+    
+    // Attempt to install native Git hooks
+    if (!flags.dryRun) {
+        hooks.installHooks(targetDir);
+    }
+
     logger.ok('Gemstack initialization complete.');
 };
