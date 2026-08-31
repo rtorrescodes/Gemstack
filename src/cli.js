@@ -7,6 +7,7 @@ const doctorCommand = require('./commands/doctor');
 const listCommand = require('./commands/list');
 const showCommand = require('./commands/show');
 const hooksCommand = require('./commands/hooks');
+const installCommand = require('./commands/install');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -21,6 +22,7 @@ Commands:
   show      Show content of a skill
   handoff   Show content of handoff.md
   hooks     Install native Git pre-commit hooks for active security
+  install   Install a remote skill via URL
 Options:
   --dry-run Show changes without writing
   --yes     Skip confirmations
@@ -37,6 +39,7 @@ Options:
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;
+            case 'install': await installCommand(args[0], flags); break;
             case 'handoff': {
                 const fs = require('fs');
                 const path = require('path');

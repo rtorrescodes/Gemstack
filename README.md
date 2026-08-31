@@ -83,6 +83,13 @@ Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack hooks` 
 - Hardcoded secrets (Stripe, AWS, JWT keys).
 - Unresolved merge conflict markers (`<<<<<<< HEAD`).
 
+## 🔌 Ecosystem & Plugins (Skill Market)
+
+You can install agent skills created by the community directly into your project using the `install` command. Gemstack will fetch the `SKILL.md`, parse its metadata, and integrate it into your AI's brain automatically:
+```bash
+npx gemstack install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
+```
+
 ## 📚 Documentation
 
 Dive deeper into the Gemstack architecture:
