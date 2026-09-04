@@ -17,5 +17,6 @@ Esta habilidad se ejecuta cuando el usuario pide terminar la sesión, invoca `/h
 5. **ARCHIVADO SEGURO:** Si "Intentos fallidos" en `handoff.md` tiene demasiados puntos (más de 10-15), CORTA los elementos más antiguos y pégalos en `handoff_archive.md` bajo su lista, conservando solo los 3-5 intentos recientes en `handoff.md`.
 6. Define los "5. Próximos pasos" exactos para la próxima sesión.
 7. Guarda los cambios en `handoff.md` (y `handoff_archive.md` si fue necesario).
-8. Despídete del usuario indicando que el handoff está listo.
+8. **Sincronización de Estado:** Verifica `.gemstack/state.json` asegurando que `current_phase` refleje con precisión si hay una spec activa o en espera, y actualiza `last_update` con la marca temporal actual.
+9. Despídete del usuario indicando que el handoff está listo.
 

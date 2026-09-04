@@ -24,6 +24,7 @@ runSafe(`node "${path.join(rootDir, 'src/cli.js')}" show gemstack-handoff`, root
 runSafe(`node "${path.join(rootDir, 'src/cli.js')}" init --dry-run --target "${tmpDir}"`, tmpDir);
 runSafe(`node "${path.join(rootDir, 'src/cli.js')}" init --yes --target "${tmpDir}"`, tmpDir);
 runSafe(`node "${path.join(rootDir, 'src/cli.js')}" doctor --target "${tmpDir}"`, tmpDir);
+runSafe(`node "${path.join(rootDir, 'src/cli.js')}" verify --target "${tmpDir}"`, tmpDir);
 runSafe(`node "${path.join(rootDir, 'src/cli.js')}" update --dry-run --target "${tmpDir}"`, tmpDir);
 
 fs.rmSync(tmpDir, { recursive: true, force: true });

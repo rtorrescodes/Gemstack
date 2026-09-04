@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const manifest = require('../lib/manifest');
+const manifest = require('./lib/manifest');
 
 // MCP Protocol structures
 function sendResponse(id, result, error = null) {

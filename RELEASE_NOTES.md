@@ -1,5 +1,20 @@
 # Gemstack Release Notes
 
+# Gemstack v1.0.2
+
+## Highlights
+- **Zero Silent Failures**: Actualización al Article III de la Constitución prohibiendo `2>nul` y operadores de supresión de fallos en scripts de testing multiplataforma.
+- **Intent-Based Routing**: Detección semántica de intenciones en lenguaje natural en `01-gemstack-core.md`, auto-activando `gemstack-spec`, `gemstack-qa`, `gemstack-investigate` y `gemstack-handoff` sin requerir estrictamente `/comando`.
+- **Auto State Sync**: Sincronización automática de `.gemstack/state.json` en `gemstack-spec`, `gemstack-ship` y `gemstack-handoff` con control de ciclo de vida (`current_phase`, `active_spec`, `last_completed_feature`).
+- **Unified Health & Security Auditor (`gemstack verify`)**: Nuevo comando CLI y script `pnpm/npm run gemstack:verify` para validar en un solo paso archivos base, integridad de memoria (5 secciones de `handoff.md`), estado local y seguridad de scripts.
+
+## Validation
+- `npm test`: 8 tests unitarios pasando al 100%.
+- `npm run gemstack:verify`: Éxito total.
+- CI Scripts: frontmatter, template clean, mojibake, package contents y smoke CLI validados.
+
+---
+
 # Gemstack v0.3.0
 
 ## Highlights

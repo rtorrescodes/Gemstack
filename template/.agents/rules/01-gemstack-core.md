@@ -49,3 +49,17 @@ Si el usuario empieza su mensaje con uno de estos comandos, **NO improvises. DEB
 - `/guard` -> Invoca `gemstack-guard`
 - `/unfreeze` -> Invoca `gemstack-guard`
 
+## Ruteo Semántico por Intención (Intent-Based Routing)
+Si el usuario interactúa en lenguaje natural sin usar un `/comando` explícito, DEBES detectar la intención subyacente y activar el protocolo correspondiente:
+1. **Nueva funcionalidad o módulo mayor sin spec activa:**
+   - Si pide crear o agregar una feature sustancial (ej. "pon una parte para editar paquetes", "vamos a agregar cobro bimoneda"), **NO saltes directo al código**. Activa `gemstack-spec` para definir requisitos y criterios de éxito antes de implementar.
+2. **Solicitud de pruebas o validación:**
+   - Si el usuario dice "haz pruebas", "valida lo hecho", "comprueba que funcione" o "verifica los cambios", activa `gemstack-qa`.
+3. **Reporte de error o bug:**
+   - Si el usuario reporta que algo falló o no funciona como se esperaba, activa `gemstack-investigate` (principio: *No fixes before investigation*).
+4. **Cierre o pausa de sesión:**
+   - Si el usuario indica "terminamos por hoy", "voy a pausar", "dejo esto listo" o "prepara el resumen", activa `gemstack-handoff`.
+5. **Auditoría de seguridad:**
+   - Si pide revisar seguridad, permisos, tokens o vulnerabilidades, activa `gemstack-cso`.
+6. **Entrega o preparación de release:**
+   - Si pide preparar el merge, PR o entrega formal de la feature terminada, activa `gemstack-ship`.

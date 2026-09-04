@@ -8,6 +8,7 @@ const listCommand = require('./commands/list');
 const showCommand = require('./commands/show');
 const hooksCommand = require('./commands/hooks');
 const installCommand = require('./commands/install');
+const verifyCommand = require('./commands/verify');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -18,6 +19,7 @@ Commands:
   init      Install Gemstack scaffolding
   update    Update Gemstack-owned files
   doctor    Check health of the installation
+  verify    Run complete integrity, state, memory and security audit (alias: audit)
   list      List available skills
   show      Show content of a skill
   handoff   Show content of handoff.md
@@ -25,10 +27,11 @@ Commands:
   install   Install a remote skill via URL
   mcp       Start the Gemstack MCP (Model Context Protocol) server over stdio
 Options:
-  --dry-run Show changes without writing
-  --yes     Skip confirmations
-  --force   Force overwrite (update only)
-  --target  Specify target directory`);
+  --dry-run   Show changes without writing
+  --yes       Skip confirmations
+  --force     Force overwrite (update only)
+  --target    Specify target directory
+  --run-tests Run test suite during verify`);
         return;
     }
 
@@ -37,6 +40,8 @@ Options:
             case 'init': await initCommand(flags); break;
             case 'update': await updateCommand(flags); break;
             case 'doctor': await doctorCommand(flags); break;
+            case 'verify':
+            case 'audit': await verifyCommand(flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;

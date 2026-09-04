@@ -14,11 +14,16 @@ Toda nueva funcionalidad DEBE nacer y estar estructurada preferentemente como un
 ## Article II: CLI / Interface Mandate
 Cada módulo o librería clave debe tener una forma de probarse e interactuar textualmente (CLI, scripts independientes, peticiones directas de texto o JSON). Evita componentes opacos que solo puedan probarse levantando interfaces gráficas complejas.
 
-## Article III: Test-First Imperative (NON-NEGOTIABLE)
+## Article III: Test-First Imperative & Zero Silent Failures (NON-NEGOTIABLE)
 NUNCA escribas el código de implementación antes que los tests (TDD).
 1. Escribe los tests (unitarios, de integración o contratos) basándote en la especificación.
 2. Si es posible, demuestra que fallan.
 3. Solo entonces, escribe la implementación real.
+4. **Zero Silent Failures (Multiplataforma Windows / Linux / macOS):**
+   - PROHIBIDO el uso de operadores de supresión de shell que enmascaren fallos en scripts de `test` de `package.json` (ej. `2>nul`, `2>/dev/null || true`).
+   - El script de test DEBE terminar con exit code distinto de cero si ocurre cualquier falla.
+   - En monorepos TypeScript, usa runners multiplataforma estandarizados (ej. `tsx --test src/**/*.test.ts tests/**/*.test.ts`, `node --test`, `vitest` o `jest`).
+   - El test runner debe validar que la suite ejecutó efectivamente pruebas (`tests > 0`). Un reporte de 0 tests ejecutados finalizando con exit code 0 es considerado un falso positivo inaceptable.
 
 ## Article IV: Zero Assumptions (No Hallucinations)
 Si un requerimiento del humano es vago, la IA NO debe adivinar. 

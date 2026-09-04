@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.0.2] - 2026-09-03
+### Added
+- Intent-Based Routing in `01-gemstack-core.md`: semantic intent detection for natural language interactions without mandatory slash prefixes.
+- Zero Silent Failures clause in Article III of `02-gemstack-constitution.md`: bans `2>nul` and error-suppressing shell operators in test runners.
+- `gemstack verify` (alias `audit`): full-stack CLI auditor validating structure, memory integrity, state consistency, and security flags.
+- Auto State Sync across `gemstack-spec`, `gemstack-ship`, and `gemstack-handoff` keeping `.gemstack/state.json` synchronized with the active feature lifecycle.
+- Unit tests for verify command in `tests/verify.test.js`.
+
 ## [v0.3.0] - 2026-08-19
 ### Added
 - GitHub Actions CI/CD workflows (`pr-ci.yml`, `main-ci.yml`, `release-readiness.yml`).
