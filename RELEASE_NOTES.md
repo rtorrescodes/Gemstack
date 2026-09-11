@@ -1,5 +1,45 @@
 # Gemstack Release Notes
 
+# Gemstack v1.4.0 — Agent Swarm & Visual QA
+
+## Highlights
+
+### Upgrade E — Agent Swarm Planning & Validation
+- **Deterministic Multi-Worker Planning**: Compiles parallelizable `tasks.md` items into deterministic, phased execution waves recorded in canonical `swarm.json`.
+- **Task Ownership & Exclusive Write Boundaries**: Validates that concurrent tasks possess strictly disjoint file write partitions (`write_set(T1) ∩ write_set(T2) = ∅`), completely preventing parallel write collisions.
+- **Automatic Collision Avoidance**: Automatically serializes conflicting tasks into sequential waves during planning (`SWARM_WRITE_COLLISION_PREVENTED`).
+- **Separation of Duties Gate**: Non-waivable mechanical check enforcing `author != reviewer` on all task reviews (`SWARM_SELF_REVIEW_DETECTED`).
+- **Task-Scoped Context Projections**: Projects minimal, structured context payloads derived from Upgrade D `context-capsule.json` with conversational narrative and raw chat transcripts strictly excluded.
+- **Cryptographic Provenance & Freshness**: Pinned `source_capsule_hash` ensures workers operate against verified project state; flags drift fail-closed (`SWARM_CONTEXT_STALE`).
+- **Provider & Budget Gating**: Intercepts model invocations via Upgrade C `ProviderCapabilityGate` and `BillableActionGate` to prevent runaway spending across concurrent workers.
+- **Worker Limits**: Prevents recursive child agent spawning (`SWARM_RECURSIVE_SPAWN_DENIED`).
+- **Explicit Invariant**: Gemstack core coordinates and validates; it does NOT execute autonomous coding agents.
+
+### Upgrade E — Visual QA Evidence & Offline Verification
+- **Canonical Visual QA Manifest (`visual-qa.json`)**: Declares explicit routes, deterministic viewports, selector masks, baseline references, and diff tolerances.
+- **Deterministic Viewport Specifications**: Locks standardized viewport profiles (Desktop, Mobile, Tablet) with explicit width, height, and device scale factor.
+- **Cryptographic Baseline Hashing**: Baselines are tracked and verified via canonical SHA-256 byte digests (`image_sha256`); flags disk tampering (`VQA_BASELINE_TAMPERED`).
+- **Neutral & Secret Selector Masking**: Neutral masks (`[MASKED_NEUTRAL]`) eliminate font/timestamp flakiness; mandatory automatic masking replaces sensitive input fields (`type=password`) with `[MASKED_SECRET]`.
+- **Structured Evidence Comparison**: Fast SHA-256 digest comparison with offline tolerance-bounded diffing (`max_diff_percentage`).
+- **Explicit Baseline Promotion**: Baselines are NEVER mutated during verification; updates require explicit `gemstack vqa promote <scenario-id>`.
+- **Pure Offline Verification (Stages 5.3 & 5.4)**: `gemstack verify` runs 100% offline with zero browser launches, zero network calls, and zero file mutations.
+- **Explicit Invariant**: Gemstack core inspects evidence; it does NOT launch browsers or capture screenshots.
+
+## Acceptance & Regression Baseline
+- 25 Upgrade A canonical acceptance tests passing.
+- 20 Upgrade B canonical acceptance tests passing.
+- 20 Upgrade C canonical acceptance tests passing.
+- 20 Upgrade D canonical acceptance tests passing.
+- 20 Upgrade E canonical acceptance tests passing (`TEST-SWARM-A01`..`E02`, `TEST-VISUAL-A01`..`E02`).
+- 10 Upgrade E bootstrap contracts passing.
+- 26 Upgrade E adversarial cases passing.
+- 105 total canonical acceptance tests passing.
+- 126 total physical tests passing across 14 explicitly enumerated suites with 0 failures and 0 skipped.
+- Full CI suite (`npm run ci:all`) passing cleanly.
+- Upgrade E closed with closure status `VERIFIED`.
+
+---
+
 # Gemstack v1.3.0 — Cost & Provider Safety Gates + Context Capsule
 
 ## Highlights

@@ -118,6 +118,7 @@ Gemstack Upgrade C guarantees fail-closed safety for commercial, remote, and AI 
 - **Environment Safety**: Commercial provider execution is forbidden in `test` and `ci` environments.
 - **Trusted Mock Boundaries**: Test mocks operate strictly in memory with zero network escapes.
 - **Offline Purity**: `gemstack verify` runs 100% offline with zero external network or provider charges.
+- **Core Invariant**: `NO PROOF OF AUTHORIZATION = NO COMMERCIAL EXECUTION`.
 
 ## 📦 Context Capsule & Compression
 
@@ -130,18 +131,73 @@ Gemstack Upgrade D enables deterministic, constraint-lossless context compressio
 - **Size Budgeting**: 32 KB target budget with deterministic priority condensation and 64 KB fail-closed hard cap.
 - **`gemstack context show`**: Displays human-readable continuation context summary or raw JSON.
 - **`gemstack context verify`**: Read-only validation of context capsule freshness and integrity.
+- **Core Invariant**: `Context Capsule = derived continuation context NOT project authority`.
 
-## 🐝 Advanced Autonomy (The WOW Update)
+## 🐝 Agent Swarm Planning & Validation
 
-Gemstack isn't just passive documents; it actively orchestrates agentic capabilities:
+Gemstack Upgrade E introduces deterministic multi-worker planning and write-set partition validation:
+- **`gemstack swarm plan`**: Compiles parallelizable `tasks.md` items into deterministic concurrent waves in `specs/<feature>/swarm.json`.
+- **Exclusive Write Boundaries**: Validates that concurrent tasks possess strictly disjoint write sets (`write_set(T1) ∩ write_set(T2) = ∅`), mathematically preventing write collisions.
+- **Collision Avoidance**: Overlapping write sets are automatically serialized into sequential waves (`SWARM_WRITE_COLLISION_PREVENTED`).
+- **Separation of Duties Gate**: Non-waivable mechanical check enforcing `author != reviewer` on all task reviews (`SWARM_SELF_REVIEW_DETECTED`).
+- **Task-Scoped Context Projections**: Projects minimal, structured context payloads derived from `context-capsule.json` without raw chat transcripts or prompt noise.
+- **Provider & Budget Integration**: Intercepts model invocations via Upgrade C `ProviderCapabilityGate` and `BillableActionGate` to prevent budget breaches.
+- **`gemstack swarm validate`**: Pure read-only validation of wave partitions, task ownership, and review independence.
+- **Explicit Boundary**: *Gemstack core coordinates and validates; Gemstack core does NOT execute autonomous coding agents.*
 
-| Command | Action |
-|---------|--------|
-| `/swarm` | Orchestrates parallel subagents for tasks marked `[P]` |
-| `/qa-visual` | Spawns sandbox browsers to visually assert Acceptance Criteria |
-| `/dashboard` | Generates a rich, interactive inline UI of your project's progress |
-| `/heal` | Hooks into GitHub CLI (`gh`) to read failing CI logs and auto-push fixes |
-| `/sandbox` | Wraps risky AI execution inside an ephemeral Docker container |
+## 👁️ Visual QA Evidence & Offline Verification
+
+Gemstack Upgrade E provides mechanical visual verification grounded in cryptographic digests and offline comparisons:
+- **Canonical Visual Manifest (`visual-qa.json`)**: Declares scenario routes, deterministic viewports, selector masks, baseline digests, and diff tolerances.
+- **Deterministic Viewports**: Standardized profiles (Desktop, Mobile, Tablet) with locked width, height, and device scale factor.
+- **Cryptographic Baseline Hashing**: Baselines are tracked and pinned via canonical SHA-256 hashes (`image_sha256`); flags disk tampering (`VQA_BASELINE_TAMPERED`).
+- **Neutral & Secret Masking**: Eliminates dynamic timestamp/counter diff flakiness (`[MASKED_NEUTRAL]`) and enforces mandatory automatic masking on password and credential fields (`[MASKED_SECRET]`).
+- **Structured Evidence Comparison**: Fast SHA-256 match path with offline tolerance-bounded diffing (`max_diff_percentage`).
+- **Explicit Promotion Semantics**: Baselines are NEVER auto-updated or healed during test or verify; requires explicit `gemstack vqa promote <scenario-id>`.
+- **`gemstack vqa validate`**: Pure read-only offline validation of manifests, baselines, and evidence completeness.
+- **Explicit Boundary**: *Gemstack core inspects and diffs evidence; Gemstack core does NOT launch browsers and does NOT capture screenshots automatically. Capture remains external/adapted.*
+
+## 🏛️ Architectural Principles
+
+Gemstack operates on strict, non-negotiable architectural principles:
+
+```text
+authority > derived artifacts
+evidence ≠ authority
+verify = validate
+agent output ≠ architecture
+visual evidence ≠ architecture
+credentials ≠ authorization
+provider availability ≠ permission
+unknown cost ≠ free
+fallback ≠ inherited authorization
+agent says done ≠ task mechanically complete
+author ≠ reviewer where independent review is required
+```
+
+## 💻 CLI Reference
+
+Gemstack provides a focused, deterministic CLI surface:
+
+```bash
+# Core verification & collection
+gemstack verify [--json] [--target <dir>]     # 6-stage read-only audit (0 mutations, 0 network)
+gemstack collect [--target <dir>]             # Executes test runner & records closure.json
+gemstack ship [--target <dir>]                # Transitions lifecycle to SHIPPED if closure is VERIFIED
+
+# Context capsule (Upgrade D)
+gemstack context generate [--force]           # Compiles deterministic context-capsule.json
+gemstack context show [--raw]                 # Displays continuation context summary or JSON
+gemstack context verify                       # Verifies capsule freshness and provenance
+
+# Agent swarm (Upgrade E)
+gemstack swarm plan [--json]                  # Compiles tasks into disjoint concurrent waves
+gemstack swarm validate [--json]              # Validates write sets and review attestations
+
+# Visual QA (Upgrade E)
+gemstack vqa validate [--json]                # Validates visual manifest, viewports, and baselines
+gemstack vqa promote <scenario-id>            # Explicitly promotes live evidence to baseline
+```
 
 ## 🪝 Active Security (Git Hooks)
 
@@ -156,6 +212,7 @@ You can install agent skills created by the community directly into your project
 ```bash
 npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
 ```
+
 
 ## 🤖 MCP Server (Model Context Protocol)
 

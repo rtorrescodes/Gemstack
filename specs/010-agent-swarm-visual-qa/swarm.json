@@ -1,0 +1,49 @@
+{
+  "$schema": "https://gemstack.dev/schemas/v1/swarm.json",
+  "version": "1.0.0",
+  "feature_id": "010-agent-swarm-visual-qa",
+  "source_capsule_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "max_workers": 4,
+  "waves": [
+    {
+      "wave_index": 1,
+      "status": "COMPLETED",
+      "tasks": [
+        {
+          "task_id": "UE-T001",
+          "description": "Zero-Dependency Core & Bootstrap Registration",
+          "assigned_role": "implementer",
+          "worker_id": "worker-impl-alpha",
+          "write_set": [
+            "src/lib/contracts.js"
+          ],
+          "status": "COMPLETED",
+          "review": {
+            "reviewer_role": "reviewer",
+            "reviewer_id": "worker-rev-beta",
+            "status": "APPROVED",
+            "review_timestamp": "2026-09-11T19:00:00Z",
+            "attestation": "All 10 bootstrap contracts verified; zero runtime dependencies."
+          }
+        },
+        {
+          "task_id": "UE-T002",
+          "description": "Swarm Manifest Schema & Parser",
+          "assigned_role": "implementer",
+          "worker_id": "worker-impl-gamma",
+          "write_set": [
+            "src/lib/swarm.js"
+          ],
+          "status": "COMPLETED",
+          "review": {
+            "reviewer_role": "reviewer",
+            "reviewer_id": "worker-rev-delta",
+            "status": "APPROVED",
+            "review_timestamp": "2026-09-11T19:05:00Z",
+            "attestation": "Schema validation and deterministic UTF-16 serialization verified."
+          }
+        }
+      ]
+    }
+  ]
+}

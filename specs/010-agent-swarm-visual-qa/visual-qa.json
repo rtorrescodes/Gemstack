@@ -1,0 +1,41 @@
+{
+  "$schema": "https://gemstack.dev/schemas/v1/visual-qa.json",
+  "version": "1.0.0",
+  "feature_id": "010-agent-swarm-visual-qa",
+  "target_base_url": "http://localhost:3000",
+  "scenarios": [
+    {
+      "scenario_id": "VQA-LOGIN-001",
+      "description": "Login screen mobile portrait conformance",
+      "route": "/login",
+      "acceptance_ids": [
+        "TEST-VISUAL-A01"
+      ],
+      "viewport": {
+        "name": "mobile-portrait",
+        "width": 375,
+        "height": 667,
+        "device_scale_factor": 2,
+        "color_scheme": "light"
+      },
+      "selectors": {
+        "root": "#login-container",
+        "mask": [
+          ".dynamic-timestamp",
+          ".live-avatar"
+        ]
+      },
+      "tolerances": {
+        "max_diff_percentage": 0,
+        "anti_aliasing_threshold": 0.1
+      },
+      "baseline": {
+        "image_path": "specs/010-agent-swarm-visual-qa/baselines/vqa-login-001.png",
+        "image_sha256": "c35ba1ccd49a5e52bdc206d7e8723bc31d288d4f38b6c9045f4f78ab79e6018f",
+        "dom_hash": "c5d6e7f80123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "approved_by": "human-lead",
+        "approved_at": "2026-09-11T19:10:00Z"
+      }
+    }
+  ]
+}

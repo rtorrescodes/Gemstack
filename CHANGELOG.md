@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.4.0] - 2026-09-11
+
+### Added
+- **Agent Swarm Planning & Validation (Upgrade E)**: Deterministic multi-worker wave planning and coordination verification framework.
+  - Deterministic swarm planning contracts and canonical `swarm.json` manifest schema.
+  - Task ownership and write-set partitioning: enforces disjoint write boundaries per wave (`write_set(T1) ∩ write_set(T2) = ∅`).
+  - Write-collision detection: automatically detects overlapping write sets and serializes conflicting tasks into sequential waves.
+  - Dependency wave scheduling: preserves task prerequisite graphs and rejects circular dependencies (`SWARM_DEPENDENCY_CYCLE`).
+  - Task-scoped context projections: compiles minimal, role-tailored contexts derived from `context-capsule.json`.
+  - Context freshness validation: verifies live capsule hash against `source_capsule_hash` to reject stale projections (`SWARM_CONTEXT_STALE`).
+  - Separation of duties gate: mechanically enforces `AUTHOR != REVIEWER` (`SWARM_SELF_REVIEW_DETECTED`).
+  - Provider policy and budget gating: integrates with Upgrade C `ProviderCapabilityGate` and `BillableActionGate` to prevent budget runaway.
+  - Subagent limits enforcement: strictly blocks unauthorized recursive worker spawning.
+  - Pure offline read-only verification (Stage 5.3 in `gemstack verify`): validates swarm manifests without worker or agent execution.
+  - Explicit non-execution invariant: Gemstack core does NOT execute autonomous coding agents.
+- **Visual QA Evidence (Upgrade E)**: Mechanical, offline visual verification architecture based on cryptographic digests and neutral masking.
+  - Canonical `visual-qa.json` manifest schema declaring route, deterministic viewport dimensions, and approved baseline references.
+  - Deterministic viewport specifications: standard profiles with explicit width, height, and device scale factor.
+  - Cryptographic baseline pinning: baseline images tracked via canonical SHA-256 byte digests (`image_sha256`).
+  - Tampering detection: flags baseline image mutations on disk (`VQA_BASELINE_TAMPERED`).
+  - Neutral selector masking: masks dynamic elements (`[MASKED_NEUTRAL]`) to prevent flaky subpixel and timestamp diffs.
+  - Mandatory automatic password & credential masking: automatically replaces sensitive input fields (`type=password`, `data-sensitive=true`) with `[MASKED_SECRET]`.
+  - Structured visual evidence comparison: fast SHA-256 digest match path with offline tolerance-bounded diffing (`max_diff_percentage`).
+  - Explicit baseline promotion: baselines are NEVER auto-updated or healed during test or verify; requires explicit `gemstack vqa promote <scenario-id>`.
+  - Pure offline read-only verification (Stage 5.4 in `gemstack verify`): zero browser launches, zero network calls, zero file mutations.
+  - Explicit non-execution invariant: Gemstack core does NOT launch browsers and does NOT capture screenshots automatically.
+- **New CLI Surfaces**:
+  - `gemstack swarm plan [--json]`: compiles `tasks.md` into deterministic concurrent waves.
+  - `gemstack swarm validate [--json]`: validates write partitions, review separation, and context freshness.
+  - `gemstack vqa validate [--json]` (or `gemstack visual validate`): validates visual QA manifests, viewports, baselines, and evidence offline.
+  - `gemstack vqa promote <scenario-id>` (or `gemstack visual promote`): explicitly promotes live evidence to approved canonical baseline.
+
+### Changed
+- `gemstack verify` extended with Stage 5.3 (Swarm Audit) and Stage 5.4 (Visual QA Audit) running in pure read-only mode.
+- `src/lib/closure-context.js` updated to track `swarm.json` and `visual-qa.json` in closure context hashing, and support alphanumeric task IDs (`UE-T001`..`T029`).
+- `package.json` test script updated to register the 5 new Upgrade E test suites.
+
+### Compatibility
+- 100% backward compatible with existing Gemstack repositories and frozen contracts from Upgrades A, B, C, and D.
+- Zero external runtime npm dependencies added (`package.json` dependencies remain `{}`).
+- Zero external development npm dependencies added (`package.json` devDependencies remain `{}`).
+
+### Validation
+- 29/29 Upgrade E tasks COMPLETE.
+- 20/20 Upgrade E canonical acceptance tests passing (`TEST-SWARM-A01`..`E02`, `TEST-VISUAL-A01`..`E02`).
+- 10/10 Upgrade E bootstrap contracts passing.
+- 26/26 adversarial test cases passing.
+- 126/126 physical tests passing across 14 suites with 0 failures and 0 skipped.
+- Full CI test matrix (`npm run ci:all`) passing cleanly.
+- `gemstack verify` exit code 0 with 0 errors and 0 open blockers.
+- Swarm manifest verified: `VALID` and `FRESH`.
+- Visual QA manifest verified: `VALID` and `FRESH`.
+- Closure evidence: `specs/010-agent-swarm-visual-qa/closure.json` status `VERIFIED`.
+
 ## [v1.3.0] - 2026-09-11
 
 ### Added

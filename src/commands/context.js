@@ -11,7 +11,7 @@ async function contextCommand(args = [], flags = {}) {
   const subcommand = args[0] || 'show';
   const targetDir = flags.target ? path.resolve(flags.target) : process.cwd();
 
-  let activeSpec = flags.feature;
+  let activeSpec = (args[1] && !args[1].startsWith('-') ? args[1] : null) || flags.feature;
   if (!activeSpec) {
     const stateFile = path.join(targetDir, '.gemstack/state.json');
     if (fs.existsSync(stateFile)) {

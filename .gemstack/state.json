@@ -1,18 +1,18 @@
 {
   "version": "0.1",
-  "current_phase": "shipped",
+  "current_phase": "closure",
   "status": "SHIPPED",
   "stop_reason": "UPGRADE_C_SHIPPED_DONE",
-  "active_spec": null,
+  "active_spec": "specs/010-agent-swarm-visual-qa",
   "completed_phases": [
     "spec",
     "plan",
     "tasks"
   ],
   "phase_hashes": {
-    "spec": "9241b9e992f687e80ecef388c79731ece7af9aa75ba989dc8f0b1e9b855f7914",
-    "plan": "6a2e29e9aeda266a71ab435fa09bca3b18521835a69f6020cd8d9f135643e3aa",
-    "tasks": "1697c32a1f6596f317491df68cd1b161e5c77fbbddc74ce3f1e6e00a42619249"
+    "spec": "767c75151f9c53a70cfa6fcec85d29bccf5e3021004580878fb81ea3c4955ed7",
+    "plan": "d6f960f97bc6bcdb20daddc3c749c5f9f155c1407e0a8b81210cdf350bdad72c",
+    "tasks": "9931dda795d31bf29349ba5f20dc7631cb6a8974b91134ff577c57dd6b9aad7e"
   },
   "consistency": {
     "status": "PASS",

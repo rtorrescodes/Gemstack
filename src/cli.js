@@ -12,6 +12,8 @@ const verifyCommand = require('./commands/verify');
 const collectCommand = require('./commands/collect');
 const shipCommand = require('./commands/ship');
 const contextCommand = require('./commands/context');
+const swarmCommand = require('./commands/swarm');
+const visualCommand = require('./commands/visual');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -25,6 +27,9 @@ Commands:
   verify    Run complete integrity, state, memory and security audit (alias: audit)
   collect   Collect mechanical test matrix and closure evidence
   ship      Verify closure gates and transition feature to shipped
+  context   Generate, show, or verify context capsule
+  swarm     Plan or validate agent swarm work and write partitions
+  vqa       Validate or promote visual QA manifests and evidence
   list      List available skills
   show      Show content of a skill
   handoff   Show content of handoff.md
@@ -50,6 +55,9 @@ Options:
             case 'collect': await collectCommand(flags); break;
             case 'ship': await shipCommand(flags); break;
             case 'context': await contextCommand(args, flags); break;
+            case 'swarm': await swarmCommand(args, flags); break;
+            case 'vqa':
+            case 'visual': await visualCommand(args, flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;

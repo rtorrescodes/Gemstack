@@ -316,7 +316,7 @@
       "value": true
     }
   ],
-  "generated_at": "2026-09-11T18:39:24.919Z",
+  "generated_at": "2026-09-11T19:51:55.434Z",
   "generator": {
     "name": "gemstack",
     "version": "1.2.0"
@@ -352,16 +352,16 @@
   ],
   "project": {
     "active_feature": "specs/009-context-capsule",
-    "current_phase": "shipped",
+    "current_phase": "closure",
     "lifecycle_status": "SHIPPED",
     "name": "gemstack-ai",
     "next_permitted_phase": "PLAN"
   },
   "provenance": {
-    "source_set_hash": "c4f41904cf21ad6f8621e310650de48b7012c40a4a73010a62b37ea633d576b5",
+    "source_set_hash": "cb553121ecd975b8c39e1378e0ff07c9adb2d12ef323f2088c34c6780ca33077",
     "sources": [
       {
-        "hash": "a38e279e94ee6bcfb8bae4e9bf407277cdc1c16491539ae6a66bc179befb0ab6",
+        "hash": "e7b3f8427fd31ef9d591b6752716ebbf1831d669c5000297a8816eeeaf5e6936",
         "path": ".gemstack/state.json",
         "role": "LIFECYCLE_STATE"
       },

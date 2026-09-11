@@ -220,7 +220,7 @@ function parseTaskMetadata(tasksContent) {
   const lines = normalized.split('\n');
   const tasks = [];
 
-  const taskHeaderRegex = /^[*-]\s+\[[ xX]\]\s+\*\*(T\d+):\s*(.*?)\*\*/;
+  const taskHeaderRegex = /^[*-]\s+\[[ xX]\]\s+\*\*([A-Za-z0-9_-]+):\s*(.*?)\*\*/;
   let currentTask = null;
 
   for (const line of lines) {
@@ -342,6 +342,14 @@ function resolveRelevantFiles(rootPath, featureDir, planBindings, taskList, plan
   const featureCapsule = (relFeature + '/context-capsule.json').replace(/^\.\//, '');
   if (fs.existsSync(path.join(rootPath, featureCapsule))) filesSet.add(featureCapsule);
   if (fs.existsSync(path.join(rootPath, '.gemstack/context-capsule.json'))) filesSet.add('.gemstack/context-capsule.json');
+
+  const featureSwarm = (relFeature + '/swarm.json').replace(/^\.\//, '');
+  if (fs.existsSync(path.join(rootPath, featureSwarm))) filesSet.add(featureSwarm);
+  if (fs.existsSync(path.join(rootPath, '.gemstack/swarm.json'))) filesSet.add('.gemstack/swarm.json');
+
+  const featureVqa = (relFeature + '/visual-qa.json').replace(/^\.\//, '');
+  if (fs.existsSync(path.join(rootPath, featureVqa))) filesSet.add(featureVqa);
+  if (fs.existsSync(path.join(rootPath, '.gemstack/visual-qa.json'))) filesSet.add('.gemstack/visual-qa.json');
 
   for (const b of (planBindings || [])) {
     if (b.file && fs.existsSync(path.join(rootPath, b.file))) {

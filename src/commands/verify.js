@@ -430,6 +430,44 @@ module.exports = async (flags) => {
         logger.ok('Sin spec activa configurada para verificación de context capsule.');
     }
 
+    // 5.3 Verificación de Swarm Manifest (Upgrade E - Read-Only)
+    logger.info('--- 5.3 Verificación de Swarm Manifest & Partition Safety (Read-Only) ---');
+    if (loadedState && loadedState.active_spec) {
+        const { validateSwarmManifest } = require('../lib/swarm');
+        const swarmResult = validateSwarmManifest(targetDir, loadedState.active_spec);
+        if (swarmResult.valid) {
+            logger.ok(`Swarm manifest verificado y sin colisiones (${loadedState.active_spec}/swarm.json).`);
+        } else if (swarmResult.state === 'MISSING') {
+            logger.info(`[LEGACY] No se detectó swarm.json en "${loadedState.active_spec}" (Modo Legacy Swarm-Free).`);
+        } else {
+            for (const f of swarmResult.findings) {
+                logger.error(`[${f.code}] ${f.details || f.message}`);
+                totalErrors++;
+            }
+        }
+    } else {
+        logger.ok('Sin spec activa configurada para verificación de swarm manifest.');
+    }
+
+    // 5.4 Verificación de Visual QA Manifest & Baselines (Upgrade E - Read-Only)
+    logger.info('--- 5.4 Verificación de Visual QA Manifest & Baselines (Read-Only) ---');
+    if (loadedState && loadedState.active_spec) {
+        const { validateVisualManifest } = require('../lib/visual-qa');
+        const vqaResult = validateVisualManifest(targetDir, loadedState.active_spec);
+        if (vqaResult.valid) {
+            logger.ok(`Visual QA manifest y baselines íntegros (${loadedState.active_spec}/visual-qa.json).`);
+        } else if (vqaResult.state === 'MISSING') {
+            logger.info(`[LEGACY] No se detectó visual-qa.json en "${loadedState.active_spec}" (Modo Legacy Visual-Free).`);
+        } else {
+            for (const f of vqaResult.findings) {
+                logger.error(`[${f.code}] ${f.details || f.message}`);
+                totalErrors++;
+            }
+        }
+    } else {
+        logger.ok('Sin spec activa configurada para verificación de visual QA.');
+    }
+
     // 6. Seguridad Local y Anti-Silent Failures en Tests
     logger.info('--- 6/6 Verificación de Seguridad y Test Runners ---');
     const envPath = fssafe.resolveSafe(targetDir, '.env');
