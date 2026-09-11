@@ -1,13 +1,15 @@
 <div align="center">
   <img src="assets/logo.jpg" alt="Gemstack Logo" width="200" style="border-radius: 20px" />
-  <h1>Gemstack</h1>
+  <h1>Gemstack v1.4.0</h1>
   <p><b>The Local-First Agentic Framework for Spec-Driven Development</b></p>
 
   [![npm version](https://img.shields.io/npm/v/gemstack-ai.svg?style=flat-square)](https://www.npmjs.com/package/gemstack-ai)
+  [![Release](https://img.shields.io/badge/release-v1.4.0-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v1.4.0)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Military--Grade-red.svg?style=flat-square)](#military-grade-security-shield)
 
+> **🚀 Current Stable Release: `v1.4.0`** — *Agent Swarm Planning & Visual QA Evidence Checkpoint*  
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
@@ -18,7 +20,7 @@ Gemstack is a zero-dependency, local-first framework designed to supercharge you
 
 Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and military-grade security into the AI's context.
 
-## ✨ Features
+## ✨ Features (v1.4.0)
 
 - 🧠 **Spec-Driven Development (SDD)**: The AI is physically prevented from hallucinating code without writing and getting approval for a `spec.md`, `plan.md`, and `tasks.md` first.
 - 🛡️ **Military-Grade Security**: Includes a built-in Chief Security Officer (`gemstack-cso`) and immutable Constitution Rules that force the AI to respect OWASP, zero-trust secrets, and multi-tenant isolation.
@@ -29,7 +31,7 @@ Instead of letting AI write code blindly in a chaotic chat window, Gemstack inst
 
 ## 🚀 Quickstart
 
-Start a new project or upgrade an existing one in seconds:
+Start a new project or upgrade an existing one in seconds with **Gemstack v1.4.0**:
 
 ```bash
 # Initialize Gemstack in your current repository

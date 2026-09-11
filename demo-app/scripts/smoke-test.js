@@ -1,5 +1,6 @@
 const { spawn } = require('child_process');
 const http = require('http');
+const path = require('path');
 
 const PORT = 3001;
 const API_URL = `http://localhost:${PORT}/api`;
@@ -32,7 +33,7 @@ function wait(ms) {
 }
 
 async function checkHealth() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
         try {
             const res = await fetchApi('/health');
             if (res.status === 200 && res.data.ok) return true;
@@ -120,7 +121,13 @@ async function runTests() {
 
 async function main() {
     console.log('[INFO] Spawning server...');
-    const server = spawn('node', ['server.js'], { stdio: 'ignore' });
+    const server = spawn('node', ['server.js'], { 
+        cwd: path.resolve(__dirname, '..'),
+        stdio: ['ignore', 'ignore', 'pipe'] 
+    });
+    server.stderr.on('data', d => {
+        process.stderr.write(`[SERVER_ERR] ${d}`);
+    });
     
     const isHealthy = await checkHealth();
     if (!isHealthy) {

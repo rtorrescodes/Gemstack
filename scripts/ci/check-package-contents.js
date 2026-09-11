@@ -8,7 +8,7 @@ try {
     const files = result[0].files.map(f => f.path.replace(/\\/g, '/'));
     
     const required = ['src/cli.js', 'template/handoff.md', 'README.md', 'LICENSE', 'CHANGELOG.md', 'RELEASE_NOTES.md', 'package.json'];
-    const forbidden = ['node_modules', 'securedocs.sqlite', 'demo-app/node_modules', '.git/', 'demo-app/securedocs.sqlite'];
+    const forbidden = ['node_modules', 'securedocs.sqlite', 'demo-app/node_modules', '.git/', 'demo-app/securedocs.sqlite', '.tgz'];
     
     let hasError = false;
     for (const req of required) {

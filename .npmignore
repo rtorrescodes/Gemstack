@@ -1,3 +1,5 @@
 demo-app/
 tests/
 **/baselines/
+*.tgz
+.github/

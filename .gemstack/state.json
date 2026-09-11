@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "current_phase": "closure",
+  "current_phase": "shipped",
   "status": "SHIPPED",
   "stop_reason": "UPGRADE_C_SHIPPED_DONE",
-  "active_spec": "specs/010-agent-swarm-visual-qa",
+  "active_spec": null,
   "completed_phases": [
     "spec",
     "plan",
@@ -23,6 +23,6 @@
     "freeze": false,
     "allowed_paths": []
   },
-  "last_update": "2026-09-11T17:38:04.916Z",
-  "last_completed_feature": "specs/008-cost-provider-safety-gates"
+  "last_update": "2026-09-11T20:08:22.039Z",
+  "last_completed_feature": "specs/010-agent-swarm-visual-qa"
 }

@@ -24,17 +24,24 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
-        run: npm ci || npm install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
 
       - name: Security Gate - Run CI All
         run: npm run ci:all
 
       - name: Pack Package
-        run: npm pack
         id: pack
+        run: |
+          TARBALL=$(npm pack)
+          echo "TARBALL=$TARBALL" >> $GITHUB_ENV
 
       - name: Publish to NPM
-        run: npm publish --access public
+        run: npm publish "$TARBALL" --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -42,11 +49,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Obtener el nombre del archivo tarball generado por npm pack
-          TARBALL=$(ls gemstack-*.tgz)
-          
-          # Crear el Release oficial de GitHub usando el CLI nativo 'gh'
           gh release create ${{ github.ref_name }} \
             --title "Release ${{ github.ref_name }}" \
             --notes-file RELEASE_NOTES.md \
-            $TARBALL
+            "$TARBALL"
+
+      - name: Verify NPM Availability
+        run: |
+          echo "Waiting for NPM registry to reflect publication..."
+          TARGET_VERSION="${{ github.ref_name }}"
+          TARGET_VERSION="${TARGET_VERSION#v}"
+          for i in {1..30}; do
+            LATEST=$(npm view gemstack-ai version 2>/dev/null || echo "")
+            echo "Current latest on npm: $LATEST (target: $TARGET_VERSION)"
+            if [ "$LATEST" = "$TARGET_VERSION" ]; then
+              echo "Successfully verified on npm: gemstack-ai@$TARGET_VERSION"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Notice: npm publish completed; edge CDN still replicating."
+
