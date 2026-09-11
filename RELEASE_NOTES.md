@@ -1,5 +1,36 @@
 # Gemstack Release Notes
 
+# Gemstack v1.1.2 — Architecture Consistency & Phase Freezing
+
+## Recovery Release Note
+v1.1.2 is the release-recovery patch for Upgrade A. v1.1.1 resolved cross-platform test discovery, exposing a host-dependent path canonicalization defect in `TEST-CONSISTENCY-G01` when simulating Windows paths on Linux runners. v1.1.2 fixes that canonicalization using explicit path-flavor-aware Node.js path semantics (`path.win32` vs `path.posix`). No product architecture, contract semantics, or canonical P1 criteria were altered.
+
+## Highlights
+- **Architecture Consistency Engine**: Mechanically prevents AI models from hallucinating or introducing silent architectural contradictions downstream through 6 canonical contract types (`ENUM_SET`, `IDENTITY_TUPLE`, `PROVENANCE_RULE`, `BOOLEAN_INVARIANT`, `BOUNDARY`, `ROADMAP_LIMIT`).
+- **Cryptographic Phase Freezing**: SHA-256 canonical hashing of phase artifacts (`spec.md`, `plan.md`, `tasks.md`) with automatic mutation detection (`FROZEN_ARTIFACT_CHANGED`).
+- **Deterministic-First Validation**: Automated cross-phase inheritance (`SPEC` -> `PLAN` -> `TASKS`) resolving contradictions before human review.
+- **Canonical Finding Fingerprints**: Full 64-character lowercase SHA-256 digests with anti-loop lifecycle management (`OPEN`, `RESOLVED`, `ACCEPTED_EXCEPTION`, `SUPERSEDED`).
+- **Accepted Exceptions Bound to Context**: Exceptions require cryptographic `contextHash` binding; any change to compared artifacts or contracts invalidates suppression.
+- **Progressive LEGACY Mode**: Features without contracts continue without disruption or breaking changes.
+- **Zero-Dependency Core**: Pure Node.js standard library implementation (`node:crypto`, `node:fs`, `node:path`, `node:test`).
+
+## Compatibility
+- 100% backward compatible with existing Gemstack repositories.
+- Zero external runtime dependencies added.
+
+## Validation
+- 17/17 Upgrade A implementation tasks complete.
+- 25/25 canonical P1 acceptance tests passing.
+- 33/33 physical test suite passing.
+- `npm test` exit code 0.
+- `gemstack verify` exit code 0 with 0 open blockers.
+- Self-dogfooded on `specs/006-architecture-consistency-engine/`.
+
+## Upgrade Notes
+- Run `npx gemstack-ai update` to pull the latest agent skills and templates into your existing project.
+
+---
+
 # Gemstack v1.1.1 — Architecture Consistency & Phase Freezing
 
 ## Recovery Release Note

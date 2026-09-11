@@ -52,15 +52,37 @@ describe('Wave 1 / Suite 2: Deterministic Hasher & Platform Invariance (P1-C & P
   });
 
   test('TEST-CONSISTENCY-G01: Resolves Windows backslashes to normalized POSIX relative path', () => {
-    const winPath = 'specs\\006-architecture\\spec.md';
+    // 1. Literal Windows relative path with backslashes
+    const winPath = 'specs\\006-architecture-consistency-engine\\spec.md';
     const normalized = normalizePath(winPath);
-    assert.equal(normalized, 'specs/006-architecture/spec.md');
+    assert.equal(normalized, 'specs/006-architecture-consistency-engine/spec.md');
 
-    // Also handles root relative normalization
-    const fakeRoot = 'C:/CODES/Gemstack';
-    const fullFakePath = 'C:\\CODES\\Gemstack\\specs\\006-architecture\\spec.md';
-    const relNormalized = normalizePath(fullFakePath, fakeRoot);
-    assert.equal(relNormalized, 'specs/006-architecture/spec.md');
+    // 2. Literal Windows absolute path with backslashes against root with forward slashes
+    const fakeWinRootForward = 'C:/CODES/Gemstack';
+    const fullWinPathBackslash = 'C:\\CODES\\Gemstack\\specs\\006-architecture-consistency-engine\\spec.md';
+    const relNormalized1 = normalizePath(fullWinPathBackslash, fakeWinRootForward);
+    assert.equal(relNormalized1, 'specs/006-architecture-consistency-engine/spec.md');
+
+    // 3. Literal Windows absolute path with backslashes against root with backslashes
+    const fakeWinRootBackslash = 'C:\\CODES\\Gemstack';
+    const relNormalized2 = normalizePath(fullWinPathBackslash, fakeWinRootBackslash);
+    assert.equal(relNormalized2, 'specs/006-architecture-consistency-engine/spec.md');
+
+    // 4. Literal POSIX absolute path against POSIX root
+    const fakePosixRoot = '/home/runner/work/Gemstack/Gemstack';
+    const fullPosixPath = '/home/runner/work/Gemstack/Gemstack/specs/006-architecture-consistency-engine/spec.md';
+    const posixNormalized = normalizePath(fullPosixPath, fakePosixRoot);
+    assert.equal(posixNormalized, 'specs/006-architecture-consistency-engine/spec.md');
+
+    // 5. Incompatible mixed flavors reject safely
+    assert.throws(() => {
+      normalizePath('/home/user/spec.md', 'C:\\CODES\\Gemstack');
+    }, /Incompatible mixed path flavors/);
+
+    // 6. Outside root rejects safely
+    assert.throws(() => {
+      normalizePath('C:\\OTHER\\spec.md', 'C:\\CODES\\Gemstack');
+    }, /outside root directory/);
   });
 
 });

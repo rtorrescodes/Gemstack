@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.2] - 2026-09-11
+### Fixed
+- Fixed host-dependent normalization of simulated Windows paths in the Architecture Consistency Engine.
+- Canonical repository-relative locations now use explicit win32/posix path semantics based on input path flavor.
+- Restored TEST-CONSISTENCY-G01 on Linux CI without changing Upgrade A architecture or acceptance semantics.
+
 ## [v1.1.1] - 2026-09-11
 ### Fixed
 - Fixed cross-platform CI test discovery for Node's built-in test runner.

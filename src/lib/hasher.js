@@ -49,8 +49,23 @@ function hashFile(filePath) {
   return hashContent(raw);
 }
 
+const WINDOWS_DRIVE_RE = /^[A-Za-z]:[\\/]/;
+const WINDOWS_UNC_RE = /^\\\\[^\\/]+[\\/][^\\/]+/;
+
+/**
+ * Checks if a path string has Windows structure (drive letter, UNC, or backslashes).
+ *
+ * @param {string} p
+ * @returns {boolean}
+ */
+function isWindowsPath(p) {
+  if (typeof p !== 'string') return false;
+  return WINDOWS_DRIVE_RE.test(p) || WINDOWS_UNC_RE.test(p) || p.includes('\\');
+}
+
 /**
  * Normalizes file paths to repository-relative POSIX format (using forward slashes '/').
+ * Uses explicit path.win32 or path.posix based on input path flavor rather than host OS.
  *
  * @param {string} filePath
  * @param {string} [rootPath] - optional repository root
@@ -58,11 +73,26 @@ function hashFile(filePath) {
  */
 function normalizePath(filePath, rootPath) {
   if (!filePath) return '';
-  let target = filePath;
-  if (rootPath) {
-    target = path.relative(rootPath, filePath);
+  if (!rootPath) {
+    return filePath.replace(/\\/g, '/');
   }
-  return target.replace(/\\/g, '/');
+
+  const fileIsWindows = isWindowsPath(filePath);
+  const rootIsWindows = isWindowsPath(rootPath);
+
+  const isPosixAbs = (p) => typeof p === 'string' && p.startsWith('/') && !WINDOWS_DRIVE_RE.test(p);
+  if ((fileIsWindows && isPosixAbs(rootPath)) || (isPosixAbs(filePath) && rootIsWindows)) {
+    throw new Error(`Incompatible mixed path flavors: filePath="${filePath}", rootPath="${rootPath}"`);
+  }
+
+  const impl = (fileIsWindows || rootIsWindows) ? path.win32 : path.posix;
+  const rel = impl.relative(rootPath, filePath);
+
+  if (rel.startsWith('..\\') || rel.startsWith('../') || rel === '..') {
+    throw new Error(`Path "${filePath}" is outside root directory "${rootPath}"`);
+  }
+
+  return rel.replace(/\\/g, '/');
 }
 
 module.exports = {
