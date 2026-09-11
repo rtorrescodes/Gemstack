@@ -2,16 +2,17 @@
   "version": "0.1",
   "current_phase": "shipped",
   "status": "SHIPPED",
-  "stop_reason": "UPGRADE_B_SHIPPED_DONE",
+  "stop_reason": "UPGRADE_C_SHIPPED_DONE",
   "active_spec": null,
   "completed_phases": [
     "spec",
-    "plan"
+    "plan",
+    "tasks"
   ],
   "phase_hashes": {
-    "spec": "75f7b5aee9a7d45836128f619ba67d0870c9be3a2634d9152b01c6501faa513d",
-    "plan": "c77a3b1410d3b3028b72d66db524c6a23b0998dce12dddaee2507b4e446aec3b",
-    "tasks": "69ea9ae8557a41f98102c7b91905f74b3645ea59cbe301a54425216d5789b1d8"
+    "spec": "9241b9e992f687e80ecef388c79731ece7af9aa75ba989dc8f0b1e9b855f7914",
+    "plan": "6a2e29e9aeda266a71ab435fa09bca3b18521835a69f6020cd8d9f135643e3aa",
+    "tasks": "1697c32a1f6596f317491df68cd1b161e5c77fbbddc74ce3f1e6e00a42619249"
   },
   "consistency": {
     "status": "PASS",
@@ -22,6 +23,6 @@
     "freeze": false,
     "allowed_paths": []
   },
-  "last_update": "2026-09-11T16:49:53.470Z",
-  "last_completed_feature": "specs/007-mechanical-test-matrix-closure-evidence/"
+  "last_update": "2026-09-11T17:38:04.916Z",
+  "last_completed_feature": "specs/008-cost-provider-safety-gates"
 }

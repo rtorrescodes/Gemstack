@@ -1,5 +1,42 @@
 # Gemstack Release Notes
 
+# Gemstack v1.3.0 — Cost & Provider Safety Gates + Context Capsule
+
+## Highlights
+
+### Upgrade C — Cost & Provider Safety Gates
+- **Deterministic Provider & Capability Validation (`ProviderCapabilityGate`)**: Validates requested provider capabilities ahead of invocation and fail-closes on undeclared or unsupported capabilities without network calls.
+- **Spending Authorization Barrier (`BillableActionGate`)**: Enforces the central invariant "NO PROOF = NO EXECUTION"; commercial or billable actions are strictly blocked unless accompanied by valid explicit spending tokens.
+- **Auditable Cost Ledger (`cost-ledger.json`)**: Machine-readable schema establishing strict freshness dates, provider cost classifications, and zero-secrets immunity.
+- **Fail-Closed Unknown Cost Policy**: Unclassified or unknown operations are never assumed free; they are treated fail-closed as commercial risks.
+- **Environment Safety & CI Isolation**: Prevents accidental commercial provider calls during tests and CI builds regardless of ambient developer credentials.
+- **Trusted Mock Enforcement**: Verifies in-memory mocks remain isolated and fail-closed against external network socket leaks.
+- **Re-Entrant Provider Fallback**: Fallback target providers trigger independent gate re-evaluation before execution.
+- **Verification Purity**: Guarantees `gemstack verify` runs strictly offline with zero provider charges and zero file mutations.
+
+### Upgrade D — Context Capsule / Context Compression
+- **Deterministic Context Compression**: Compiles authoritative specification, plan, tasks, lifecycle, and closure artifacts into compact, machine-readable continuation context (`context-capsule.json`).
+- **Constraint-Lossless Compression**: 100% of normative behavioral constraints (`MUST`, `MUST NOT`), frozen architectural contracts, and acceptance criteria survive compression without semantic loss.
+- **Canonical Authority Precedence**: Authoritative repository artifacts unconditionally govern over derived capsule claims (`SPEC` > `PLAN` > `TASKS` > implementation).
+- **Cryptographic Provenance & Drift Detection**: Live SHA-256 source digests detect artifact modifications or tampering immediately (`STALE` / `TAMPERED`).
+- **Strict Secrets Barrier**: Automated regex scanner blocks credential properties (`apiKey`, `token`, `secret`, `clientSecret`), token patterns (`sk-...`, `AIza...`, `ghp_...`), private keys, and `.env` references.
+- **Deterministic Size Budgeting**: 32 KB target budget with prioritized 3-tier condensation and a 64 KB hard fail-closed limit.
+- **Read-Only Verification (Stage 5.2)**: `gemstack verify` inspects context capsule freshness without modifying or rewriting disk state.
+- **CLI Commands**: `gemstack context generate`, `gemstack context show`, and `gemstack context verify`.
+- **Zero Runtime Dependencies**: Native Node.js standard library implementation (`node:crypto`, `node:fs`, `node:path`, `node:test`).
+
+## Acceptance & Regression Baseline
+- 25 Upgrade A canonical acceptance tests passing (`TEST-CONSISTENCY-A01` through `H02`).
+- 20 Upgrade B canonical acceptance tests passing (`TEST-CLOSURE-A01` through `H01`).
+- 20 Upgrade C canonical acceptance tests passing (`TEST-COST-A01` through `H01`).
+- 20 Upgrade D canonical acceptance tests passing (`TEST-CONTEXT-A01` through `H01`).
+- 85 total canonical acceptance tests passing.
+- 100 total physical tests passing across 25 explicitly enumerated suites.
+- Full CI suite (`npm run ci:all`) passing with 0 warnings and 0 errors.
+- Both Upgrade C and Upgrade D closed with closure status `VERIFIED`.
+
+---
+
 # Gemstack v1.2.0 — Mechanical Test Matrix & Closure Evidence
 
 ## Highlights

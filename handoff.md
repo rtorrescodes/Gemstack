@@ -8,16 +8,18 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
 4. Comando unificado `gemstack verify` (alias `audit`) para auditoría integral en un solo paso.
 
 ## 2. Estado actual
-- **Upgrade A (Consistency Core & Phase Freezing)**: CERRADO Y PUBLICADO OFICIALMENTE como `gemstack-ai@1.1.2` en npm y GitHub Release.
-- **Upgrade B (Mechanical Test Matrix & Closure Evidence)**: CERRADO Y PREPARADO PARA RELEASE como `gemstack-ai@1.2.0`.
-  - 20/20 pruebas canónicas P1 de Upgrade B pasando al 100% en 6 nuevas suites.
-  - 25/25 pruebas canónicas P1 de Upgrade A preservadas con 0 regresiones.
-  - 53/53 pruebas físicas totales ejecutadas y pasando con 0 errores en CI/CD local (`npm test`, `npm run ci:all`).
-  - Comando mutador `gemstack collect` implementado y probado en Feature 007, generando `closure.json` atómicamente.
-  - Comando `gemstack verify` ampliado a 6 etapas estrictamente read-only con validación de frescura contra `closureContextHash`.
-  - Compuerta de cierre `gemstack ship` ejecutada exitosamente con estado `VERIFIED` y transición de ciclo de vida formal.
-  - Zero dependencias externas añadidas en producción.
-  - Excluidos completamente Upgrade C y Upgrade D.
+- **Upgrade A (Consistency Core & Phase Freezing)**: CERRADO Y PUBLICADO OFICIALMENTE en `v1.1.2`.
+- **Upgrade B (Mechanical Test Matrix & Closure Evidence)**: CERRADO Y PUBLICADO OFICIALMENTE en `v1.2.0`.
+- **Upgrade C (Cost & Provider Safety Gates)**: CERRADO Y VERIFICADO (`closure.json` status `VERIFIED`).
+  - 20/20 pruebas canónicas P1 de Upgrade C pasando al 100% en 6 suites dedicadas.
+  - Gates `ProviderCapabilityGate` y `BillableActionGate` implementados con fail-closed default deny.
+  - Cost ledger (`cost-ledger.json`) validado, offline verification purity garantizada.
+- **Upgrade D (Context Capsule / Context Compression)**: CERRADO Y VERIFICADO (`closure.json` status `VERIFIED`, capsule `VALID` y `FRESH`).
+  - 20/20 pruebas canónicas de Upgrade D pasando al 100% en 8 suites dedicadas.
+  - Serializador canónico determinista, defensa de secretos fail-closed, presupuesto 32KB/64KB.
+  - Comandos CLI `gemstack context` y etapa 5.2 en `gemstack verify`.
+  - 100/100 pruebas físicas totales pasando en 25 suites sin dependencias externas.
+  - Preparado para release estable `v1.3.0`.
 
 ## 3. Archivos y cambios
 - `src/lib/test-matrix.js`: Parser de `gemstack-test-matrix`, validación de esquema de 20 tests canónicos y cálculo de `acceptanceSignature` canónico SHA-256.
@@ -41,5 +43,5 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
 - **Closure Manifest Self-Reference**: Al incluir `specs/<feature>/closure.json` en los archivos de implementación de `tasks.md`, `closureContextHash` cambiaba cada vez que `closure.json` era escrito, provocando que la evidencia se marcara como `STALE` inmediatamente después de recolectarse. Se resolvió excluyendo explícitamente `closure.json` de la agregación de hashes de contexto de implementación (`implementationContextHash`).
 
 ## 5. Próximos pasos
-1. Completar la publicación de la versión minor v1.2.0 en GitHub Release y npm.
-2. Iniciar la fase de arquitectura de Upgrade C (Cost & Provider Safety Gates) en su ciclo correspondiente.
+1. Completar la publicación y git tag de la versión minor `v1.3.0`.
+2. Proceder a Upgrade E (SPEC ONLY) una vez autorizada la fase siguiente.

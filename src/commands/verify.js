@@ -376,6 +376,60 @@ module.exports = async (flags) => {
         logger.ok('Sin spec activa configurada para validación de evidencia de cierre.');
     }
 
+    // 5.1 Verificación de Políticas de Costos y Proveedores (Upgrade C - Read-Only)
+    const { loadCostLedger } = require('../lib/cost-ledger');
+    let costLedgerFound = false;
+    const ledgerCandidates = [];
+    if (loadedState && loadedState.active_spec) {
+        ledgerCandidates.push(fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'cost-ledger.json')));
+    }
+    ledgerCandidates.push(fssafe.resolveSafe(targetDir, 'cost-ledger.json'));
+    ledgerCandidates.push(fssafe.resolveSafe(targetDir, '.gemstack/cost-ledger.json'));
+
+    for (const lPath of ledgerCandidates) {
+        if (fs.existsSync(lPath)) {
+            costLedgerFound = true;
+            const res = loadCostLedger(lPath);
+            if (res.findings.length > 0) {
+                for (const f of res.findings) {
+                    if (f.is_blocking) {
+                        logger.error(`[COST_SAFETY_BLOCKER] ${f.code}: ${f.details}`);
+                        totalErrors++;
+                    } else {
+                        logger.warn(`[COST_SAFETY_WARNING] ${f.code}: ${f.details}`);
+                        totalWarnings++;
+                    }
+                }
+            } else {
+                logger.ok(`Cost ledger verificado (${path.basename(lPath)}): íntegro y sin secretos.`);
+            }
+            break;
+        }
+    }
+
+    if (!costLedgerFound) {
+        logger.info('[LEGACY] [LEGACY_NO_PROVIDERS_DECLARED] No se detectaron declaraciones de costos o proveedores (Modo Legacy Provider-Free).');
+    }
+
+    // 5.2 Verificación de Context Capsule (Upgrade D - Read-Only)
+    logger.info('--- 5.2 Verificación de Context Capsule (Read-Only) ---');
+    if (loadedState && loadedState.active_spec) {
+        const { validateContextCapsule } = require('../lib/context-capsule');
+        const capResult = validateContextCapsule(targetDir, loadedState.active_spec);
+        if (capResult.valid) {
+            logger.ok(`Context capsule verificado y fresco (${loadedState.active_spec}/context-capsule.json).`);
+        } else if (capResult.state === 'MISSING') {
+            logger.info(`[LEGACY] No se detectó context-capsule.json en "${loadedState.active_spec}" (Modo Legacy Context-Free).`);
+        } else {
+            for (const f of capResult.findings) {
+                logger.error(`[${f.code}] ${f.message}`);
+                totalErrors++;
+            }
+        }
+    } else {
+        logger.ok('Sin spec activa configurada para verificación de context capsule.');
+    }
+
     // 6. Seguridad Local y Anti-Silent Failures en Tests
     logger.info('--- 6/6 Verificación de Seguridad y Test Runners ---');
     const envPath = fssafe.resolveSafe(targetDir, '.env');

@@ -108,6 +108,29 @@ Gemstack Upgrade B guarantees that what was planned is what was physically teste
 - **`gemstack ship`**: Gatekeeper requiring verified evidence before allowing transition to `SHIPPED`.
 - **Git Optionality & Legacy Support**: Works identically on clean Git, dirty Git, and non-Git projects, with graceful legacy fallback.
 
+## 🛡️ Cost & Provider Safety Gates
+
+Gemstack Upgrade C guarantees fail-closed safety for commercial, remote, and AI providers:
+- **`ProviderCapabilityGate`**: Validates provider capability declarations before invocation without network attempts.
+- **`BillableActionGate`**: Enforces strict spending authorization tokens before executing billable operations.
+- **Cost Ledger (`cost-ledger.json`)**: Auditable schema tracking provider cost assumptions, freshness thresholds, and currency units.
+- **Fail-Closed Unknown Cost Policy**: Operations with unclassified or ambiguous costs are strictly blocked.
+- **Environment Safety**: Commercial provider execution is forbidden in `test` and `ci` environments.
+- **Trusted Mock Boundaries**: Test mocks operate strictly in memory with zero network escapes.
+- **Offline Purity**: `gemstack verify` runs 100% offline with zero external network or provider charges.
+
+## 📦 Context Capsule & Compression
+
+Gemstack Upgrade D enables deterministic, constraint-lossless context compression for cross-session continuation:
+- **`gemstack context generate`**: Compiles authoritative specifications, plans, tasks, contracts, and closure evidence into `context-capsule.json`.
+- **Constraint Losslessness**: 100% of normative `MUST`/`MUST NOT` constraints, frozen contracts, and acceptance criteria survive compression.
+- **Authority Precedence**: Authoritative repository artifacts unconditionally override derived capsule claims (`SPEC` > `PLAN` > `TASKS` > implementation).
+- **Drift & Tampering Detection**: Live SHA-256 source hashing flags modified or manually tampered capsules as `STALE`.
+- **Secret Defense**: Fail-closed regex scanning strictly blocks credentials, tokens, private keys, and `.env` data.
+- **Size Budgeting**: 32 KB target budget with deterministic priority condensation and 64 KB fail-closed hard cap.
+- **`gemstack context show`**: Displays human-readable continuation context summary or raw JSON.
+- **`gemstack context verify`**: Read-only validation of context capsule freshness and integrity.
+
 ## 🐝 Advanced Autonomy (The WOW Update)
 
 Gemstack isn't just passive documents; it actively orchestrates agentic capabilities:

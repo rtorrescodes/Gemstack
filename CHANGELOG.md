@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.3.0] - 2026-09-11
+
+### Added
+- **Cost & Provider Safety Gates (Upgrade C)**: Deterministic, fail-closed safety and cost verification framework for commercial, external, and AI provider interactions.
+  - `ProviderCapabilityGate`: validates that requested capabilities are declared and supported by the active provider adapter before invocation.
+  - `BillableActionGate`: blocks billable actions unless explicit spending authorization tokens are granted.
+  - Provider Registry: canonical provider directory with declared capability contracts and deterministic rejection of unknown providers.
+  - Cost Ledger (`cost-ledger.json`): auditable schema validating provider cost assumptions, freshness thresholds, and currency units.
+  - Fail-Closed Unknown Cost Policy: unclassified or ambiguous operations are strictly treated as commercial rather than defaulted to free.
+  - Environment Safety Isolation: prevents accidental commercial provider invocations in `test` and `ci` environments even if ambient credentials exist.
+  - Trusted Mock Boundaries: enforces that test mocks execute strictly in memory with zero network escapes.
+  - Re-Entrant Fallback Authorization: secondary fallback providers trigger independent gate re-evaluation before execution.
+  - Verification Purity: guarantees `gemstack verify` executes offline with zero network sockets and zero ledger file mutations.
+- **Context Capsule / Context Compression (Upgrade D)**: Deterministic, auditable, constraint-lossless context compression architecture for cross-session AI continuation.
+  - Deterministic Context Capsule Generation: compiles authoritative sources (`spec.md`, `plan.md`, `tasks.md`, `.gemstack/state.json`, `closure.json`) into `context-capsule.json`.
+  - Constraint-Lossless Compression: 100% of normative `MUST` and `MUST NOT` constraints, frozen contracts, and acceptance signatures survive compression.
+  - Canonical Authority Precedence: authoritative repository sources unconditionally govern over derived capsule claims (`SPEC` > `PLAN` > `TASKS` > implementation).
+  - Provenance & Freshness Hashing: live SHA-256 source digests detect drift or manual tampering immediately (`STALE` / `TAMPERED`).
+  - Strict Secrets Defense: automatic regex and property pattern scanner rejects tokens, API keys, private keys, and `.env` references fail-closed.
+  - Size Budget Enforcement: 32 KB target budget with deterministic 3-tier condensation and 64 KB fail-closed hard limit.
+  - Pure Offline & Atomic Writing: generation and validation execute 100% offline with atomic write semantics (`.tmp` + rename).
+  - Read-Only Verification (Stage 5.2): `gemstack verify` inspects context capsule freshness without disk writes or file mutation.
+  - New CLI Surface: `gemstack context generate`, `gemstack context show`, and `gemstack context verify`.
+  - Progressive Legacy Support: repositories or features lacking capsules operate cleanly with informational notices and zero blockers.
+
+### Changed
+- `gemstack verify` pipeline extended to include Stage 5.2 Context Capsule read-only audit.
+- `package.json` test script updated to explicitly enumerate all 25 physical test suites across Upgrades A, B, C, and D.
+- Closure context resolution (`src/lib/closure-context.js`) incorporates `context-capsule.json` in relevant files hashing.
+
+### Compatibility
+- 100% backward compatible with existing Gemstack repositories and frozen contracts from Upgrades A, B, and C.
+- Zero external runtime npm dependencies added (`package.json` dependencies remain `{}`).
+
+### Validation
+- 20/20 Upgrade C canonical acceptance tests passing (`TEST-COST-A01` through `H01`).
+- 20/20 Upgrade D canonical acceptance tests passing (`TEST-CONTEXT-A01` through `H01`).
+- 85/85 combined canonical acceptance tests passing (25 Upgrade A + 20 Upgrade B + 20 Upgrade C + 20 Upgrade D).
+- 100/100 physical tests passing with 0 failures and 0 regressions.
+- Full CI test matrix (`npm run ci:all`) passing cleanly.
+- `gemstack verify` exit code 0 with 0 errors and 0 open blockers.
+- Context capsule verified: `VALID` and `FRESH` (11,873 bytes < 32 KB budget).
+
 ## [v1.2.0] - 2026-09-11
 ### Added
 - **Mechanical Test Matrix & Closure Evidence (Upgrade B)**: Full mechanical closure verification framework eliminating false closure and test discovery hallucinations.

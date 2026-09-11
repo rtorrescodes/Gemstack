@@ -334,6 +334,15 @@ function resolveRelevantFiles(rootPath, featureDir, planBindings, taskList, plan
   if (fs.existsSync(path.join(rootPath, planPath))) filesSet.add(planPath);
   if (fs.existsSync(path.join(rootPath, tasksPath))) filesSet.add(tasksPath);
 
+  const featureLedger = (relFeature + '/cost-ledger.json').replace(/^\.\//, '');
+  if (fs.existsSync(path.join(rootPath, featureLedger))) filesSet.add(featureLedger);
+  if (fs.existsSync(path.join(rootPath, 'cost-ledger.json'))) filesSet.add('cost-ledger.json');
+  if (fs.existsSync(path.join(rootPath, '.gemstack/cost-ledger.json'))) filesSet.add('.gemstack/cost-ledger.json');
+
+  const featureCapsule = (relFeature + '/context-capsule.json').replace(/^\.\//, '');
+  if (fs.existsSync(path.join(rootPath, featureCapsule))) filesSet.add(featureCapsule);
+  if (fs.existsSync(path.join(rootPath, '.gemstack/context-capsule.json'))) filesSet.add('.gemstack/context-capsule.json');
+
   for (const b of (planBindings || [])) {
     if (b.file && fs.existsSync(path.join(rootPath, b.file))) {
       filesSet.add(b.file);

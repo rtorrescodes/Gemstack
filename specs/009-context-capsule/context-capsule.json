@@ -1,0 +1,428 @@
+{
+  "$schema": "https://gemstack.dev/schemas/context-capsule-v1.json",
+  "acceptance_matrix": {
+    "canonical_ids": [
+      "TEST-CONTEXT-A01",
+      "TEST-CONTEXT-A02",
+      "TEST-CONTEXT-A03",
+      "TEST-CONTEXT-A04",
+      "TEST-CONTEXT-B01",
+      "TEST-CONTEXT-B02",
+      "TEST-CONTEXT-B03",
+      "TEST-CONTEXT-B04",
+      "TEST-CONTEXT-C01",
+      "TEST-CONTEXT-C02",
+      "TEST-CONTEXT-C03",
+      "TEST-CONTEXT-D01",
+      "TEST-CONTEXT-D02",
+      "TEST-CONTEXT-E01",
+      "TEST-CONTEXT-E02",
+      "TEST-CONTEXT-E03",
+      "TEST-CONTEXT-F01",
+      "TEST-CONTEXT-F02",
+      "TEST-CONTEXT-G01",
+      "TEST-CONTEXT-H01"
+    ],
+    "signature": "a14a0bb4dd5df3a13fa1af25ac0398fce93af52d45fef5148340e5ae567ed77a",
+    "total_required": 20
+  },
+  "architecture_summary": {
+    "core_purpose": "Deterministic context compression and safe continuation for AI-assisted engineering.",
+    "critical_boundaries": [
+      "Capsule is strictly derived, never authoritative",
+      "Semantic constraint losslessness: MUST/MUST NOT survive compression",
+      "Verification is read-only and never regenerates capsules"
+    ]
+  },
+  "canonical_invariants": [
+    {
+      "id": "INV-001",
+      "normative": "MUST_NOT",
+      "rule": "**Strict Derived-Artifact Model**: Enforce that the capsule is mechanically derived from authoritative sources. The capsule NEVER supersedes or replaces `spec.md`, `plan.md`, `tasks.md`, or `closure.json`.",
+      "source_ref": "spec.md#goals"
+    },
+    {
+      "id": "INV-002",
+      "normative": "MUST_NOT",
+      "rule": "Compression means omitting redundant explanation, conversational padding, and transient execution traces. It **never** permits omitting, softening, or generalizing a normative requirement (`MUST`, `MUST NOT`, `REQUIRED`, `FORBIDDEN`).",
+      "source_ref": "spec.md#central-invariant-2:-semantic-constraint-losslessness"
+    },
+    {
+      "id": "INV-003",
+      "normative": "MUST_NOT",
+      "rule": "\"description\": \"Context compression must never drop, weaken, or generalize normative MUST/MUST NOT behavioral constraints or frozen contracts.\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-004",
+      "normative": "MUST_NOT",
+      "rule": "Downstream tooling MUST NOT use the capsule to override or amend any Level 1–6 artifact.",
+      "source_ref": "spec.md#precedence-rule"
+    },
+    {
+      "id": "INV-005",
+      "normative": "MUST_NOT",
+      "rule": "The compiler MUST NOT ingest:",
+      "source_ref": "spec.md#strictly-excluded-inputs"
+    },
+    {
+      "id": "INV-006",
+      "normative": "MUST_NOT",
+      "rule": "\"Semantic constraint losslessness: MUST/MUST NOT survive compression\",",
+      "source_ref": "spec.md#10"
+    },
+    {
+      "id": "INV-007",
+      "normative": "MUST",
+      "rule": "\"normative\": \"MUST\",",
+      "source_ref": "spec.md#10"
+    },
+    {
+      "id": "INV-008",
+      "normative": "MUST",
+      "rule": "\"normative\": \"MUST\",",
+      "source_ref": "spec.md#10"
+    },
+    {
+      "id": "INV-009",
+      "normative": "MUST",
+      "rule": "To guarantee that a downstream agent receives complete continuation guidance, the capsule MUST contain:",
+      "source_ref": "spec.md#11"
+    },
+    {
+      "id": "INV-010",
+      "normative": "MUST_NOT",
+      "rule": "**Canonical Invariants**: All `MUST` and `MUST NOT` constraints with source cross-references.",
+      "source_ref": "spec.md#11"
+    },
+    {
+      "id": "INV-011",
+      "normative": "MUST_NOT",
+      "rule": "Strict normative rules containing `MUST`, `MUST NOT`, `REQUIRED`, `FORBIDDEN`.",
+      "source_ref": "spec.md#12"
+    },
+    {
+      "id": "INV-012",
+      "normative": "MUST_NOT",
+      "rule": "**Priority 1 (IMMUTABLE - NEVER CONDENSED)**:",
+      "source_ref": "spec.md#deterministic-priority-model-under-pressure"
+    },
+    {
+      "id": "INV-013",
+      "normative": "MUST_NOT",
+      "rule": "Core safety invariants and `MUST` / `MUST NOT` constraints.",
+      "source_ref": "spec.md#deterministic-priority-model-under-pressure"
+    },
+    {
+      "id": "INV-014",
+      "normative": "MUST_NOT",
+      "rule": "If Priority 1 and Priority 2 contents alone exceed the hard limit of 64 KB, the generator **MUST NOT** drop constraints. It halts with error:",
+      "source_ref": "spec.md#overflow-fail-closed-rule"
+    },
+    {
+      "id": "INV-015",
+      "normative": "MUST_NOT",
+      "rule": "`gemstack verify` **NEVER**:",
+      "source_ref": "spec.md#22"
+    },
+    {
+      "id": "INV-016",
+      "normative": "MUST",
+      "rule": "It MUST pass through Upgrade C `ProviderCapabilityGate` and `BillableActionGate`.",
+      "source_ref": "spec.md#24"
+    },
+    {
+      "id": "INV-017",
+      "normative": "MUST_NOT",
+      "rule": "| **`CONTEXT_CAPSULE_INVARIANT_DROPPED`** | BLOCKER | Normative MUST/MUST NOT constraint missing. | **NO** |",
+      "source_ref": "spec.md#28"
+    },
+    {
+      "id": "INV-018",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-019",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-020",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-021",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-022",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-023",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-024",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-025",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-026",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-027",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-028",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-029",
+      "normative": "MUST_NOT",
+      "rule": "\"description\": \"Preserves 100% of MUST and MUST NOT normative constraints from spec.md in canonical_invariants.\",",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-030",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-031",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-032",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-033",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-034",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-035",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-036",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-037",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-038",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#31"
+    },
+    {
+      "id": "INV-039",
+      "normative": "MUST_NOT",
+      "rule": "Asserts 100% extraction of `MUST` and `MUST NOT` statements into `canonical_invariants`.",
+      "source_ref": "spec.md#32"
+    }
+  ],
+  "deferred_items": [
+    "Autonomous cross-repo capsule federations (out of scope)",
+    "LLM narrative fine-tuning (non-authoritative)"
+  ],
+  "frozen_contracts": [
+    {
+      "id": "capsule-is-derived-not-authority",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "capsule-offline-deterministic",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "capsule-secrets-forbidden",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "capsule-size-budget-fail-closed",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "compression-preserves-semantic-constraints",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "legacy-capsule-compatibility",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "verify-never-regenerates-capsule",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    },
+    {
+      "id": "zero-dependency-core",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    }
+  ],
+  "generated_at": "2026-09-11T18:39:24.919Z",
+  "generator": {
+    "name": "gemstack",
+    "version": "1.2.0"
+  },
+  "historical_context": [
+    {
+      "feature": "specs/006-architecture-consistency-engine",
+      "key_guarantees": [
+        "Anti-loop findings",
+        "Deterministic hashing",
+        "Frozen contracts"
+      ],
+      "status": "CLOSED"
+    },
+    {
+      "feature": "specs/007-mechanical-test-matrix-closure-evidence",
+      "key_guarantees": [
+        "Mechanical test matrix",
+        "VERIFY = VALIDATE",
+        "closure.json evidence"
+      ],
+      "status": "CLOSED"
+    },
+    {
+      "feature": "specs/008-cost-provider-safety-gates",
+      "key_guarantees": [
+        "Fail-closed gates",
+        "NO PROOF = NO EXECUTION",
+        "Zero network verify"
+      ],
+      "status": "CLOSED"
+    }
+  ],
+  "project": {
+    "active_feature": "specs/009-context-capsule",
+    "current_phase": "shipped",
+    "lifecycle_status": "SHIPPED",
+    "name": "gemstack-ai",
+    "next_permitted_phase": "PLAN"
+  },
+  "provenance": {
+    "source_set_hash": "c4f41904cf21ad6f8621e310650de48b7012c40a4a73010a62b37ea633d576b5",
+    "sources": [
+      {
+        "hash": "a38e279e94ee6bcfb8bae4e9bf407277cdc1c16491539ae6a66bc179befb0ab6",
+        "path": ".gemstack/state.json",
+        "role": "LIFECYCLE_STATE"
+      },
+      {
+        "hash": "5d7c5bf9eb22a055b10a0073171c8c0879573ac3efcf71727d55d71054219f85",
+        "path": "specs/009-context-capsule/closure.json",
+        "role": "CLOSURE_EVIDENCE"
+      },
+      {
+        "hash": "0d976bfd399cdbd86afac530231603d550bd504c4625330833ef86f8db8bbba9",
+        "path": "specs/009-context-capsule/plan.md",
+        "role": "PLAN"
+      },
+      {
+        "hash": "aae7b3b11f96a788517496df40a59e030f9285bd420d0b8be99cb9ba94da9fd8",
+        "path": "specs/009-context-capsule/spec.md",
+        "role": "SPECIFICATION"
+      },
+      {
+        "hash": "8921f2faa46bed964ae74705f6a0870c69f5948b8d3d971b7fbb057d78bb7bff",
+        "path": "specs/009-context-capsule/tasks.md",
+        "role": "TASKS"
+      }
+    ]
+  },
+  "relevant_files": [
+    "src/commands/context.js",
+    "src/lib/context-capsule.js",
+    "tests/context-determinism.test.js"
+  ],
+  "schema_version": 1,
+  "tasks_state": {
+    "active_task_ids": [
+      "T001",
+      "T002",
+      "T003",
+      "T004",
+      "T005",
+      "T006",
+      "T007",
+      "T008",
+      "T009",
+      "T010",
+      "T011",
+      "T012",
+      "T013",
+      "T014",
+      "T015",
+      "T016",
+      "T017",
+      "T018",
+      "T019",
+      "T020",
+      "T021",
+      "T022",
+      "T023",
+      "T024"
+    ],
+    "completed": 0,
+    "in_progress": "T001",
+    "total": 24
+  },
+  "unresolved_blockers": []
+}

@@ -11,6 +11,7 @@ const installCommand = require('./commands/install');
 const verifyCommand = require('./commands/verify');
 const collectCommand = require('./commands/collect');
 const shipCommand = require('./commands/ship');
+const contextCommand = require('./commands/context');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -48,6 +49,7 @@ Options:
             case 'audit': await verifyCommand(flags); break;
             case 'collect': await collectCommand(flags); break;
             case 'ship': await shipCommand(flags); break;
+            case 'context': await contextCommand(args, flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;
