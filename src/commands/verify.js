@@ -13,7 +13,7 @@ module.exports = async (flags) => {
     let totalWarnings = 0;
 
     // 1. Verificación Estructural y Manifest
-    logger.info('--- 1/5 Verificación Estructural (Archivos Base) ---');
+    logger.info('--- 1/6 Verificación Estructural (Archivos Base) ---');
     const manifestPath = fssafe.resolveSafe(targetDir, '.gemstack/manifest.json');
     if (!fs.existsSync(manifestPath)) {
         logger.warn('Manifest no encontrado (.gemstack/manifest.json). Es posible que Gemstack no esté inicializado en este directorio.');
@@ -58,7 +58,7 @@ module.exports = async (flags) => {
     }
 
     // 2. Verificación de Memoria (handoff.md)
-    logger.info('--- 2/5 Verificación de Memoria e Integridad de Handoff ---');
+    logger.info('--- 2/6 Verificación de Memoria e Integridad de Handoff ---');
     const handoffPath = fssafe.resolveSafe(targetDir, 'handoff.md');
     if (!fs.existsSync(handoffPath)) {
         logger.error('handoff.md no existe en la raíz. La memoria de sesión es obligatoria.');
@@ -90,7 +90,7 @@ module.exports = async (flags) => {
     }
 
     // 3. Consistencia de Estado Local (.gemstack/state.json)
-    logger.info('--- 3/5 Verificación de Estado Local (.gemstack/state.json) ---');
+    logger.info('--- 3/6 Verificación de Estado Local (.gemstack/state.json) ---');
     const statePath = fssafe.resolveSafe(targetDir, '.gemstack/state.json');
     let loadedState = null;
     if (!fs.existsSync(statePath)) {
@@ -119,7 +119,7 @@ module.exports = async (flags) => {
     }
 
     // 4. Consistencia de Arquitectura y Hashes de Fase (Upgrade A)
-    logger.info('--- 4/5 Verificación de Consistencia de Arquitectura y Hashes de Fase ---');
+    logger.info('--- 4/6 Verificación de Consistencia de Arquitectura y Hashes de Fase ---');
     if (loadedState && loadedState.active_spec) {
         try {
             const { hashFile } = require('../lib/hasher');
@@ -254,8 +254,130 @@ module.exports = async (flags) => {
         logger.ok('Sin spec activa configurada para verificación de contratos.');
     }
 
-    // 5. Seguridad Local y Anti-Silent Failures en Tests
-    logger.info('--- 5/5 Verificación de Seguridad y Test Runners ---');
+    // 5. Verificación de Evidencia de Cierre Mecánico (Upgrade B - Read-Only)
+    logger.info('--- 5/6 Verificación de Evidencia de Cierre Mecánico (Read-Only) ---');
+    if (loadedState && loadedState.active_spec) {
+        try {
+            const { extractTestMatrixBlock } = require('../lib/test-matrix');
+            const specFile = fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'spec.md'));
+
+            if (!fs.existsSync(specFile)) {
+                logger.ok(`Modo legacy: no existe spec.md en ${loadedState.active_spec}`);
+            } else {
+                const specContent = fs.readFileSync(specFile, 'utf8');
+                const { isLegacy } = extractTestMatrixBlock(specContent);
+
+                if (isLegacy) {
+                    logger.info(`[LEGACY] Spec "${loadedState.active_spec}" opera en modo legacy sin matriz de pruebas.`);
+                } else {
+                    // Feature structured: read closure.json in strictly read-only mode
+                    const specDir = fssafe.resolveSafe(targetDir, loadedState.active_spec);
+                    const closurePath = path.join(specDir, 'closure.json');
+
+                    if (!fs.existsSync(closurePath)) {
+                        logger.error(`[CLOSURE_MANIFEST_MISSING] closure.json no existe en ${loadedState.active_spec}. Ejecuta "gemstack collect" para generar la evidencia mecánica.`);
+                        totalErrors++;
+                    } else {
+                        let manifest;
+                        try {
+                            manifest = JSON.parse(fs.readFileSync(closurePath, 'utf8'));
+                        } catch (e) {
+                            logger.error(`[CLOSURE_MANIFEST_INVALID] closure.json tiene formato JSON inválido: ${e.message}`);
+                            totalErrors++;
+                            manifest = null;
+                        }
+
+                        if (manifest) {
+                            // Recompute closureContextHash in-memory without modifying any file
+                            const {
+                                validateTestMatrix,
+                                computeAcceptanceSignature
+                            } = require('../lib/test-matrix');
+                            const {
+                                parsePlanBindings,
+                                parsePlanGates,
+                                parseTaskMetadata,
+                                computeContentAggregateHash,
+                                resolveRepositoryContext,
+                                computeClosureContextHash
+                            } = require('../lib/closure-context');
+                            const { hashFile } = require('../lib/hasher');
+
+                            const planFile = path.join(specDir, 'plan.md');
+                            const tasksFile = path.join(specDir, 'tasks.md');
+
+                            let planBindings = [];
+                            let planGates = [];
+                            if (fs.existsSync(planFile)) {
+                                const planContent = fs.readFileSync(planFile, 'utf8');
+                                planBindings = parsePlanBindings(planContent);
+                                planGates = parsePlanGates(planContent);
+                            }
+
+                            let tasks = [];
+                            if (fs.existsSync(tasksFile)) {
+                                const tasksContent = fs.readFileSync(tasksFile, 'utf8');
+                                tasks = parseTaskMetadata(tasksContent);
+                            }
+
+                            const { matrix } = extractTestMatrixBlock(specContent);
+                            const canonicalMatrix = validateTestMatrix(matrix);
+                            const acceptanceSignature = computeAcceptanceSignature(canonicalMatrix);
+
+                            const repoContext = resolveRepositoryContext(targetDir);
+                            const phaseHashes = {
+                                spec: hashFile(specFile),
+                                plan: fs.existsSync(planFile) ? hashFile(planFile) : null,
+                                tasks: fs.existsSync(tasksFile) ? hashFile(tasksFile) : null
+                            };
+
+                            const boundTestFiles = Array.from(new Set(planBindings.map(b => b.file)));
+                            const testFilesHash = computeContentAggregateHash(targetDir, boundTestFiles);
+                            const implementationFiles = Array.from(new Set(tasks.flatMap(t => t.files || [])))
+                                .filter(f => !f.endsWith('closure.json'));
+                            const implementationContextHash = computeContentAggregateHash(targetDir, implementationFiles);
+                            const requiredGateDefinitionHash = computeContentAggregateHash(targetDir, ['package.json']);
+
+                            const freshContextObj = {
+                                version: 1,
+                                repository: repoContext,
+                                phase_hashes: phaseHashes,
+                                acceptance_signature: acceptanceSignature,
+                                test_files_hash: testFilesHash,
+                                implementation_context_hash: implementationContextHash,
+                                required_gate_definition_hash: requiredGateDefinitionHash
+                            };
+
+                            const freshContextHash = computeClosureContextHash(freshContextObj);
+                            const recordedContextHash = manifest.closure_context ? manifest.closure_context.closure_context_hash : null;
+
+                            if (recordedContextHash !== freshContextHash) {
+                                logger.error(`[CLOSURE_EVIDENCE_STALE] La evidencia de cierre está desactualizada respecto al estado actual del proyecto. Re-ejecuta "gemstack collect". (Registrado: ${recordedContextHash ? recordedContextHash.slice(0, 12) : 'none'}..., Actual: ${freshContextHash.slice(0, 12)}...)`);
+                                totalErrors++;
+                            } else {
+                                logger.ok(`Frescura de evidencia de cierre verificada (${freshContextHash.slice(0, 12)}...).`);
+
+                                if (manifest.status !== 'VERIFIED' && manifest.status !== 'VERIFIED_WITH_EXCEPTIONS') {
+                                    logger.error(`[CLOSURE_NOT_VERIFIED] Estado del manifiesto es "${manifest.status}". Bloqueadores: ${JSON.stringify(manifest.blockers || [])}`);
+                                    totalErrors++;
+                                } else {
+                                    logger.ok(`Evidencia de cierre aprobada: status="${manifest.status}", ${manifest.canonical_summary ? manifest.canonical_summary.required_passed : 0}/${manifest.canonical_summary ? manifest.canonical_summary.required_total : 0} pruebas canónicas pasadas.`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (mErr) {
+            logger.error(`Error en verificación de evidencia de cierre: ${mErr.message}`);
+            totalErrors++;
+        }
+    } else {
+        logger.ok('Sin spec activa configurada para validación de evidencia de cierre.');
+    }
+
+    // 6. Seguridad Local y Anti-Silent Failures en Tests
+    logger.info('--- 6/6 Verificación de Seguridad y Test Runners ---');
     const envPath = fssafe.resolveSafe(targetDir, '.env');
     if (fs.existsSync(envPath)) {
         logger.warn('Archivo .env detectado en el directorio de trabajo. Verifica que esté en .gitignore.');

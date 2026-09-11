@@ -47,3 +47,33 @@ ruta/archivo: [Razón]
 [
 ]
 ```
+
+## 7. Vinculación Física de Pruebas (Upgrade B)
+<!--
+  Vincula cada test_id canónico de spec.md a un archivo físico ejecutable por el runner correspondiente.
+-->
+```gemstack-test-bindings
+[
+  {
+    "test_id": "TEST-FEATURE-A01",
+    "runner": "node:test",
+    "file": "tests/feature.test.js"
+  }
+]
+```
+
+## 8. Gates de Cierre de Proyecto (Upgrade B)
+<!--
+  Declara scripts requeridos del package.json como compuertas obligatorias de cierre.
+-->
+```gemstack-closure-gates
+[
+  {
+    "id": "project-tests",
+    "type": "PACKAGE_SCRIPT",
+    "script": "test",
+    "requirement": "REQUIRED",
+    "waivable": false
+  }
+]
+```

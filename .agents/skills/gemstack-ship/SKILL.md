@@ -12,7 +12,11 @@ Invocado mediante `/ship`.
 ## Proceso:
 1. Verifica revisión (`/review`) y validación (`/qa`).
 2. Confirma validación de seguridad (`/cso`).
-3. Comprueba si los specs se cumplieron.
+3. **Validación de Evidencia Mecánica de Cierre (Upgrade B)**:
+   - Comprueba que exista `specs/[nombre-feature]/closure.json`.
+   - Confirma que el estado sea `VERIFIED` o `VERIFIED_WITH_EXCEPTIONS`.
+   - Bloquea el ship si el estado es `STALE`, `BLOCKED`, o si falta el archivo (a menos que la feature opere en modo LEGACY).
+   - Ejecuta `node src/cli.js ship` para validar compuertas y transicionar el ciclo de vida.
 4. Genera un PR summary si se pide.
 5. NO hagas push, merge o deploy sin aprobación explícita.
 6. Sugiere ejecutar `/handoff` para documentar la entrega en la memoria del proyecto.

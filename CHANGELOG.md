@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.2.0] - 2026-09-11
+### Added
+- **Mechanical Test Matrix & Closure Evidence (Upgrade B)**: Full mechanical closure verification framework eliminating false closure and test discovery hallucinations.
+- Canonical fenced `gemstack-test-matrix` blocks in `spec.md` with 20 canonical acceptance test criteria (`TEST-CLOSURE-A01` through `H01`).
+- Deterministic Acceptance Signature (`acceptanceSignature`): SHA-256 digest calculated across all canonical test definitions ensuring immutable acceptance criteria.
+- Bidirectional Task <-> Test Traceability: strict mapping between `tasks.md` validation blocks and canonical acceptance tests.
+- Zero-Shell Test Runner Adapters: safe, cross-platform `node:test` TAP runner adapter with suite container detection (`kind: 'SUITE'` vs `kind: 'TEST'`).
+- Exact Canonical Reconciliation Arithmetic: verifies `canonical_required = canonical_passed + missing`, `physical_executed = canonical_executed + supporting_executed`, and prevents phantoms and orphans.
+- Mutating Evidence Collector (`gemstack collect`): executes bound test files and required `PACKAGE_SCRIPT` gates to produce `specs/<feature>/closure.json`.
+- Dynamic Closure Context Freshness (`closureContextHash`): binds closure evidence to the repository state (clean/dirty git or non-git), phase hashes, test files, and bounded implementation code.
+- Read-Only Closure Gate in `gemstack verify`: stage 5/6 verifies `closure.json` freshness and acceptance criteria without writing or mutating any files on disk.
+- Lifecycle Ship Enforcement (`gemstack ship`): requires status `VERIFIED` in `closure.json` before transitioning feature lifecycle to `SHIPPED`.
+- Progressive `LEGACY` mode support: features lacking test matrix blocks continue without friction or errors.
+
+### Changed
+- `gemstack verify` upgraded to a 6-stage deterministic verification pipeline with zero-mutation read-only verification.
+- `package.json` test script explicitly enumerates all 11 physical test suites for portable cross-platform execution.
+- Agent skills (`gemstack-spec`, `gemstack-plan`, `gemstack-tasks`, `gemstack-qa`, `gemstack-ship`) and templates updated with Upgrade B canonical workflows.
+
+### Compatibility
+- 100% backward compatible with existing Gemstack repositories and Upgrade A contract blocks.
+- Zero external runtime or development npm dependencies added (`package.json` dependencies remain `{}`).
+
+### Validation
+- 22/22 Upgrade B implementation tasks complete (T001–T022).
+- 20/20 canonical P1 acceptance tests passing.
+- 45/45 combined canonical acceptance tests passing (25 Upgrade A + 20 Upgrade B).
+- 53/53 physical tests passing with 0 regressions.
+- `npm test` exit code 0.
+- `gemstack verify` exit code 0 with 0 open blockers.
+- Self-dogfooded on `specs/007-mechanical-test-matrix-closure-evidence/` with closure status `VERIFIED`.
+
 ## [v1.1.2] - 2026-09-11
 ### Fixed
 - Fixed host-dependent normalization of simulated Windows paths in the Architecture Consistency Engine.

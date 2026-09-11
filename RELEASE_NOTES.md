@@ -1,5 +1,29 @@
 # Gemstack Release Notes
 
+# Gemstack v1.2.0 — Mechanical Test Matrix & Closure Evidence
+
+## Highlights
+- **Mechanical Test Matrix & Closure Verification (Upgrade B)**: Eliminates false closure and test discovery hallucinations by introducing a deterministic verification pipeline from specification to shipment.
+- **Canonical Test Matrix (`gemstack-test-matrix`)**: Explicit acceptance criteria defined in `spec.md` with deterministic `acceptanceSignature` (SHA-256) ensuring acceptance rules are immutable once approved.
+- **Task ↔ Test Traceability**: Explicit bidirectional binding between implementation tasks in `tasks.md` and canonical acceptance tests.
+- **Safe Zero-Shell Runners**: Pure Node.js `node:test` TAP runner adapter with suite container exclusion (`kind: 'SUITE'` vs `kind: 'TEST'`), ensuring TAP headers/containers are never counted as physical tests.
+- **Exact Canonical Reconciliation Arithmetic**: Mechanical validation proving `canonical_required = canonical_passed + missing` and `physical_executed = canonical_executed + supporting_executed` with zero tolerance for phantoms or orphans.
+- **Mutating Collector (`gemstack collect`)**: Executes bound test suites and required `PACKAGE_SCRIPT` gates to produce `specs/<feature>/closure.json`.
+- **Dynamic Closure Context Freshness (`closureContextHash`)**: Cryptographically binds closure evidence to repository state (clean git, dirty git, or non-git), phase hashes, bound test files, and bounded implementation source files.
+- **Read-Only Verification Pipeline (`gemstack verify`)**: Stage 5/6 inspects closure freshness and gate outcomes in memory with 0 disk mutations.
+- **Ship Gatekeeper (`gemstack ship`)**: Strict gate requiring `status: "VERIFIED"` in `closure.json` before transitioning feature lifecycle to `SHIPPED`.
+- **Progressive LEGACY Mode**: Full backward compatibility for features without test matrices or contract blocks.
+- **Zero-Dependency Architecture**: 100% native Node.js standard library implementation with zero third-party production dependencies.
+
+## Acceptance & Regression Baseline
+- 25 Upgrade A canonical acceptance tests passing (`TEST-CONSISTENCY-A01` through `H02`).
+- 20 Upgrade B canonical acceptance tests passing (`TEST-CLOSURE-A01` through `H01`).
+- 45 total canonical acceptance tests passing.
+- 53 total physical tests passing with 0 regressions.
+- 11 physical test suites explicitly enumerated for cross-platform reliability.
+
+---
+
 # Gemstack v1.1.2 — Architecture Consistency & Phase Freezing
 
 ## Recovery Release Note

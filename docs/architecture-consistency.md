@@ -130,10 +130,10 @@ Gemstack strictly separates operational state from historical audit trails:
 
 ## 9. Verification Integration (`gemstack verify`)
 
-Architectural consistency is embedded as **Step 4/5** in the unified `gemstack verify` command:
+Architectural consistency is embedded as **Step 4/6** in the unified `gemstack verify` command:
 
 ```text
-[INFO] --- 4/5 Verificación de Consistencia de Arquitectura y Hashes de Fase ---
+[INFO] --- 4/6 Verificación de Consistencia de Arquitectura y Hashes de Fase ---
 [OK] [STRUCTURED] 5 contrato(s) base declarados en spec.md.
 [OK] Hash congelado de spec.md verificado: f5d423eaf508...
 [OK] Hash congelado de plan.md verificado: 1ce0e5886342...
@@ -142,3 +142,15 @@ Architectural consistency is embedded as **Step 4/5** in the unified `gemstack v
 ```
 
 If any contracts contradict, artifacts mutate, or unapproved blockers exist, `gemstack verify` exits with code 1, halting CI/CD pipelines.
+
+---
+
+## 10. Mechanical Test Matrix & Closure Evidence (Upgrade B)
+
+Beyond static contract consistency across phase files, Gemstack Upgrade B validates execution evidence against declared requirements:
+
+- **`acceptanceSignature`**: Full semantic record SHA-256 digest of the canonical test matrix in `spec.md`.
+- **Authoritative Execution**: Native test runners (such as `node:test`) execute bound tests without shell intermediaries. TAP output is parsed to extract executed canonical test tokens.
+- **Reconciliation & Set Equality**: Proves that all declared required canonical tests were physically executed and passed (`PASS + FAIL + SKIP + TODO + CANCELLED == TOTAL_PHYSICAL`). Detects `PHANTOM_TEST` (claimed but unexecuted) and `ORPHAN_TEST` (executed with unregistered canonical ID).
+- **`closureContextHash`**: Deterministic SHA-256 fingerprint binding repository state, phase hashes, test files, implementation files, and gate definitions. Prevents whole-repository scanning while detecting stale evidence.
+- **Progressive Legacy Compatibility**: Specifications lacking a test matrix operate seamlessly in legacy mode with an informational notice, preserving 100% backward compatibility.

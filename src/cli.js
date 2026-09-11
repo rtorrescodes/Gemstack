@@ -9,6 +9,8 @@ const showCommand = require('./commands/show');
 const hooksCommand = require('./commands/hooks');
 const installCommand = require('./commands/install');
 const verifyCommand = require('./commands/verify');
+const collectCommand = require('./commands/collect');
+const shipCommand = require('./commands/ship');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -20,6 +22,8 @@ Commands:
   update    Update Gemstack-owned files
   doctor    Check health of the installation
   verify    Run complete integrity, state, memory and security audit (alias: audit)
+  collect   Collect mechanical test matrix and closure evidence
+  ship      Verify closure gates and transition feature to shipped
   list      List available skills
   show      Show content of a skill
   handoff   Show content of handoff.md
@@ -42,6 +46,8 @@ Options:
             case 'doctor': await doctorCommand(flags); break;
             case 'verify':
             case 'audit': await verifyCommand(flags); break;
+            case 'collect': await collectCommand(flags); break;
+            case 'ship': await shipCommand(flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;

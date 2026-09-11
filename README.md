@@ -95,6 +95,19 @@ Gemstack mechanically prevents AI agents from silently violating or hallucinatin
 - `gemstack verify` performs strictly read-only verification without mutating or overwriting accepted phase hashes (`VERIFY != FREEZE`).
 - Existing projects without structured contracts automatically run in **LEGACY** mode without breaking.
 
+
+## 🧪 Mechanical Test Matrix & Closure Evidence
+
+Gemstack Upgrade B guarantees that what was planned is what was physically tested:
+- **Canonical Test Matrix**: `spec.md` declares canonical acceptance tests and cryptographic `acceptanceSignature`.
+- **Physical Test Bindings**: `plan.md` maps canonical IDs 1:1 to physical runner test files.
+- **Task Traceability**: `tasks.md` validates that all required canonical tests have implementation tasks.
+- **Safe Runner Adapters**: Direct zero-shell execution of test suites and package script gates.
+- **`gemstack collect`**: Mutating runner that executes tests and atomically writes `specs/<feature>/closure.json`.
+- **`gemstack verify`**: Strictly read-only 6-stage validator verifying evidence freshness against `closureContextHash`.
+- **`gemstack ship`**: Gatekeeper requiring verified evidence before allowing transition to `SHIPPED`.
+- **Git Optionality & Legacy Support**: Works identically on clean Git, dirty Git, and non-Git projects, with graceful legacy fallback.
+
 ## 🐝 Advanced Autonomy (The WOW Update)
 
 Gemstack isn't just passive documents; it actively orchestrates agentic capabilities:

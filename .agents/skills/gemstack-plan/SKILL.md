@@ -17,5 +17,6 @@ Invocado mediante `/plan`.
 5. Detalla el stack y llena la tabla "Complexity Tracking" SÓLO si rompiste alguna regla de la constitución y necesitas justificarlo.
 6. Opcionalmente, genera los entregables satélites: `data-model.md`, `contracts/` (para APIs/Interfaces), y `quickstart.md`.
 7. **Herencia y Contratos Aditivos (Upgrade A)**: PLAN hereda automáticamente los contratos declarados en `spec.md`. No contradigas ni alteres los contratos congelados heredados; si requieres contratos técnicos adicionales, decláralos de forma compatible y aditiva en el bloque ````gemstack-contracts ```` de `plan.md`.
-8. Pide aprobación al usuario antes de permitir la ejecución de `/tasks`.
+8. **Vinculación Física de Pruebas y Gates (Upgrade B)**: Define en `plan.md` los bloques canónicos ````gemstack-test-bindings ```` (asociando cada ID de prueba a un archivo físico y runner) y ````gemstack-closure-gates ```` (especificando scripts de package.json obligatorios).
+9. Pide aprobación al usuario antes de permitir la ejecución de `/tasks`.
 

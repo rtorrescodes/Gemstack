@@ -50,3 +50,21 @@
   }
 ]
 ```
+
+## 7. Matriz Mecánica de Pruebas de Aceptación (Upgrade B)
+<!--
+  Declara la matriz canónica de pruebas para cierre mecánico en el bloque gemstack-test-matrix.
+  Campos requeridos: id, category, layer, description, pass_criteria, gate (REQUIRED | SUPPLEMENTAL).
+-->
+```gemstack-test-matrix
+[
+  {
+    "id": "TEST-FEATURE-A01",
+    "category": "CORE",
+    "layer": "UNIT",
+    "description": "Verifica el comportamiento principal de la funcionalidad",
+    "pass_criteria": "Retorna resultado esperado bajo condiciones normales",
+    "gate": "REQUIRED"
+  }
+]
+```

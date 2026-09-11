@@ -15,3 +15,6 @@ Invocado mediante `/qa` o `/qa-only`.
 3. Si la aplicación es visual, recomienda `/browser` o correr tests de Playwright para verificar manualmente la UI.
 4. Genera un breve reporte indicando si cada Criterio pasó o falló.
 
+
+5. **Recolección Mecánica de Evidencias (Upgrade B)**: Ejecuta `node src/cli.js collect` para ejecutar los runners de pruebas, gates y reconciliar la matriz mecánica generando `specs/[nombre-feature]/closure.json`.
+6. Valida que la evidencia esté fresca y en modo lectura con `node src/cli.js verify`.

@@ -1,3 +1,12 @@
+
+<!--
+  Sintaxis de Metadatos de Tareas (Upgrade B):
+  Para cada tarea ejecutable, añade comentarios HTML que declaren:
+  <!-- gemstack:validation_required=true|false -->
+  <!-- gemstack:tests=TEST-ID-1,TEST-ID-2 -->
+  <!-- gemstack:files=src/file.js,tests/file.test.js -->
+  <!-- gemstack:depends=T001,T002 -->
+-->
 # Tareas de Implementación
 
 <!--

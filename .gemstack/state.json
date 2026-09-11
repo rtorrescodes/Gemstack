@@ -2,18 +2,16 @@
   "version": "0.1",
   "current_phase": "shipped",
   "status": "SHIPPED",
-  "stop_reason": "UPGRADE_A_SHIPPED_DONE",
+  "stop_reason": "UPGRADE_B_SHIPPED_DONE",
   "active_spec": null,
   "completed_phases": [
     "spec",
-    "plan",
-    "tasks",
-    "implement"
+    "plan"
   ],
   "phase_hashes": {
-    "spec": "f5d423eaf508b06b663b39f467fba1d9ceff6db21f01e427500ad739a90c5be8",
-    "plan": "1ce0e58863427905022a6294f8683b9f508d72b171379c78807db19862c75004",
-    "tasks": "dfad2484ad112e26ef906ea851b12cf6ea090d6faf244a6fbd2650baee8e0d98"
+    "spec": "75f7b5aee9a7d45836128f619ba67d0870c9be3a2634d9152b01c6501faa513d",
+    "plan": "c77a3b1410d3b3028b72d66db524c6a23b0998dce12dddaee2507b4e446aec3b",
+    "tasks": "69ea9ae8557a41f98102c7b91905f74b3645ea59cbe301a54425216d5789b1d8"
   },
   "consistency": {
     "status": "PASS",
@@ -24,6 +22,6 @@
     "freeze": false,
     "allowed_paths": []
   },
-  "last_update": "2026-09-11T09:01:18.769Z",
-  "last_completed_feature": "specs/006-architecture-consistency-engine/"
+  "last_update": "2026-09-11T16:49:53.470Z",
+  "last_completed_feature": "specs/007-mechanical-test-matrix-closure-evidence/"
 }
