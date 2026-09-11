@@ -1,6 +1,6 @@
 {
   "name": "gemstack-ai",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Agentic Spec-Driven Development framework for Gemini/Antigravity",
   "main": "src/cli.js",
   "bin": {
@@ -10,7 +10,7 @@
     "node": ">=18.18.0"
   },
   "scripts": {
-    "test": "node --test tests/**/*.test.js",
+    "test": "node --test tests/contracts.test.js tests/hasher.test.js tests/findings.test.js tests/init.test.js tests/verify.test.js",
     "gemstack:verify": "node src/cli.js verify",
     "pack:dry": "npm pack --dry-run",
     "ci:frontmatter": "node scripts/ci/check-frontmatter.js",

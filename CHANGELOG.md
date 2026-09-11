@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.1] - 2026-09-11
+### Fixed
+- Fixed cross-platform CI test discovery for Node's built-in test runner.
+- Replaced shell-dependent recursive glob invocation with deterministic explicit test-file execution (`node --test tests/contracts.test.js tests/hasher.test.js tests/findings.test.js tests/init.test.js tests/verify.test.js`).
+- No Upgrade A architecture or acceptance semantics changed.
+
 ## [v1.1.0] - 2026-09-11
 ### Added
 - `FrozenContractRegistry`: deterministic architectural contract engine supporting 6 canonical types (`ENUM_SET`, `IDENTITY_TUPLE`, `PROVENANCE_RULE`, `BOOLEAN_INVARIANT`, `BOUNDARY`, `ROADMAP_LIMIT`).
