@@ -13,7 +13,7 @@ module.exports = async (flags) => {
     let totalWarnings = 0;
 
     // 1. Verificación Estructural y Manifest
-    logger.info('--- 1/4 Verificación Estructural (Archivos Base) ---');
+    logger.info('--- 1/5 Verificación Estructural (Archivos Base) ---');
     const manifestPath = fssafe.resolveSafe(targetDir, '.gemstack/manifest.json');
     if (!fs.existsSync(manifestPath)) {
         logger.warn('Manifest no encontrado (.gemstack/manifest.json). Es posible que Gemstack no esté inicializado en este directorio.');
@@ -58,7 +58,7 @@ module.exports = async (flags) => {
     }
 
     // 2. Verificación de Memoria (handoff.md)
-    logger.info('--- 2/4 Verificación de Memoria e Integridad de Handoff ---');
+    logger.info('--- 2/5 Verificación de Memoria e Integridad de Handoff ---');
     const handoffPath = fssafe.resolveSafe(targetDir, 'handoff.md');
     if (!fs.existsSync(handoffPath)) {
         logger.error('handoff.md no existe en la raíz. La memoria de sesión es obligatoria.');
@@ -90,22 +90,24 @@ module.exports = async (flags) => {
     }
 
     // 3. Consistencia de Estado Local (.gemstack/state.json)
-    logger.info('--- 3/4 Verificación de Estado Local (.gemstack/state.json) ---');
+    logger.info('--- 3/5 Verificación de Estado Local (.gemstack/state.json) ---');
     const statePath = fssafe.resolveSafe(targetDir, '.gemstack/state.json');
+    let loadedState = null;
     if (!fs.existsSync(statePath)) {
         logger.warn('.gemstack/state.json no encontrado.');
         totalWarnings++;
     } else {
         try {
-            const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
-            logger.ok(`Estado local cargado. Fase actual: ${state.current_phase || 'no definida'}`);
-            if (state.active_spec) {
-                const specFile = fssafe.resolveSafe(targetDir, path.join(state.active_spec, 'spec.md'));
+            const { readState } = require('../lib/state');
+            loadedState = readState(targetDir);
+            logger.ok(`Estado local cargado. Fase actual: ${loadedState.current_phase || 'no definida'}`);
+            if (loadedState.active_spec) {
+                const specFile = fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'spec.md'));
                 if (!fs.existsSync(specFile)) {
-                    logger.warn(`Desfase de estado: active_spec apunta a "${state.active_spec}", pero "${specFile}" no existe.`);
+                    logger.warn(`Desfase de estado: active_spec apunta a "${loadedState.active_spec}", pero "${specFile}" no existe.`);
                     totalWarnings++;
                 } else {
-                    logger.ok(`active_spec confirmado: ${state.active_spec}`);
+                    logger.ok(`active_spec confirmado: ${loadedState.active_spec}`);
                 }
             } else {
                 logger.ok('Sin spec activa pendiente (estado limpio o cerrado).');
@@ -116,8 +118,144 @@ module.exports = async (flags) => {
         }
     }
 
-    // 4. Seguridad Local y Anti-Silent Failures en Tests
-    logger.info('--- 4/4 Verificación de Seguridad y Test Runners ---');
+    // 4. Consistencia de Arquitectura y Hashes de Fase (Upgrade A)
+    logger.info('--- 4/5 Verificación de Consistencia de Arquitectura y Hashes de Fase ---');
+    if (loadedState && loadedState.active_spec) {
+        try {
+            const { hashFile } = require('../lib/hasher');
+            const {
+                extractContractsBlock,
+                validateContractSchemas,
+                comparePhaseContracts,
+                resolvePhaseInheritance
+            } = require('../lib/contracts');
+            const {
+                reconcileFindings,
+                evaluateAcceptedExceptions,
+                formatDisplayFingerprint
+            } = require('../lib/findings');
+
+            const specFile = fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'spec.md'));
+            const planFile = fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'plan.md'));
+            const tasksFile = fssafe.resolveSafe(targetDir, path.join(loadedState.active_spec, 'tasks.md'));
+
+            if (fs.existsSync(specFile)) {
+                const specRaw = fs.readFileSync(specFile, 'utf8');
+                const specBlock = extractContractsBlock(specRaw);
+
+                if (specBlock.isLegacy) {
+                    logger.ok(`[LEGACY] Feature "${loadedState.active_spec}" opera en modo legacy (sin bloques de contratos).`);
+                } else {
+                    const specContracts = validateContractSchemas(specBlock.contracts);
+                    logger.ok(`[STRUCTURED] ${specContracts.length} contrato(s) base declarados en spec.md.`);
+
+                    // Detección de mutación de spec congelada (VERIFY != FREEZE)
+                    if (loadedState.phase_hashes && loadedState.phase_hashes.spec) {
+                        const currentSpecHash = hashFile(specFile);
+                        if (currentSpecHash !== loadedState.phase_hashes.spec) {
+                            logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado spec.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.spec}, actual: ${currentSpecHash}`);
+                            totalErrors++;
+                        } else {
+                            logger.ok(`Hash congelado de spec.md verificado: ${loadedState.phase_hashes.spec.slice(0, 12)}...`);
+                        }
+                    }
+
+                    // Validación de PLAN si existe
+                    let effectiveUpstream = specContracts;
+                    let planContracts = [];
+                    let violations = [];
+
+                    if (fs.existsSync(planFile)) {
+                        const planRaw = fs.readFileSync(planFile, 'utf8');
+                        const planBlock = extractContractsBlock(planRaw);
+                        if (!planBlock.isLegacy) {
+                            planContracts = validateContractSchemas(planBlock.contracts);
+                            const planViolations = comparePhaseContracts(effectiveUpstream, planContracts, 'plan');
+                            violations.push(...planViolations.map(v => ({ ...v, location: path.join(loadedState.active_spec, 'plan.md') })));
+                            effectiveUpstream = resolvePhaseInheritance(effectiveUpstream, planContracts);
+                        }
+
+                        if (loadedState.phase_hashes && loadedState.phase_hashes.plan) {
+                            const currentPlanHash = hashFile(planFile);
+                            if (currentPlanHash !== loadedState.phase_hashes.plan) {
+                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado plan.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.plan}, actual: ${currentPlanHash}`);
+                                totalErrors++;
+                            } else {
+                                logger.ok(`Hash congelado de plan.md verificado: ${loadedState.phase_hashes.plan.slice(0, 12)}...`);
+                            }
+                        }
+                    }
+
+                    // Validación de TASKS si existe
+                    if (fs.existsSync(tasksFile)) {
+                        const tasksRaw = fs.readFileSync(tasksFile, 'utf8');
+                        const tasksBlock = extractContractsBlock(tasksRaw);
+                        if (!tasksBlock.isLegacy) {
+                            const tasksContracts = validateContractSchemas(tasksBlock.contracts);
+                            const tasksViolations = comparePhaseContracts(effectiveUpstream, tasksContracts, 'tasks');
+                            violations.push(...tasksViolations.map(v => ({ ...v, location: path.join(loadedState.active_spec, 'tasks.md') })));
+                        }
+
+                        if (loadedState.phase_hashes && loadedState.phase_hashes.tasks) {
+                            const currentTasksHash = hashFile(tasksFile);
+                            if (currentTasksHash !== loadedState.phase_hashes.tasks) {
+                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado tasks.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.tasks}, actual: ${currentTasksHash}`);
+                                totalErrors++;
+                            } else {
+                                logger.ok(`Hash congelado de tasks.md verificado: ${loadedState.phase_hashes.tasks.slice(0, 12)}...`);
+                            }
+                        }
+                    }
+
+                    // Reconciliación de hallazgos y evaluación de excepciones aceptadas vía sidecar de feature
+                    const featureDir = fssafe.resolveSafe(targetDir, loadedState.active_spec);
+                    const { readSidecar, writeSidecarAtomic } = require('../lib/state');
+                    const sidecar = readSidecar(featureDir);
+
+                    // Migración retrocompatible: si state tenía findings o accepted_exceptions, migrarlos al sidecar
+                    const existingFindings = sidecar.historical_findings && sidecar.historical_findings.length > 0
+                        ? sidecar.historical_findings
+                        : (loadedState.findings || []);
+                    const acceptedExceptions = sidecar.accepted_exceptions && sidecar.accepted_exceptions.length > 0
+                        ? sidecar.accepted_exceptions
+                        : (loadedState.accepted_exceptions || []);
+
+                    const reconciled = reconcileFindings(existingFindings, violations);
+                    const currentContext = {
+                        upstreamAcceptedPhaseHash: (loadedState.phase_hashes && loadedState.phase_hashes.spec) || '',
+                        currentComparedPhaseHash: (loadedState.phase_hashes && loadedState.phase_hashes.plan) || '',
+                        normalizedContractRepresentation: JSON.stringify(effectiveUpstream)
+                    };
+                    const evaluated = evaluateAcceptedExceptions(reconciled, acceptedExceptions, currentContext);
+
+                    // Persistir el historial detallado de hallazgos exclusivamente en el sidecar
+                    sidecar.historical_findings = evaluated;
+                    sidecar.accepted_exceptions = acceptedExceptions;
+                    writeSidecarAtomic(featureDir, sidecar);
+
+                    const blockers = evaluated.filter(f => f.is_blocking);
+                    if (blockers.length > 0) {
+                        for (const b of blockers) {
+                            logger.error(`[CONSISTENCY_BLOCKER] Contrato "${b.contractId}" en fase "${b.phase}" (${formatDisplayFingerprint(b.fingerprint)}): ${JSON.stringify(b.delta)}`);
+                        }
+                        totalErrors += blockers.length;
+                    } else {
+                        logger.ok('Verificación de consistencia arquitectónica aprobada (0 bloqueadores).');
+                    }
+                }
+            } else {
+                logger.ok(`Modo legacy: no existe spec.md en ${loadedState.active_spec}`);
+            }
+        } catch (cErr) {
+            logger.error(`Error en verificación de consistencia: ${cErr.message}`);
+            totalErrors++;
+        }
+    } else {
+        logger.ok('Sin spec activa configurada para verificación de contratos.');
+    }
+
+    // 5. Seguridad Local y Anti-Silent Failures en Tests
+    logger.info('--- 5/5 Verificación de Seguridad y Test Runners ---');
     const envPath = fssafe.resolveSafe(targetDir, '.env');
     if (fs.existsSync(envPath)) {
         logger.warn('Archivo .env detectado en el directorio de trabajo. Verifica que esté en .gitignore.');

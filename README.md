@@ -68,6 +68,33 @@ Gemstack ships with `03-gemstack-security.md` and `04-gemstack-infrastructure.md
 - **DevSecOps & Infra**: Enforces Immutable Infrastructure (Docker/Terraform), Private Subnets (VPC), IAM Least Privilege, and Cloud Secret Managers.
 - **Server-Side Validation**: Complete distrust of frontend state.
 
+## 🔒 Architecture Consistency & Phase Freezing
+
+Gemstack mechanically prevents AI agents from silently violating or hallucinating deviations from approved architecture. Critical decisions declared in `spec.md` are frozen using canonical cryptographic contracts and checked deterministically through `plan.md`, `tasks.md`, and implementation:
+
+```gemstack-contracts
+[
+  {
+    "id": "zero-dependency-core",
+    "type": "BOOLEAN_INVARIANT",
+    "value": true
+  },
+  {
+    "id": "external-sync",
+    "type": "BOUNDARY",
+    "value": "FORBIDDEN"
+  }
+]
+```
+
+- **SPEC** owns base architectural contracts.
+- **PLAN** inherits them and may add compatible technical contracts.
+- **TASKS** inherits the consolidated registry.
+- Contradictions become deterministic blockers (`FROZEN_CONTRACT_VIOLATION`).
+- Phase artifacts are frozen via canonical SHA-256 digests; tampering is caught immediately (`FROZEN_ARTIFACT_CHANGED`).
+- `gemstack verify` performs strictly read-only verification without mutating or overwriting accepted phase hashes (`VERIFY != FREEZE`).
+- Existing projects without structured contracts automatically run in **LEGACY** mode without breaking.
+
 ## 🐝 Advanced Autonomy (The WOW Update)
 
 Gemstack isn't just passive documents; it actively orchestrates agentic capabilities:
@@ -115,6 +142,7 @@ Add the following to your MCP client configuration:
 Dive deeper into the Gemstack architecture:
 - [📖 **Manual de Usuario**](MANUAL.md) - The Definitive Guide for beginners.
 - [🧠 Spec-Driven Development](docs/spec-driven-development.md) - How the SDD loop works.
+- [🔒 Architecture Consistency](docs/architecture-consistency.md) - Deterministic contracts & phase freezing.
 - [Available Skills](docs/skills.md)
 - [Security Model](docs/security.md)
 - [Handoff Protocol](docs/handoff.md)

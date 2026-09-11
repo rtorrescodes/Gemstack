@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.1.0] - 2026-09-11
+### Added
+- `FrozenContractRegistry`: deterministic architectural contract engine supporting 6 canonical types (`ENUM_SET`, `IDENTITY_TUPLE`, `PROVENANCE_RULE`, `BOOLEAN_INVARIANT`, `BOUNDARY`, `ROADMAP_LIMIT`).
+- Canonical fenced `gemstack-contracts` blocks in phase artifacts (`spec.md`, `plan.md`, `tasks.md`).
+- Cross-phase contract inheritance (`SPEC` -> `PLAN` -> `TASKS`) and deterministic contradiction detection (`FROZEN_CONTRACT_VIOLATION`).
+- Phase artifact SHA-256 freezing and mutation detection (`FROZEN_ARTIFACT_CHANGED`).
+- Canonical 64-character lowercase SHA-256 finding fingerprints with 12-character cosmetic display tokens.
+- Anti-loop finding lifecycle reconciliation (`OPEN`, `RESOLVED`, `ACCEPTED_EXCEPTION`, `SUPERSEDED`).
+- Formal accepted exception suppression bound to deterministic 3-tuple `contextHash`.
+- Per-feature `.gemstack.json` historical metadata sidecar preserving phase hash and finding audit trails.
+- Atomic state and sidecar persistence with temporary file write and atomic rename with bounded retry for cross-platform file locking.
+- Progressive `LEGACY` mode ensuring features without contract blocks continue without friction or errors.
+- Integrated Stage 4/5 Architectural Consistency verification into `gemstack verify` (alias `audit`).
+
+### Changed
+- `gemstack verify` upgraded from 4-stage to 5-stage deterministic verification pipeline.
+- Agent skills (`gemstack-spec`, `gemstack-plan`, `gemstack-tasks`, `gemstack-review`) and phase templates updated to generate and validate frozen architectural contracts.
+- Gemstack Constitution strengthened to forbid silent downstream contradictions of frozen contracts.
+
+### Compatibility
+- Existing projects without `gemstack-contracts` blocks remain 100% supported through progressive LEGACY mode.
+- No mandatory migration is required.
+- Zero external runtime or development npm dependencies added (`package.json` dependencies remain `{}`).
+
+### Validation
+- 17 / 17 Upgrade A implementation tasks complete.
+- 25 / 25 canonical P1 acceptance tests passing (Categories A–H).
+- 33 / 33 physical test cases passing across 5 test suites.
+- `npm test` exit code 0.
+- `gemstack verify` exit code 0 with 0 open blockers.
+- Self-dogfooded on `specs/006-architecture-consistency-engine/` with 5 base contracts passing and 0 contradictions.
+
 ## [v1.0.2] - 2026-09-03
 ### Added
 - Intent-Based Routing in `01-gemstack-core.md`: semantic intent detection for natural language interactions without mandatory slash prefixes.

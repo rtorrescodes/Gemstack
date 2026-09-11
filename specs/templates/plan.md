@@ -36,3 +36,14 @@ ruta/archivo: [Razón]
 | Violación de Regla | Por qué es necesario | Alternativa simple rechazada por |
 |--------------------|----------------------|-----------------------------------|
 | [Ej. Wrapper]      | [Razón]              | [Razón]                           |
+
+## 6. Contratos Aditivos del Plan (Opcional - Upgrade A)
+<!--
+  Hereda automáticamente los contratos de spec.md.
+  Si se requieren contratos técnicos adicionales compatibles, declararlos aquí en un bloque canónico.
+  No modifiques contratos de spec sin aprobación explícita de enmienda.
+-->
+```gemstack-contracts
+[
+]
+```

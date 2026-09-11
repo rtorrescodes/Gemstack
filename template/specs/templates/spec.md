@@ -33,3 +33,20 @@
 ## 5. Entidades Clave (Data / Models)
 - **[Entidad 1]**: [Representación abstracta]
 - **[Entidad 2]**: [Relación]
+
+## 6. Contratos Arquitectónicos Congelados (Opcional - Upgrade A)
+<!--
+  Declara decisiones arquitectónicas congeladas usando el bloque canónico.
+  Tipos soportados: ENUM_SET, IDENTITY_TUPLE, PROVENANCE_RULE, BOOLEAN_INVARIANT, BOUNDARY, ROADMAP_LIMIT.
+  Si no se incluye este bloque, la feature operará en modo LEGACY.
+-->
+```gemstack-contracts
+[
+  {
+    "id": "feature-invariants",
+    "type": "BOOLEAN_INVARIANT",
+    "value": true,
+    "description": "Invariante principal congelada para este feature"
+  }
+]
+```

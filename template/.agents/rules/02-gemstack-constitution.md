@@ -47,3 +47,9 @@ Usa las funciones del framework y librerías estándar nativamente en lugar de c
 
 ## Article IX: Integration-First Testing
 Prioriza el testing realista. Si puedes probar el contrato real o la base de datos local real (con un entorno temporal) por encima de mocks complejos, hazlo. El código generado debe funcionar en la práctica.
+
+## Article X: Architecture Consistency & Immutability Gate (Upgrade A)
+Las decisiones arquitectónicas congeladas no pueden ser contradichas silenciosamente por fases posteriores.
+- Antes de avanzar de fase, el hash del artefacto aguas arriba debe ser válido, los contratos compatibles y la cantidad de bloqueadores deterministas abiertos debe ser exactamente 0.
+- Los artefactos de fases aprobadas quedan sellados criptográficamente (SHA-256) y no pueden mutar sin enmienda explícita aprobada por humanos.
+- Proyectos preexistentes sin bloques de contratos operan en modo LEGACY transparente sin fallas.

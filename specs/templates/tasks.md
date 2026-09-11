@@ -4,6 +4,7 @@
   Instrucciones:
   - Marca con `[P]` las tareas que sean seguras de paralelizar (por ej. si usas múltiples subagentes).
   - Incluye la redacción y validación de TESTS ANTES de la implementación real.
+  - Hereda los contratos congelados de SPEC y PLAN por defecto (no se requiere bloque de contratos).
 -->
 
 ## Fase 1: Tests (Test-First Imperative)
