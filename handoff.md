@@ -8,20 +8,23 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
 4. Comando unificado `gemstack verify` (alias `audit`) para auditoría integral en un solo paso.
 
 ## 2. Estado actual
-- **Upgrade A (Consistency Core & Phase Freezing)**: CERRADO Y LIBERADO como v1.1.0 (`GEMSTACK UPGRADE A SHIPPED / DONE — ARCHITECTURE CLOSED`).
+- **Upgrade A (Consistency Core & Phase Freezing)**: CERRADO Y PUBLICADO OFICIALMENTE como `gemstack-ai@1.1.2` en npm y GitHub Release (`GEMSTACK v1.1.2 RELEASED — GITHUB + NPM VERIFIED`).
+- Historial de release:
+  - `v1.1.0`: Release automation falló antes de publicar debido a glob recursivo no portable en runner Linux (`tests/**/*.test.js`).
+  - `v1.1.1`: Comando de testing explicitado para portabilidad; detectó fallo en `TEST-CONSISTENCY-G01` en Linux por dependencia de host en `path.relative()`.
+  - `v1.1.2`: Corrección definitiva de canonicalización con detección de flavor (`path.win32` vs `path.posix`); CI pasó al 100%, npm publish exitoso y GitHub Release creado.
 - 17/17 tareas completadas, 25/25 tests canónicos P1 pasando (33/33 físicos), 0 bloqueadores.
-- Reglas `01-gemstack-core.md`, `02-gemstack-constitution.md`, plantillas y skills actualizados y sincronizados en `template/`.
-- Motor de consistencia integrado en `gemstack verify` (Paso 4/5).
 
 ## 3. Archivos y cambios
+- `src/lib/hasher.js`: Detección estructural de path-flavor (`path.win32` vs `path.posix`) para canonicalización multiplataforma inmune al SO host.
+- `tests/hasher.test.js`: Suite G01 ampliada con pruebas de paths Windows y POSIX ejecutables en cualquier sistema operativo.
 - `src/lib/contracts.js`: Parser column-0 fenced, esquemas de 6 contratos, resolución de herencia y detección de contradicciones.
-- `src/lib/hasher.js`: Hashing canónico SHA-256 (64 hex lowercase) con normalización CRLF->LF y rechazo de BOM UTF-8.
 - `src/lib/findings.js`: Fingerprints canónicos SHA-256 de 64 caracteres, display token de 12 caracteres y excepciones con `contextHash`.
 - `src/lib/state.js`: Persistencia atómica de `state.json` (solo operativo) y sidecar histórico `.gemstack.json`.
 - `src/commands/verify.js`: Paso 4/5 de consistencia arquitectónica y hashes congelados.
-- `tests/`: 5 suites unitarias (`contracts.test.js`, `hasher.test.js`, `findings.test.js`, `init.test.js`, `verify.test.js`).
+- `tests/`: 5 suites unitarias con comando de test explícito y determinista en `package.json`.
 - `docs/architecture-consistency.md`: Referencia técnica integral de consistencia y congelamiento de fases.
-- `CHANGELOG.md`, `README.md`, `RELEASE_NOTES.md`, `package.json`: Versión v1.1.0 documentada y preparada para release.
+- `CHANGELOG.md`, `README.md`, `RELEASE_NOTES.md`, `package.json`: Actualizados a v1.1.2.
 
 ## 4. Intentos fallidos
 - Se confirmó en proyectos reales que scripts de prueba con sintaxis `2>nul` en `package.json` provocan que PowerShell/Bash enmascaren errores y retornen código de salida 0 con 0 tests ejecutados. Ahora esto es detectado como error por `gemstack verify` y prohibido en la Constitución.
