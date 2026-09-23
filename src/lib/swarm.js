@@ -234,7 +234,7 @@ function planSwarmWaves(tasks) {
     const nextRemaining = [];
 
     for (const task of remaining) {
-      const taskWrites = (task.write_set || []).map(normalizePath);
+      const taskWrites = (task.write_set || []).map(p => normalizePath(p));
       let collides = false;
 
       for (const p of taskWrites) {
@@ -283,7 +283,7 @@ function validateWritePartitions(wave) {
   const claimedPaths = new Map(); // path -> task_id
 
   for (const t of tasks) {
-    const writes = (t.write_set || []).map(normalizePath);
+    const writes = (t.write_set || []).map(p => normalizePath(p));
     for (const p of writes) {
       if (claimedPaths.has(p)) {
         const otherTaskId = claimedPaths.get(p);

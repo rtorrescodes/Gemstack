@@ -31,7 +31,7 @@ module.exports = async (flags) => {
 
     walkDir(templateDir, (filePath) => {
         const relativePath = path.relative(templateDir, filePath).replace(/\\/g, '/');
-        const destPath = fssafe.resolveSafe(targetDir, relativePath);
+        const destPath = fssafe.resolveSafeStrict(targetDir, relativePath);
 
         if (fs.existsSync(destPath)) {
             if (['handoff.md', 'handoff_archive.md', '.gemstack/learnings.md', '.gemstack/state.json'].includes(relativePath)) {

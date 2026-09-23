@@ -5,12 +5,12 @@ const logger = require('./logger');
 
 module.exports = {
     backupFile: (targetDir, relativeFilePath, dryRun, sessionTimestamp) => {
-        const fullPath = fssafe.resolveSafe(targetDir, relativeFilePath);
+        const fullPath = fssafe.resolveSafeStrict(targetDir, relativeFilePath);
         if (!fs.existsSync(fullPath)) return;
 
         const timestamp = sessionTimestamp || new Date().toISOString().replace(/[:.]/g, '-');
-        const backupDir = fssafe.resolveSafe(targetDir, `.gemstack/backups/${timestamp}`);
-        const backupDest = fssafe.resolveSafe(backupDir, relativeFilePath);
+        const backupDir = fssafe.resolveSafeStrict(targetDir, `.gemstack/backups/${timestamp}`);
+        const backupDest = fssafe.resolveSafeStrict(backupDir, relativeFilePath);
 
         logger.info(`Backup: ${relativeFilePath}`);
         if (!dryRun) {
