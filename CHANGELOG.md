@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.0] - 2026-09-23
+
+### Major Architecture Milestone: Gemstack 2.0
+Gemstack 2.0 elevates the framework from declarative agent guidance to reproducible cryptographic and runtime guarantees.
+
+### Added
+- **P0 Trust Boundaries & Hardening (Sprint A)**:
+  - `resolveSafeStrict`: Enforces realpath resolution to permanently eliminate arbitrary symlink path traversal outside project roots.
+  - Remote Skill Provenance: Verifies remote skills against `allowed_sources` and validates SHA-256 content checksums prior to installation.
+  - Native Secret Blocking in Git Hooks: Local pre-commit hook automatically scans for and rejects commits containing API keys (GitHub PATs, OpenAI/Anthropic/Stripe tokens), private keys, or `.env` files.
+  - Environment & Log Sanitization: Eliminates credential leakage by redacting sensitive values across all CLI logs.
+- **P1 Honest Evidence & Reliable Metrics (Sprint B)**:
+  - Authenticated Billable Action Tokens: Implemented HMAC-SHA256 authenticated spending tokens, cumulative budget accounting, and positive unit enforcement (`src/lib/safety-gates.js`).
+  - Disk-Recomputed Visual Evidence: Screenshots must be verified by recomputing SHA-256 hashes from disk; rejects self-declared diffs without a registered visual diff adapter (`UNVERIFIED`).
+  - Pre-Persistence Secret Masking: Sensitive inputs and credentials are redacted prior to persisting visual evidence on disk.
+  - Public Control Matrix: Public `Control / Scope / Test / Limit` 4-column matrix in `README.md` and rules, eliminating unverified marketing claims.
+  - Pinned CI Workflows: GitHub Actions pinned to 40-character commit SHAs with explicit least-privilege `permissions: contents: read`.
+- **P2 Adaptable SDD & Incremental Specs (Sprint C)**:
+  - Four Rigor Levels: `quick` (single-artifact lightweight mode), `fix` (enforces linked regression test), `feature` (standard 3-phase SDD), and `high-risk` (threat model, rollback plan, and dual human approvals).
+  - Incremental Spec Deltas: Structured `ADDED`, `MODIFIED`, and `REMOVED` declarations preventing destructive overwriting of base specifications by concurrent agents.
+  - Offline Spec Merge: `gemstack spec merge` detects colliding contracts and duplicate canonical test IDs before merging branches.
+  - Formal Contract Amendments: Replaces silent contract mutations with signed, auditable amendment records (`src/lib/contract-amendments.js`).
+- **P3 Efficient Context & Persistent Memory (Sprint D)**:
+  - Context Fatigue Detector & Noise Pruning: Flags warnings when accumulated token load or redundancy ratios exceed thresholds; deterministically prunes ephemeral chatter while preserving contracts and state.
+  - Offline Dependency Auditor in `gemstack doctor`: Analyzes orphan dependencies, undeclared imports, and local circular cycles in <10ms without invoking external network requests.
+  - Memory Cross-Verification in `gemstack verify`: Reconciles recent git commit log against `handoff.md` to prevent unrecorded work from being lost across sessions.
+
+### Validation
+- 180 physical tests passing across 23 test suites with 0 failures and 0 skipped.
+- Full CI test suite (`npm run ci:all`) passing cleanly.
+- `gemstack verify` passing with 0 errors and 0 open blockers.
+- Zero runtime npm dependencies maintained (`dependencies: {}`).
+
 ## [v1.4.0] - 2026-09-11
 
 ### Added

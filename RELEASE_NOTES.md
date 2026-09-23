@@ -1,5 +1,44 @@
 # Gemstack Release Notes
 
+# Gemstack v2.0.0 — Security Hardening, Adaptable SDD & Persistent Memory
+
+## Highlights
+
+### Gemstack 2.0 Architectural Milestone
+Gemstack 2.0 converts declarative conventions into reproducible cryptographic and runtime guarantees:
+
+### Sprint A: P0 Trust Boundaries & Hardening
+- **Strict Symlink Traversal Elimination**: Replaced lax normalization with `resolveSafeStrict` (`fs.realpathSync`) to permanently eliminate symlink escapes.
+- **Remote Skill Provenance & Checksums**: Enforces `allowed_sources` and SHA-256 verification before installing community skills.
+- **Git Pre-commit Hook Hardening**: Zero-dependency regex secret blocking directly inside native Git hooks.
+- **Environment & Log Sanitization**: Scrubbed process environments and redacted sensitive credentials in all output logs.
+
+### Sprint B: P1 Honest Evidence & Reliable Metrics
+- **Cryptographic Billable Token Boundary**: Implemented HMAC-SHA256 authenticated spending tokens, cumulative budget verification, positive unit validation, and strict scope binding.
+- **Visual QA Evidence Verification**: Forced disk re-computation of screenshot hashes; rejected self-declared diffs without a registered visual diff adapter (`UNVERIFIED` fallback).
+- **Pre-Persistence Secret Masking**: Added credential masking before visual evidence is written to disk.
+- **Public Control Matrix**: Replaced all ungrounded superlatives with the public `Control / Scope / Test / Limit` matrix across `README.md` and security rules.
+- **GitHub Actions Hardening**: Pinned all workflow actions to 40-character commit SHAs with explicit least-privilege `permissions: contents: read` and clean `npm ci`.
+
+### Sprint C: P2 Adaptable SDD & Incremental Specs
+- **Four Rigor Levels**: `quick` (single-artifact lightweight mode), `fix` (linked regression test), `feature` (standard 3-phase SDD), and `high-risk` (threat model, rollback plan, and dual human approvals).
+- **Incremental Spec Deltas**: Structured `ADDED`, `MODIFIED`, and `REMOVED` declarations preventing destructive clobbering of base specifications.
+- **Spec Merge & Conflict Detection**: `gemstack spec merge` detects colliding contracts and duplicate canonical test IDs before merging branches.
+- **Formal Contract Amendments**: Replaces silent contract mutations with signed, auditable amendment records (`src/lib/contract-amendments.js`).
+
+### Sprint D: P3 Efficient Context & Persistent Memory
+- **Context Fatigue Detector & Noise Pruning**: Monitors token accumulation and redundancy; deterministically prunes ephemeral chatter while preserving contracts and decisions.
+- **Offline Dependency Auditor in `gemstack doctor`**: Scans dependencies offline for orphans, undeclared imports, and circular cycles in <10ms without network calls.
+- **Memory Cross-Verification in `gemstack verify`**: Reconciles recent git commits against `handoff.md` to prevent unrecorded work from being lost across sessions.
+
+## Acceptance & Regression Baseline
+- 180 total physical tests passing across 23 explicitly enumerated suites with 0 failures and 0 skipped.
+- Full CI suite (`npm run ci:all`) passing cleanly.
+- `gemstack verify` exit code 0 with 0 errors and 0 open blockers.
+- Zero runtime dependencies maintained (`dependencies: {}`).
+
+---
+
 # Gemstack v1.4.0 — Agent Swarm & Visual QA
 
 ## Highlights
@@ -59,7 +98,7 @@
 - **Constraint-Lossless Compression**: 100% of normative behavioral constraints (`MUST`, `MUST NOT`), frozen architectural contracts, and acceptance criteria survive compression without semantic loss.
 - **Canonical Authority Precedence**: Authoritative repository artifacts unconditionally govern over derived capsule claims (`SPEC` > `PLAN` > `TASKS` > implementation).
 - **Cryptographic Provenance & Drift Detection**: Live SHA-256 source digests detect artifact modifications or tampering immediately (`STALE` / `TAMPERED`).
-- **Strict Secrets Barrier**: Automated regex scanner blocks credential properties (`apiKey`, `token`, `secret`, `clientSecret`), token patterns (`sk-...`, `AIza...`, `ghp_...`), private keys, and `.env` references.
+- **Strict Secrets Barrier**: Automated regex scanner blocks credential properties (`apiKey`, `token`, `secret`, `clientSecret`), token patterns (`sk-...`, `AIza...`, GitHub/Slack tokens), private keys, and `.env` references.
 - **Deterministic Size Budgeting**: 32 KB target budget with prioritized 3-tier condensation and a 64 KB hard fail-closed limit.
 - **Read-Only Verification (Stage 5.2)**: `gemstack verify` inspects context capsule freshness without modifying or rewriting disk state.
 - **CLI Commands**: `gemstack context generate`, `gemstack context show`, and `gemstack context verify`.

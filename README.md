@@ -1,15 +1,15 @@
 <div align="center">
   <img src="assets/logo.jpg" alt="Gemstack Logo" width="200" style="border-radius: 20px" />
-  <h1>Gemstack v1.4.0</h1>
+  <h1>Gemstack v2.0.0</h1>
   <p><b>The Local-First Agentic Framework for Spec-Driven Development</b></p>
 
   [![npm version](https://img.shields.io/npm/v/gemstack-ai.svg?style=flat-square)](https://www.npmjs.com/package/gemstack-ai)
-  [![Release](https://img.shields.io/badge/release-v1.4.0-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v1.4.0)
+  [![Release](https://img.shields.io/badge/release-v2.0.0-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v2.0.0)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
 
-> **🚀 Current Stable Release: `v1.4.0`** — *Agent Swarm Planning & Visual QA Evidence Checkpoint*  
+> **🚀 Current Stable Release: `v2.0.0`** — *Security Hardening, Adaptable SDD & Persistent Memory Checkpoint*  
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
@@ -20,18 +20,21 @@ Gemstack is a zero-dependency, local-first framework designed to supercharge you
 
 Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and rigorous security gates into the AI's context.
 
-## ✨ Features (v1.4.0)
+## ✨ Features (v2.0.0)
 
-- 🧠 **Spec-Driven Development (SDD)**: The AI is mechanically verified against architectural specifications before coding through a strict sequence of `spec.md`, `plan.md`, and `tasks.md`.
-- 🛡️ **Active Security & Safety Gates**: Includes a built-in Chief Security Officer (`gemstack-cso`) and immutable Constitution Rules that guide the AI to respect OWASP, zero-trust secrets, and multi-tenant isolation.
-- 🐝 **Swarm Architecture**: Tag tasks with `[P]` and invoke `/swarm` to watch the AI spawn parallel subagents to code your app simultaneously.
-- 🏥 **Self-Healing CI/CD**: Run `/heal` when GitHub Actions fails. The AI will autonomously read the CI logs, write the patch, and push the fix.
-- 👁️ **Visual QA Automation**: The `/qa-visual` skill instructs the agent to write and execute ephemeral Playwright scripts in an isolated sandbox to visually verify UI criteria.
-- 📦 **Zero Dependencies**: Gemstack's footprint is just standard Markdown and JSON files. No heavy NPM packages polluting your production bundle.
+- 🧠 **Adaptable Spec-Driven Development (SDD)**: Four rigor levels (`quick`, `fix`, `feature`, `high-risk`) tailoring validation rigor to change impact without unnecessary friction.
+- 🛡️ **Hardened Trust Boundaries & Safety Gates**: Authenticated HMAC spending tokens (`BillableActionGate`), realpath symlink enforcement, pre-commit secret blocking, and automated credential masking.
+- 🔄 **Incremental Specs & Conflict Detection**: Structured `ADDED`/`MODIFIED`/`REMOVED` declarations and offline `gemstack spec merge` to mechanically detect contract collisions before merging branches.
+- 📜 **Formal Contract Amendments**: Replaces silent contract tampering with signed, auditable amendment records (`src/lib/contract-amendments.js`).
+- 🩺 **Offline Health & Dependency Auditor**: `gemstack doctor` scans for orphans, undeclared packages, and local circular imports in milliseconds without network calls.
+- 🧠 **Context Fatigue Detection & Persistent Memory**: Monitors token accumulation, prunes ephemeral noise, and cross-verifies `handoff.md` against git commit history.
+- 🐝 **Agent Swarm Planning**: Compiles tasks into deterministic execution waves with disjoint write partition ownership.
+- 👁️ **Visual QA Verification**: Disk-recomputed SHA-256 evidence hashing with offline tolerance-bounded diffing and neutral masking.
+- 📦 **Zero Dependencies**: 100% native Node.js standard library with 0 runtime and 0 dev npm dependencies.
 
 ## 🚀 Quickstart
 
-Start a new project or upgrade an existing one in seconds with **Gemstack v1.4.0**:
+Start a new project or upgrade an existing one in seconds with **Gemstack v2.0.0**:
 
 ```bash
 # Initialize Gemstack in your current repository
@@ -242,6 +245,24 @@ Add the following to your MCP client configuration:
   }
 }
 ```
+
+## 📜 Version History & Release Highlights
+
+Gemstack tracks every architectural enhancement through verifiable milestones:
+
+| Version | Milestone & Core Highlights | Canonical Tests | Status |
+| :--- | :--- | :--- | :--- |
+| **`v2.0.0`** | **Security Hardening, Adaptable SDD & Persistent Memory**<br/>• Strict symlink realpath confinement & remote skill SHA-256 verification.<br/>• HMAC-authenticated spending tokens & disk-recomputed visual evidence.<br/>• 4 SDD Rigor levels (`quick`, `fix`, `feature`, `high-risk`) & incremental spec deltas.<br/>• Signed contract amendments & offline collision detection (`gemstack spec merge`).<br/>• Context fatigue detection, offline dependency auditor, & git-memory cross-audit. | **180 physical tests / 23 suites** | **Current Stable** |
+| **`v1.4.0`** | **Agent Swarm Planning & Visual QA Evidence Checkpoint**<br/>• Multi-worker wave planning with disjoint write partitions (`swarm.json`).<br/>• Separation of duties gate (`author != reviewer`) and subagent limits.<br/>• Offline Visual QA manifest, deterministic viewports, & auto-secret masking. | **126 physical tests / 14 suites** | Superseded by v2.0.0 |
+| **`v1.3.0`** | **Cost & Provider Safety Gates + Context Capsule**<br/>• `ProviderCapabilityGate` and `BillableActionGate` (NO PROOF = NO EXECUTION).<br/>• Deterministic context capsule compression with 32KB budget. | **100 physical tests / 25 suites** | Superseded by v1.4.0 |
+| **`v1.2.0`** | **Mechanical Test Matrix & Closure Evidence**<br/>• Canonical acceptance matrices, mutating collector (`gemstack collect`), & `closure.json`.<br/>• Zero-shell TAP test runner & exact reconciliation arithmetic. | **53 physical tests / 11 suites** | Superseded by v1.3.0 |
+| **`v1.1.2`** | **Architecture Consistency Engine & Phase Freezing**<br/>• Cryptographic SHA-256 phase freezing (`spec.md` -> `plan.md` -> `tasks.md`).<br/>• 6 canonical contract types & context-bound accepted exceptions. | **33 physical tests** | Superseded by v1.2.0 |
+| **`v1.0.2`** | **Zero Silent Failures & Intent Routing**<br/>• Constitution update prohibiting `2>nul` silent masking in test runners.<br/>• Semantic intent-based routing and unified `gemstack verify` command. | **8 physical tests** | Superseded by v1.1.2 |
+| **`v0.3.0`** | **Cross-Platform CI & Supply-Chain Hardening**<br/>• Multi-OS GitHub Actions workflows and zero-dependency CI verification scripts. | Unit + Smoke suites | Superseded by v1.0.2 |
+| **`v0.2.0`** | **Zero-Dependency CLI & Scaffolding Engine**<br/>• Local-first `gemstack init` and `gemstack update` with automated rollback backups. | Native node:test suite | Superseded by v0.3.0 |
+| **`v0.1.0`** | **Initial Antigravity Spec-Driven Development Framework**<br/>• Foundational 13 skills, Constitution rulebooks, and SecureDocs anti-IDOR demo app. | Demo smoke tests | Superseded by v0.2.0 |
+
+For full historical details and upgrade guides, see [CHANGELOG.md](CHANGELOG.md) and [RELEASE_NOTES.md](RELEASE_NOTES.md).
 
 ## 📚 Documentation
 
