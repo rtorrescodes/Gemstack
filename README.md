@@ -199,7 +199,7 @@ Gemstack provides a focused, deterministic CLI surface:
 
 ```bash
 # Core verification & collection
-gemstack verify [--json] [--target <dir>]     # 6-stage read-only audit (0 mutations, 0 network)
+gemstack verify [--json] [--target <dir>]     # 6-stage read-only audit (0 mutations; --run-tests delegates to npm test)
 gemstack collect [--target <dir>]             # Executes test runner & records closure.json
 gemstack ship [--target <dir>]                # Transitions lifecycle to SHIPPED if closure is VERIFIED
 

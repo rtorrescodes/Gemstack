@@ -5,6 +5,17 @@ const fssafe = require('../lib/filesystem-safe');
 const logger = require('../lib/logger');
 const manifestLib = require('../lib/manifest');
 
+/**
+ * gemstack verify
+ *
+ * Alcance de la garantía de solo lectura:
+ * - En su modo predeterminado (sin banderas que deleguen a comandos externos), gemstack verify
+ *   es estrictamente de solo lectura: audita en memoria los 6 estadios de SDD, no crea ni muta archivos,
+ *   y no modifica sidecars (.gemstack.json), hashes de fase congelados ni el árbol de trabajo.
+ * - Modo opcional --run-tests: cuando se invoca explícitamente con --run-tests, Gemstack delega
+ *   la ejecución a scripts externos del proyecto (ej. `npm test`), cuyo comportamiento y posibles
+ *   efectos colaterales en disco quedan gobernados por la configuración y el test runner del propio proyecto.
+ */
 module.exports = async (flags) => {
     const targetDir = flags.target || process.cwd();
     logger.info(`Ejecutando verificación integral de Gemstack en: ${targetDir}`);

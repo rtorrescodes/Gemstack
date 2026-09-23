@@ -32,5 +32,5 @@ Gemstack complements Architecture Consistency with mechanical closure verificati
 
 4. **Lifecycle: COLLECT vs VERIFY vs SHIP**:
    - `gemstack collect`: Mutating evidence collector. Executes test runners, evaluates package script gates, reconciles counts, computes `closureContextHash`, and generates feature-local `closure.json`.
-   - `gemstack verify`: Strictly read-only validator (6 stages). Evaluates existing `closure.json` against in-memory fresh `closureContextHash`. Never writes to disk.
+   - `gemstack verify`: Strictly read-only validator in standard mode (6 stages, 0 disk mutations, evaluates existing `closure.json` against in-memory fresh `closureContextHash`). Optional `--run-tests` delegates execution to external project test scripts (`npm test`), whose side effects depend on the project's runner.
    - `gemstack ship`: Lifecycle gatekeeper. Enforces that `closure.json` is fresh and marked `VERIFIED` (or policy-waived `VERIFIED_WITH_EXCEPTIONS`) before transitioning state to `SHIPPED`.

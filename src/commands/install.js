@@ -259,7 +259,6 @@ async function install(arg1, arg2) {
     const inspected = inspectSkillContent(rawContent);
 
     const relativePath = `.agents/skills/${inspected.name}/SKILL.md`;
-    const fullSkillPath = path.join(targetDir, relativePath);
 
     // 1. Verify Expected SHA-256 before doing anything else
     const expectedChecksum = flags.sha256 || flags.expectedChecksum;
@@ -281,8 +280,11 @@ async function install(arg1, arg2) {
         return { name: inspected.name, path: relativePath, sha256: inspected.sha256, installed: false };
     }
 
-    // 3. Overwrite Protection & Backup Flow
-    if (fs.existsSync(fullSkillPath)) {
+    // 3. Resolve and validate target path strictly within project boundaries
+    const safeTargetSkillPath = fssafe.resolveSafeStrict(targetDir, relativePath);
+
+    // 4. Overwrite Protection & Backup Flow
+    if (fs.existsSync(safeTargetSkillPath)) {
         if (!flags.update && !flags.force) {
             const err = new Error(`El skill "${inspected.name}" ya existe en ${relativePath}. Especifique --update para actualizar con respaldo o --force.`);
             err.code = 'SKILL_ALREADY_EXISTS';
@@ -291,14 +293,14 @@ async function install(arg1, arg2) {
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const backupRelPath = `.gemstack/backups/skills/${inspected.name}_${timestamp}.bak`;
-        const oldContent = fs.readFileSync(fullSkillPath, 'utf8');
+        const oldContent = fs.readFileSync(safeTargetSkillPath, 'utf8');
         fssafe.withConfinedAtomicWrite(targetDir, backupRelPath, (tempFile) => {
             fs.writeFileSync(tempFile, oldContent, 'utf8');
         });
         logger.info(`Respaldo de versión previa guardado en ${backupRelPath}`);
     }
 
-    // 4. Atomic write inside project boundaries
+    // 5. Atomic write inside project boundaries
     fssafe.withConfinedAtomicWrite(targetDir, relativePath, (tempFile) => {
         fs.writeFileSync(tempFile, rawContent, 'utf8');
     });

@@ -252,5 +252,76 @@ describe('Skill Installation Provenance & Safe Inspection (Gemstack v2.0.1)', ()
     }
   });
 
+  it('TEST-PROV-P08: Rejects install --update when target skill path is a symlink escaping project root, creates no backups, and mutates no external files', async () => {
+    const tempBase = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-install-symlink-'));
+    const projDir = path.join(tempBase, 'project');
+    const outsideDir = path.join(tempBase, 'outside');
+    fs.mkdirSync(projDir);
+    fs.mkdirSync(outsideDir);
+
+    const outsideSecretFile = path.join(outsideDir, 'SKILL.md');
+    const originalSecretContent = '---\nname: malicious-symlink\n---\n# Confidential Host Secret';
+    fs.writeFileSync(outsideSecretFile, originalSecretContent, 'utf8');
+
+    // Create junction inside project to outsideDir
+    const skillDir = path.join(projDir, '.agents', 'skills', 'malicious-symlink');
+    fs.mkdirSync(path.dirname(skillDir), { recursive: true });
+    try {
+      fs.symlinkSync(outsideDir, skillDir, 'junction');
+    } catch {
+      try {
+        fs.symlinkSync(outsideDir, skillDir, 'dir');
+      } catch {
+        fs.rmSync(tempBase, { recursive: true, force: true });
+        return; // Skip if host environment forbids symlinks
+      }
+    }
+
+    const newPayload = '---\nname: malicious-symlink\n---\n# Overwrite Payload';
+    const crypto = require('crypto');
+    const payloadSha256 = crypto.createHash('sha256').update(newPayload, 'utf8').digest('hex');
+
+    const originalFetch = global.fetch;
+    global.fetch = async () => ({
+      ok: true,
+      headers: new Headers({ 'content-length': String(Buffer.byteLength(newPayload)) }),
+      arrayBuffer: async () => Buffer.from(newPayload)
+    });
+
+    try {
+      await assert.rejects(
+        async () => {
+          await install('https://raw.githubusercontent.com/test-org/repo/SKILL.md', {
+            target: projDir,
+            sha256: payloadSha256,
+            update: true,
+            skipDnsResolve: true
+          });
+        },
+        (err) => {
+          assert.strictEqual(err.code, 'SYMLINK_ESCAPE_DETECTED');
+          return true;
+        }
+      );
+
+      // Verify no backup was created
+      const backupDir = path.join(projDir, '.gemstack', 'backups');
+      assert.strictEqual(fs.existsSync(backupDir), false, 'Backup directory must not be created');
+
+      // Verify external file is completely intact and unmodified
+      assert.strictEqual(fs.readFileSync(outsideSecretFile, 'utf8'), originalSecretContent);
+
+      // Verify external dir contains only the original file and no new files
+      assert.deepStrictEqual(fs.readdirSync(outsideDir), ['SKILL.md']);
+
+      // Verify project directory had no skill content installed
+      const manifestFile = path.join(projDir, '.gemstack', 'manifest.json');
+      assert.strictEqual(fs.existsSync(manifestFile), false);
+    } finally {
+      global.fetch = originalFetch;
+      fs.rmSync(tempBase, { recursive: true, force: true });
+    }
+  });
+
 });
 
