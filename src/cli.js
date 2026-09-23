@@ -14,6 +14,7 @@ const shipCommand = require('./commands/ship');
 const contextCommand = require('./commands/context');
 const swarmCommand = require('./commands/swarm');
 const visualCommand = require('./commands/visual');
+const specCommand = require('./commands/spec');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -30,6 +31,7 @@ Commands:
   context   Generate, show, or verify context capsule
   swarm     Plan or validate agent swarm work and write partitions
   vqa       Validate or promote visual QA manifests and evidence
+  spec      Validate spec rigor, merge concurrent specs, and check conflicts
   list      List available skills
   show      Show content of a skill
   handoff   Show content of handoff.md
@@ -58,6 +60,7 @@ Options:
             case 'swarm': await swarmCommand(args, flags); break;
             case 'vqa':
             case 'visual': await visualCommand(args, flags); break;
+            case 'spec': await specCommand(args, flags); break;
             case 'list': await listCommand(flags); break;
             case 'show': await showCommand(args[0], flags); break;
             case 'hooks': hooksCommand.installHooks(flags.target); break;

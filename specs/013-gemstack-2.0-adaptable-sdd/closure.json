@@ -1,0 +1,58 @@
+{
+  "schema": "gemstack-closure",
+  "version": 1,
+  "feature": "specs/013-gemstack-2.0-adaptable-sdd",
+  "generated_at": "2026-09-23T02:03:25.332Z",
+  "status": "VERIFIED",
+  "closure_context": {
+    "closure_context_hash": "b52fe3acce82fe7d2d102ad0227438ebb60c8ff47bcb9652cbaadf1c17cbcc8a",
+    "repository_type": "git",
+    "git_commit": "dd57930a56e02e7aba59ce929112f8327d125541",
+    "working_tree_clean": false,
+    "relevant_files_digest": "ff07ec45a69e0fb973d7dfc9e06216833f804f232f3a61e8718a1c247bbddf2a"
+  },
+  "acceptance_signature": "6ae546034e43677a9ce51b451415db890d27b57e36df3163286897fcd6720e07",
+  "canonical_summary": {
+    "required_total": 13,
+    "required_passed": 13,
+    "supplemental_total": 0,
+    "supplemental_passed": 0
+  },
+  "physical_summary": {
+    "supporting_total": 0,
+    "supporting_passed": 0,
+    "total_executed": 13,
+    "total_passed": 13,
+    "total_failed": 0,
+    "total_skipped": 0
+  },
+  "reconciliation": {
+    "math_valid": true,
+    "phantoms_detected": 0,
+    "orphans_detected": 0,
+    "missing_canonical_ids": []
+  },
+  "task_traceability_summary": {
+    "tasks_total": 6,
+    "tasks_with_validation": 6,
+    "tasks_documentation_only": 0,
+    "unmapped_canonical_tests": []
+  },
+  "required_gates": {
+    "gate-test": "PASS",
+    "gate-ci-all": "PASS"
+  },
+  "supplemental_gates": {},
+  "exceptions": [],
+  "evidence_sources": [
+    {
+      "type": "PACKAGE_SCRIPT",
+      "script": "test",
+      "runner": "node:test",
+      "exit_code": 0,
+      "duration_ms": 390
+    }
+  ],
+  "blockers": [],
+  "warnings": []
+}

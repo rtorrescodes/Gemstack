@@ -9,9 +9,9 @@
     "plan"
   ],
   "phase_hashes": {
-    "spec": "6dffec0cf644212f418cd329b1156f476930580414dc2b2f4e2286937ec33384",
-    "plan": "202f51d4ba5f7aded6a8dd2401f416bc45b5a570e96d7d77f48ea034fceb9977",
-    "tasks": "2c66ac7d034b22a07e66f764a5cd55e982ebaef3f8269becc35b4ee576d7555a"
+    "spec": "32f326f279a7083e67bd3b386597718c203abbcca99f71d8426b50ca3616d93d",
+    "plan": "8be9cb72e649dbdc53819c8fac9029fc73241d7c267e3ff596e0104927a1b5c1",
+    "tasks": "843f2d12bf20c0ba844f0b7979aeb9b829faba32b2bcc04aa67f254126ceb9c4"
   },
   "consistency": {
     "status": "PASS",
@@ -22,6 +22,6 @@
     "freeze": false,
     "allowed_paths": []
   },
-  "last_update": "2026-09-23T01:58:48.131Z",
-  "last_completed_feature": "specs/012-gemstack-2.0-honest-evidence"
+  "last_update": "2026-09-23T02:03:38.070Z",
+  "last_completed_feature": "specs/013-gemstack-2.0-adaptable-sdd"
 }
