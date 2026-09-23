@@ -149,3 +149,70 @@ test('Verify command detects silent failure 2>nul in package.json test script', 
         process.exit = originalExit;
     }
 });
+
+test('Verify command is strictly read-only: does not create or mutate files, including feature sidecar .gemstack.json', async (t) => {
+    const tmp = createTempDir();
+    const { hashFile } = require('../src/lib/hasher');
+
+    try {
+        await initCommand({ dryRun: false, yes: true, target: tmp });
+
+        // Set up active spec with structured contracts
+        const specDir = path.join(tmp, 'specs', 'read-only-feature');
+        fs.mkdirSync(specDir, { recursive: true });
+        const specPath = path.join(specDir, 'spec.md');
+        fs.writeFileSync(
+            specPath,
+            `# Spec\n\`\`\`gemstack-contracts\n[\n  { "id": "c1", "type": "BOOLEAN_INVARIANT", "value": true }\n]\n\`\`\`\n`,
+            'utf8'
+        );
+
+        const statePath = path.join(tmp, '.gemstack', 'state.json');
+        const stateObj = {
+            version: '0.1',
+            current_phase: 'spec',
+            status: 'SPEC_COMPLETE',
+            active_spec: 'specs/read-only-feature',
+            phase_hashes: { spec: hashFile(specPath) }
+        };
+        fs.writeFileSync(statePath, JSON.stringify(stateObj, null, 2), 'utf8');
+
+        // Snapshot all directory files and hashes recursively BEFORE verify
+        function getTreeSnapshot(dir) {
+            const snapshot = {};
+            function walk(current) {
+                const entries = fs.readdirSync(current, { withFileTypes: true });
+                for (const entry of entries) {
+                    const full = path.join(current, entry.name);
+                    const rel = path.relative(dir, full);
+                    if (entry.isDirectory()) {
+                        walk(full);
+                    } else if (entry.isFile()) {
+                        snapshot[rel] = hashFile(full);
+                    }
+                }
+            }
+            walk(dir);
+            return snapshot;
+        }
+
+        const snapshotBefore = getTreeSnapshot(tmp);
+
+        // Execute verify
+        await assert.doesNotReject(async () => {
+            await verifyCommand({ target: tmp, runTests: false });
+        });
+
+        const snapshotAfter = getTreeSnapshot(tmp);
+
+        // Assert 100% identity of file tree and file contents: zero files created, modified, or removed
+        assert.deepEqual(snapshotAfter, snapshotBefore, 'gemstack verify must not create, modify, or delete any files');
+
+        // Specifically assert that no .gemstack.json was written to the feature dir
+        const sidecarPath = path.join(specDir, '.gemstack.json');
+        assert.equal(fs.existsSync(sidecarPath), false, 'feature sidecar .gemstack.json must not be created by verify');
+    } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
+});
+

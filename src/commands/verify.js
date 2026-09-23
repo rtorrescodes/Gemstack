@@ -311,11 +311,11 @@ module.exports = async (flags) => {
                         }
                     }
 
-                    // Reconciliación de hallazgos y evaluación de excepciones aceptadas vía sidecar de feature
-                    const { readSidecar, writeSidecarAtomic } = require('../lib/state');
+                    // Reconciliación de hallazgos y evaluación de excepciones aceptadas vía sidecar de feature (Read-Only)
+                    const { readSidecar } = require('../lib/state');
                     const sidecar = readSidecar(featureDir);
 
-                    // Migración retrocompatible: si state tenía findings o accepted_exceptions, migrarlos al sidecar
+                    // Migración retrocompatible en memoria: si state tenía findings o accepted_exceptions, usarlos
                     const existingFindings = sidecar.historical_findings && sidecar.historical_findings.length > 0
                         ? sidecar.historical_findings
                         : (loadedState.findings || []);
@@ -330,11 +330,6 @@ module.exports = async (flags) => {
                         normalizedContractRepresentation: JSON.stringify(effectiveUpstream)
                     };
                     const evaluated = evaluateAcceptedExceptions(reconciled, acceptedExceptions, currentContext);
-
-                    // Persistir el historial detallado de hallazgos exclusivamente en el sidecar
-                    sidecar.historical_findings = evaluated;
-                    sidecar.accepted_exceptions = acceptedExceptions;
-                    writeSidecarAtomic(featureDir, sidecar);
 
                     const blockers = evaluated.filter(f => f.is_blocking);
                     if (blockers.length > 0) {
