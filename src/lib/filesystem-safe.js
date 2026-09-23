@@ -36,8 +36,23 @@ function resolveSafeStrict(targetDir, relativePath) {
     let current = target;
     for (const part of parts) {
         current = path.join(current, part);
-        if (fs.existsSync(current)) {
-            const realCurrent = fs.realpathSync(current);
+        let isLink = false;
+        try {
+            const st = fs.lstatSync(current);
+            isLink = st.isSymbolicLink();
+        } catch {}
+
+        if (fs.existsSync(current) || isLink) {
+            let realCurrent;
+            try {
+                realCurrent = fs.realpathSync(current);
+            } catch {
+                try {
+                    realCurrent = path.resolve(path.dirname(current), fs.readlinkSync(current));
+                } catch {
+                    realCurrent = current;
+                }
+            }
             const normCurrent = normalizePlatformPath(realCurrent);
             if (!normCurrent.startsWith(normRoot) || (normCurrent !== normRoot && normCurrent[normRoot.length] !== path.sep && normCurrent[normRoot.length] !== '/' && normCurrent[normRoot.length] !== '\\')) {
                 const err = new Error(`Symlink escape detected: path component "${part}" resolves to "${realCurrent}" outside project root "${realRoot}"`);
@@ -47,10 +62,25 @@ function resolveSafeStrict(targetDir, relativePath) {
         }
     }
 
-    if (fs.existsSync(candidate)) {
-        const realCandidate = fs.realpathSync(candidate);
+    let isCandidateLink = false;
+    try {
+        const st = fs.lstatSync(candidate);
+        isCandidateLink = st.isSymbolicLink();
+    } catch {}
+
+    if (fs.existsSync(candidate) || isCandidateLink) {
+        let realCandidate;
+        try {
+            realCandidate = fs.realpathSync(candidate);
+        } catch {
+            try {
+                realCandidate = path.resolve(path.dirname(candidate), fs.readlinkSync(candidate));
+            } catch {
+                realCandidate = candidate;
+            }
+        }
         const normCandidate = normalizePlatformPath(realCandidate);
-        if (!normCandidate.startsWith(normRoot)) {
+        if (!normCandidate.startsWith(normRoot) || (normCandidate !== normRoot && normCandidate[normRoot.length] !== path.sep && normCandidate[normRoot.length] !== '/' && normCandidate[normRoot.length] !== '\\')) {
             const err = new Error(`Symlink escape detected: destination resolves to "${realCandidate}" outside project root "${realRoot}"`);
             err.code = 'SYMLINK_ESCAPE_DETECTED';
             throw err;
@@ -68,7 +98,7 @@ function ensureDir(dirPath) {
 
 function withConfinedAtomicWrite(rootDir, relativePath, writeFn) {
     const finalPath = resolveSafeStrict(rootDir, relativePath);
-    const tmpDir = path.join(path.resolve(rootDir), '.gemstack', 'tmp');
+    const tmpDir = resolveSafeStrict(rootDir, '.gemstack/tmp');
     ensureDir(tmpDir);
 
     const tmpFile = path.join(tmpDir, `atomic-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.tmp`);

@@ -159,14 +159,18 @@ module.exports = async (flags) => {
                     const specContracts = validateContractSchemas(specBlock.contracts);
                     logger.ok(`[STRUCTURED] ${specContracts.length} contrato(s) base declarados en spec.md.`);
 
-                    // Detección de mutación de spec congelada (VERIFY != FREEZE)
-                    if (loadedState.phase_hashes && loadedState.phase_hashes.spec) {
-                        const currentSpecHash = hashFile(specFile);
-                        if (currentSpecHash !== loadedState.phase_hashes.spec) {
-                            logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado spec.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.spec}, actual: ${currentSpecHash}`);
+                    const featureDir = fssafe.resolveSafe(targetDir, loadedState.active_spec);
+                    const amendmentsFile = path.join(featureDir, 'amendments.json');
+                    let declaredAmendments = [];
+                    let amendCheck = null;
+
+                    if (fs.existsSync(amendmentsFile)) {
+                        try {
+                            declaredAmendments = JSON.parse(fs.readFileSync(amendmentsFile, 'utf8'));
+                            if (!Array.isArray(declaredAmendments)) declaredAmendments = [declaredAmendments];
+                        } catch (e) {
+                            logger.error(`[AMENDMENT_FILE_INVALID] Error leyendo amendments.json: ${e.message}`);
                             totalErrors++;
-                        } else {
-                            logger.ok(`Hash congelado de spec.md verificado: ${loadedState.phase_hashes.spec.slice(0, 12)}...`);
                         }
                     }
 
@@ -196,6 +200,45 @@ module.exports = async (flags) => {
                         }
                     }
 
+                    // Si existen enmiendas declaradas, validarlas formalmente contra las modificaciones
+                    if (declaredAmendments.length > 0) {
+                        const { validateContractAmendments } = require('../lib/contract-amendments');
+                        const featureId = path.basename(loadedState.active_spec);
+                        const amendSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
+                        const downstreamContracts = planContracts.length > 0 ? planContracts : specContracts;
+
+                        amendCheck = validateContractAmendments(
+                            specContracts,
+                            downstreamContracts,
+                            declaredAmendments,
+                            { secret: amendSecret, feature_id: featureId }
+                        );
+
+                        if (!amendCheck.valid) {
+                            logger.error(`[AMENDMENT_REJECTED] Enmienda formal rechazada: ${amendCheck.error} (código: ${amendCheck.code})`);
+                            totalErrors++;
+                        } else {
+                            logger.ok(`[AMENDMENT_VERIFIED] ${amendCheck.verified_amendments} enmienda(s) contractual(es) formalmente autorizada(s) con firma válida.`);
+                            const authorizedIds = new Set(declaredAmendments.map(a => a.contract_id));
+                            violations = violations.filter(v => !authorizedIds.has(v.contractId));
+                        }
+                    }
+
+                    // Detección de mutación de spec congelada (VERIFY != FREEZE)
+                    if (loadedState.phase_hashes && loadedState.phase_hashes.spec) {
+                        const currentSpecHash = hashFile(specFile);
+                        if (currentSpecHash !== loadedState.phase_hashes.spec) {
+                            if (amendCheck && amendCheck.valid) {
+                                logger.ok(`[FROZEN_ARTIFACT_AMENDED] Modificación en spec.md autorizada formalmente por enmienda firmada.`);
+                            } else {
+                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado spec.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.spec}, actual: ${currentSpecHash}`);
+                                totalErrors++;
+                            }
+                        } else {
+                            logger.ok(`Hash congelado de spec.md verificado: ${loadedState.phase_hashes.spec.slice(0, 12)}...`);
+                        }
+                    }
+
                     // Validación de TASKS si existe
                     if (fs.existsSync(tasksFile)) {
                         const tasksRaw = fs.readFileSync(tasksFile, 'utf8');
@@ -218,7 +261,6 @@ module.exports = async (flags) => {
                     }
 
                     // Reconciliación de hallazgos y evaluación de excepciones aceptadas vía sidecar de feature
-                    const featureDir = fssafe.resolveSafe(targetDir, loadedState.active_spec);
                     const { readSidecar, writeSidecarAtomic } = require('../lib/state');
                     const sidecar = readSidecar(featureDir);
 

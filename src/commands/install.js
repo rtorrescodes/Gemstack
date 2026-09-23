@@ -131,7 +131,10 @@ function validateUrlSafety(urlStr, flags = {}) {
     }
 
     if (parsed.username || parsed.password) {
-        const err = new Error(`Credentials in URL are strictly blocked: ${urlStr}`);
+        const sanitized = new URL(parsed.toString());
+        sanitized.username = '';
+        sanitized.password = '';
+        const err = new Error(`Credentials in URL are strictly blocked: ${sanitized.toString()}`);
         err.code = 'CREDENTIALS_IN_URL_BLOCKED';
         throw err;
     }
@@ -242,7 +245,15 @@ async function install(arg1, arg2) {
     }
 
     const targetDir = flags.target || process.cwd();
-    logger.info(`Descargando skill desde: ${url}`);
+
+    // Validate URL safety BEFORE any logging to prevent credential leakage
+    const parsedUrl = validateUrlSafety(url, flags);
+
+    // Sanitize URL string for safe display in logs
+    const safeLogUrl = new URL(url);
+    safeLogUrl.username = '';
+    safeLogUrl.password = '';
+    logger.info(`Descargando skill desde: ${safeLogUrl.toString()}`);
 
     const rawContent = await fetchSkillUrl(url, flags);
     const inspected = inspectSkillContent(rawContent);

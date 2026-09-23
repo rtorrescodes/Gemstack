@@ -2,6 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const { detectRigorLevel, validateRigorRequirements } = require('../src/lib/sdd-rigor');
 const { parseSpecDelta, applySpecDelta } = require('../src/lib/spec-delta');
 const { detectSpecConflicts, mergeSpecs } = require('../src/lib/spec-merge');
@@ -441,4 +444,123 @@ test('TEST-AMEND-D06: Detects cross-feature signature replay attack', () => {
 
   assert.equal(replayRes.valid, false);
   assert.equal(replayRes.code, 'AMENDMENT_REPLAY_DETECTED');
+});
+
+test('TEST-AMEND-D07: CLI verify rejects project when frozen contract is modified without a valid signed amendment', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-verify-amend-fail-'));
+  const initCmd = require('../src/commands/init');
+  const verifyCmd = require('../src/commands/verify');
+  const { writeStateAtomic } = require('../src/lib/state');
+
+  try {
+    await initCmd({ dryRun: false, yes: true, target: tempDir });
+
+    const specDir = path.join(tempDir, 'specs', '001-test');
+    fs.mkdirSync(specDir, { recursive: true });
+
+    // spec.md declares contract c1 = true
+    const specMd = `# Spec\n\`\`\`gemstack-contracts\n[\n  {"id": "c1", "type": "BOOLEAN_INVARIANT", "value": true}\n]\n\`\`\`\n`;
+    fs.writeFileSync(path.join(specDir, 'spec.md'), specMd, 'utf8');
+
+    // plan.md modifies contract c1 to false
+    const planMd = `# Plan\n\`\`\`gemstack-contracts\n[\n  {"id": "c1", "type": "BOOLEAN_INVARIANT", "value": false}\n]\n\`\`\`\n`;
+    fs.writeFileSync(path.join(specDir, 'plan.md'), planMd, 'utf8');
+
+    writeStateAtomic(tempDir, {
+      version: '0.1',
+      current_phase: 'plan',
+      active_spec: 'specs/001-test',
+      phase_hashes: {}
+    });
+
+    const forgedAmendment = [{
+      amendment_id: 'AMD-FORGED',
+      contract_id: 'c1',
+      version: 2,
+      reason: 'Unapproved modification',
+      approved_by: 'attacker',
+      signature: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+    }];
+    fs.writeFileSync(path.join(specDir, 'amendments.json'), JSON.stringify(forgedAmendment, null, 2), 'utf8');
+
+    const originalExit = process.exit;
+    let exitCalled = false;
+    process.exit = (code) => {
+      exitCalled = true;
+      throw new Error(`process.exit called with ${code}`);
+    };
+
+    try {
+      await assert.rejects(
+        async () => {
+          await verifyCmd({ target: tempDir, runTests: false });
+        },
+        /process\.exit called with 1/
+      );
+      assert.equal(exitCalled, true);
+    } finally {
+      process.exit = originalExit;
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('TEST-AMEND-D08: CLI verify succeeds when modified contract has a valid formal signed amendment', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-verify-amend-pass-'));
+  const initCmd = require('../src/commands/init');
+  const verifyCmd = require('../src/commands/verify');
+  const { writeStateAtomic } = require('../src/lib/state');
+
+  const oldSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
+  process.env.GEMSTACK_AMENDMENT_SECRET = testAmendmentSecret;
+
+  try {
+    await initCmd({ dryRun: false, yes: true, target: tempDir });
+
+    const specDir = path.join(tempDir, 'specs', '001-test');
+    fs.mkdirSync(specDir, { recursive: true });
+
+    // spec.md declares contract c1 = true
+    const specMd = `# Spec\n\`\`\`gemstack-contracts\n[\n  {"id": "c1", "type": "BOOLEAN_INVARIANT", "value": true}\n]\n\`\`\`\n`;
+    fs.writeFileSync(path.join(specDir, 'spec.md'), specMd, 'utf8');
+
+    // plan.md modifies contract c1 to false
+    const planMd = `# Plan\n\`\`\`gemstack-contracts\n[\n  {"id": "c1", "type": "BOOLEAN_INVARIANT", "value": false}\n]\n\`\`\`\n`;
+    fs.writeFileSync(path.join(specDir, 'plan.md'), planMd, 'utf8');
+
+    writeStateAtomic(tempDir, {
+      version: '0.1',
+      current_phase: 'plan',
+      active_spec: 'specs/001-test',
+      phase_hashes: {}
+    });
+
+    const upstreamContract = { id: 'c1', type: 'BOOLEAN_INVARIANT', value: true };
+    const proposedContract = { id: 'c1', type: 'BOOLEAN_INVARIANT', value: false };
+
+    const validAmendment = {
+      amendment_id: 'AMD-VALID-001',
+      feature_id: '001-test',
+      contract_id: 'c1',
+      version: 2,
+      reason: 'Authorized modification by Lead Architect',
+      approved_by: 'lead@gemstack.ai'
+    };
+    validAmendment.signature = computeAmendmentSignature(validAmendment, testAmendmentSecret, {
+      feature_id: '001-test',
+      previousContract: upstreamContract,
+      proposedContract: proposedContract
+    });
+
+    fs.writeFileSync(path.join(specDir, 'amendments.json'), JSON.stringify([validAmendment], null, 2), 'utf8');
+
+    await assert.doesNotReject(async () => {
+      await verifyCmd({ target: tempDir, runTests: false });
+    });
+  } finally {
+    if (oldSecret) process.env.GEMSTACK_AMENDMENT_SECRET = oldSecret;
+    else delete process.env.GEMSTACK_AMENDMENT_SECRET;
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 });

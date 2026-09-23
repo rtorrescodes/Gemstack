@@ -219,4 +219,38 @@ describe('Skill Installation Provenance & Safe Inspection (Gemstack v2.0.1)', ()
     }
   });
 
+  it('TEST-PROV-P07: credentials embedded in install URL are rejected and never leaked to logs or error strings', async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-prov-cred-'));
+    const secretPassword = 'SUPER_SECRET_PASSWORD_12345';
+    const rawUrlWithCreds = `https://admin:${secretPassword}@raw.githubusercontent.com/test-org/test-repo/main/SKILL.md`;
+
+    // Intercept stdout to verify credentials are never printed
+    let stdoutBuffer = '';
+    const originalStdoutWrite = process.stdout.write;
+    process.stdout.write = (chunk, ...args) => {
+      stdoutBuffer += chunk.toString();
+      return originalStdoutWrite.apply(process.stdout, [chunk, ...args]);
+    };
+
+    try {
+      await assert.rejects(
+        async () => {
+          await install(rawUrlWithCreds, { target: tempDir, skipDnsResolve: true });
+        },
+        (err) => {
+          assert.strictEqual(err.code, 'CREDENTIALS_IN_URL_BLOCKED');
+          assert.strictEqual(err.message.includes(secretPassword), false, 'Error message must not contain secret password');
+          return true;
+        }
+      );
+
+      // Verify stdout contains zero references to the password
+      assert.strictEqual(stdoutBuffer.includes(secretPassword), false, 'Logs/stdout must not contain secret password');
+    } finally {
+      process.stdout.write = originalStdoutWrite;
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
 });
+

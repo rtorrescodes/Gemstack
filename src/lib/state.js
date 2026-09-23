@@ -9,7 +9,14 @@ const path = require('node:path');
  * @returns {object} State object
  */
 function readState(rootPath) {
-  const statePath = path.join(rootPath, '.gemstack', 'state.json');
+  const fssafe = require('./filesystem-safe');
+  let statePath;
+  try {
+    statePath = fssafe.resolveSafeStrict(rootPath, '.gemstack/state.json');
+  } catch (err) {
+    if (err.code === 'SYMLINK_ESCAPE_DETECTED') throw err;
+    statePath = path.join(rootPath, '.gemstack', 'state.json');
+  }
   if (!fs.existsSync(statePath)) {
     return {
       version: '0.1',
@@ -91,9 +98,11 @@ function writeJsonAtomic(filePath, data) {
  * @param {object} stateObj - State data
  */
 function writeStateAtomic(rootPath, stateObj) {
-  const statePath = path.join(rootPath, '.gemstack', 'state.json');
+  const fssafe = require('./filesystem-safe');
   const { findings, accepted_exceptions, ...operationalState } = stateObj;
-  writeJsonAtomic(statePath, operationalState);
+  fssafe.withConfinedAtomicWrite(rootPath, '.gemstack/state.json', (tempFile) => {
+    fs.writeFileSync(tempFile, JSON.stringify(operationalState, null, 2) + '\n', 'utf8');
+  });
 }
 
 /**
