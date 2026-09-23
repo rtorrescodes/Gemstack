@@ -220,10 +220,158 @@ function validateContractAmendments(upstreamContracts = [], currentContracts = [
   };
 }
 
+const REQUIRED_ARTIFACT_AMENDMENT_FIELDS = [
+  'amendment_id',
+  'artifact',
+  'version',
+  'previous_artifact_sha256',
+  'proposed_artifact_sha256',
+  'reason',
+  'approved_by',
+  'signature'
+];
+
+/**
+ * Computes deterministic HMAC signature for an artifact-level amendment,
+ * cryptographically binding previous frozen artifact hash to proposed artifact hash.
+ * @param {object} amendment - { amendment_id, artifact, version, previous_artifact_sha256, proposed_artifact_sha256, reason, approved_by, [feature_id] }
+ * @param {string} secret - Mandatory trusted secret (min 16 chars)
+ * @param {object} [context={}] - { feature_id }
+ * @returns {string} Hex-encoded HMAC-SHA256 signature
+ */
+function computeArtifactAmendmentSignature(amendment, secret, context = {}) {
+  if (!amendment || typeof amendment !== 'object') {
+    throw new Error('Amendment must be an object');
+  }
+
+  const effectiveSecret = secret || process.env.GEMSTACK_AMENDMENT_SECRET;
+  if (!effectiveSecret || typeof effectiveSecret !== 'string' || effectiveSecret.length < 16) {
+    const err = new Error('A trusted amendment signing secret (min 16 chars) is required to compute or verify amendment signatures.');
+    err.code = 'AMENDMENT_SECRET_MISSING';
+    throw err;
+  }
+
+  const featureId = String(context.feature_id || amendment.feature_id || '*').trim();
+  const artifact = String(amendment.artifact || amendment.target_artifact || '').trim();
+  const version = String(amendment.version || '').trim();
+  const prevHash = String(context.previous_artifact_sha256 || amendment.previous_artifact_sha256 || '').trim();
+  const propHash = String(context.proposed_artifact_sha256 || amendment.proposed_artifact_sha256 || '').trim();
+  const approvedBy = String(amendment.approved_by || '').trim();
+  const reason = String(amendment.reason || '').trim();
+
+  const payload = [
+    featureId,
+    artifact,
+    version,
+    prevHash,
+    propHash,
+    approvedBy,
+    reason
+  ].join('|');
+
+  return crypto.createHmac('sha256', effectiveSecret).update(payload).digest('hex');
+}
+
+/**
+ * Validates whether a specific frozen artifact mutation is authorized by a signed artifact amendment record.
+ * @param {object} amendment - Artifact amendment record
+ * @param {string} secret - Signing secret
+ * @param {object} context - { feature_id, artifact, previousHash, currentHash }
+ * @returns {{ valid: boolean, code?: string, error?: string }}
+ */
+function validateArtifactAmendment(amendment, secret, context = {}) {
+  if (!amendment || typeof amendment !== 'object') {
+    return {
+      valid: false,
+      code: 'AMENDMENT_MISSING',
+      error: 'No se proporcionó registro de enmienda de artefacto.'
+    };
+  }
+
+  for (const field of REQUIRED_ARTIFACT_AMENDMENT_FIELDS) {
+    if (!amendment[field] && amendment[field] !== 0) {
+      return {
+        valid: false,
+        code: 'AMENDMENT_MALFORMED',
+        error: `Enmienda de artefacto "${amendment.amendment_id || 'UNKNOWN'}" carece del campo obligatorio "${field}".`
+      };
+    }
+  }
+
+  const effectiveSecret = secret || process.env.GEMSTACK_AMENDMENT_SECRET;
+  if (!effectiveSecret || typeof effectiveSecret !== 'string' || effectiveSecret.length < 16) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_SECRET_MISSING',
+      error: 'Se requiere una clave o secreto confiable (min 16 caracteres) para verificar la enmienda del artefacto.'
+    };
+  }
+
+  if (context.feature_id && amendment.feature_id && amendment.feature_id !== context.feature_id) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_REPLAY_DETECTED',
+      error: `Enmienda "${amendment.amendment_id}" pertenece a la feature "${amendment.feature_id}", no coincide con "${context.feature_id}".`
+    };
+  }
+
+  const expectedArtifact = context.artifact;
+  if (expectedArtifact && amendment.artifact !== expectedArtifact) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_ARTIFACT_MISMATCH',
+      error: `La enmienda "${amendment.amendment_id}" apunta al artefacto "${amendment.artifact}", se esperaba "${expectedArtifact}".`
+    };
+  }
+
+  if (context.previousHash && amendment.previous_artifact_sha256 !== context.previousHash) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_BASELINE_MISMATCH',
+      error: `El hash base previo del artefacto "${amendment.artifact}" no coincide con la enmienda "${amendment.amendment_id}".`
+    };
+  }
+
+  if (context.currentHash && amendment.proposed_artifact_sha256 !== context.currentHash) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_PROPOSED_MISMATCH',
+      error: `El hash del artefacto propuesto actual "${amendment.artifact}" difiere del hash autorizado en la enmienda "${amendment.amendment_id}".`
+    };
+  }
+
+  let expectedSig;
+  try {
+    expectedSig = computeArtifactAmendmentSignature(amendment, effectiveSecret, context);
+  } catch (e) {
+    return {
+      valid: false,
+      code: e.code || 'AMENDMENT_SIGNATURE_ERROR',
+      error: e.message
+    };
+  }
+
+  const bufA = Buffer.from(String(amendment.signature));
+  const bufB = Buffer.from(String(expectedSig));
+  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
+    return {
+      valid: false,
+      code: 'AMENDMENT_SIGNATURE_INVALID',
+      error: `Firma criptográfica inválida para la enmienda de artefacto "${amendment.amendment_id}".`
+    };
+  }
+
+  return { valid: true };
+}
+
 module.exports = {
   REQUIRED_AMENDMENT_FIELDS,
+  REQUIRED_ARTIFACT_AMENDMENT_FIELDS,
   computeContractCanonicalHash,
   computeAmendmentSignature,
+  computeArtifactAmendmentSignature,
   computeAmendmentIntegrityHash,
-  validateContractAmendments
+  validateContractAmendments,
+  validateArtifactAmendment
 };
+

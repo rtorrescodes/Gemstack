@@ -192,16 +192,35 @@ module.exports = async (flags) => {
                         if (loadedState.phase_hashes && loadedState.phase_hashes.plan) {
                             const currentPlanHash = hashFile(planFile);
                             if (currentPlanHash !== loadedState.phase_hashes.plan) {
-                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado plan.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.plan}, actual: ${currentPlanHash}`);
-                                totalErrors++;
+                                const { validateArtifactAmendment } = require('../lib/contract-amendments');
+                                const featureId = path.basename(loadedState.active_spec);
+                                const amendSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
+                                const planAmendment = declaredAmendments.find(a => (a.artifact === 'plan.md' || a.target_artifact === 'plan.md'));
+
+                                const artifactValidation = planAmendment
+                                    ? validateArtifactAmendment(planAmendment, amendSecret, {
+                                        feature_id: featureId,
+                                        artifact: 'plan.md',
+                                        previousHash: loadedState.phase_hashes.plan,
+                                        currentHash: currentPlanHash
+                                    })
+                                    : { valid: false, code: 'AMENDMENT_MISSING' };
+
+                                if (artifactValidation.valid) {
+                                    logger.ok(`[FROZEN_ARTIFACT_AMENDED] Modificación en plan.md autorizada formalmente por enmienda firmada vinculada al hash base y propuesto.`);
+                                } else {
+                                    logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado plan.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.plan}, actual: ${currentPlanHash}`);
+                                    totalErrors++;
+                                }
                             } else {
                                 logger.ok(`Hash congelado de plan.md verificado: ${loadedState.phase_hashes.plan.slice(0, 12)}...`);
                             }
                         }
                     }
 
-                    // Si existen enmiendas declaradas, validarlas formalmente contra las modificaciones
-                    if (declaredAmendments.length > 0) {
+                    // Si existen enmiendas contractuales declaradas, validarlas formalmente contra las modificaciones
+                    const contractAmendments = declaredAmendments.filter(a => a.contract_id || !a.artifact);
+                    if (contractAmendments.length > 0) {
                         const { validateContractAmendments } = require('../lib/contract-amendments');
                         const featureId = path.basename(loadedState.active_spec);
                         const amendSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
@@ -210,7 +229,7 @@ module.exports = async (flags) => {
                         amendCheck = validateContractAmendments(
                             specContracts,
                             downstreamContracts,
-                            declaredAmendments,
+                            contractAmendments,
                             { secret: amendSecret, feature_id: featureId }
                         );
 
@@ -219,7 +238,7 @@ module.exports = async (flags) => {
                             totalErrors++;
                         } else {
                             logger.ok(`[AMENDMENT_VERIFIED] ${amendCheck.verified_amendments} enmienda(s) contractual(es) formalmente autorizada(s) con firma válida.`);
-                            const authorizedIds = new Set(declaredAmendments.map(a => a.contract_id));
+                            const authorizedIds = new Set(contractAmendments.map(a => a.contract_id));
                             violations = violations.filter(v => !authorizedIds.has(v.contractId));
                         }
                     }
@@ -228,10 +247,24 @@ module.exports = async (flags) => {
                     if (loadedState.phase_hashes && loadedState.phase_hashes.spec) {
                         const currentSpecHash = hashFile(specFile);
                         if (currentSpecHash !== loadedState.phase_hashes.spec) {
-                            if (amendCheck && amendCheck.valid) {
-                                logger.ok(`[FROZEN_ARTIFACT_AMENDED] Modificación en spec.md autorizada formalmente por enmienda firmada.`);
+                            const { validateArtifactAmendment } = require('../lib/contract-amendments');
+                            const featureId = path.basename(loadedState.active_spec);
+                            const amendSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
+                            const specAmendment = declaredAmendments.find(a => (a.artifact === 'spec.md' || a.target_artifact === 'spec.md'));
+
+                            const artifactValidation = specAmendment
+                                ? validateArtifactAmendment(specAmendment, amendSecret, {
+                                    feature_id: featureId,
+                                    artifact: 'spec.md',
+                                    previousHash: loadedState.phase_hashes.spec,
+                                    currentHash: currentSpecHash
+                                })
+                                : { valid: false, code: 'AMENDMENT_MISSING' };
+
+                            if (artifactValidation.valid) {
+                                logger.ok(`[FROZEN_ARTIFACT_AMENDED] Modificación en spec.md autorizada formalmente por enmienda firmada vinculada al hash base y propuesto.`);
                             } else {
-                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado spec.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.spec}, actual: ${currentSpecHash}`);
+                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado spec.md fue mutado sin autorización criptográfica de documento. Hash esperado: ${loadedState.phase_hashes.spec}, actual: ${currentSpecHash}`);
                                 totalErrors++;
                             }
                         } else {
@@ -252,8 +285,26 @@ module.exports = async (flags) => {
                         if (loadedState.phase_hashes && loadedState.phase_hashes.tasks) {
                             const currentTasksHash = hashFile(tasksFile);
                             if (currentTasksHash !== loadedState.phase_hashes.tasks) {
-                                logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado tasks.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.tasks}, actual: ${currentTasksHash}`);
-                                totalErrors++;
+                                const { validateArtifactAmendment } = require('../lib/contract-amendments');
+                                const featureId = path.basename(loadedState.active_spec);
+                                const amendSecret = process.env.GEMSTACK_AMENDMENT_SECRET;
+                                const tasksAmendment = declaredAmendments.find(a => (a.artifact === 'tasks.md' || a.target_artifact === 'tasks.md'));
+
+                                const artifactValidation = tasksAmendment
+                                    ? validateArtifactAmendment(tasksAmendment, amendSecret, {
+                                        feature_id: featureId,
+                                        artifact: 'tasks.md',
+                                        previousHash: loadedState.phase_hashes.tasks,
+                                        currentHash: currentTasksHash
+                                    })
+                                    : { valid: false, code: 'AMENDMENT_MISSING' };
+
+                                if (artifactValidation.valid) {
+                                    logger.ok(`[FROZEN_ARTIFACT_AMENDED] Modificación en tasks.md autorizada formalmente por enmienda firmada vinculada al hash base y propuesto.`);
+                                } else {
+                                    logger.error(`[FROZEN_ARTIFACT_CHANGED] El artefacto congelado tasks.md fue mutado sin autorización. Hash esperado: ${loadedState.phase_hashes.tasks}, actual: ${currentTasksHash}`);
+                                    totalErrors++;
+                                }
                             } else {
                                 logger.ok(`Hash congelado de tasks.md verificado: ${loadedState.phase_hashes.tasks.slice(0, 12)}...`);
                             }
