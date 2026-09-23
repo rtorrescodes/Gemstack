@@ -15,11 +15,19 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
   - Gates `ProviderCapabilityGate` y `BillableActionGate` implementados con fail-closed default deny.
   - Cost ledger (`cost-ledger.json`) validado, offline verification purity garantizada.
 - **Upgrade D (Context Capsule / Context Compression)**: CERRADO Y VERIFICADO (`closure.json` status `VERIFIED`, capsule `VALID` y `FRESH`).
-  - 20/20 pruebas canónicas de Upgrade D pasando al 100% en 8 suites dedicadas.
-  - Serializador canónico determinista, defensa de secretos fail-closed, presupuesto 32KB/64KB.
-  - Comandos CLI `gemstack context` y etapa 5.2 en `gemstack verify`.
-  - 100/100 pruebas físicas totales pasando en 25 suites sin dependencias externas.
-  - Preparado para release estable `v1.3.0`.
+- **Upgrade E (Agent Swarm & Visual QA)**: CERRADO Y VERIFICADO (`v1.4.0`).
+- **Gemstack 2.0 Sprint A (P0 Trust Boundaries & Hardening)**: CERRADO Y ENVIADO (commit `ba58055`).
+  - Resolución de symlinks arbitrarios con `resolveSafeStrict` y denegación de rutas fuera de root.
+  - Validación e integridad de skills remotos vía SHA-256 (`allowed_sources`).
+  - Pre-commit hooks con bloqueo nativo de secretos.
+  - Sanitización de variables de entorno y redacción estricta en logs.
+- **Gemstack 2.0 Sprint B (P1 Honest Evidence & Reliable Metrics)**: CERRADO Y ENVIADO (commit `2bf9157`).
+  - 14/14 pruebas canónicas aprobadas en `tests/honest-evidence-p1.test.js` (155 tests totales en 23 suites).
+  - Tokens de gasto autenticados con HMAC y validación de presupuestos acumulativos en `BillableActionGate`.
+  - Recálculo obligatorio de hashes de evidencia visual desde disco y degradación a `UNVERIFIED` en diff sin adaptador gráfico real.
+  - Redacción previa de secretos y credenciales en evidencias antes de persistir en disco.
+  - Eliminación de declaraciones superlativas sin evidencia; publicación de matriz 4-columnas `Control / Scope / Test / Limit` en README y reglas.
+  - Pinned GitHub Actions a commit SHAs de 40 dígitos con least-privilege `contents: read`.
 
 ## 3. Archivos y cambios
 - `src/lib/test-matrix.js`: Parser de `gemstack-test-matrix`, validación de esquema de 20 tests canónicos y cálculo de `acceptanceSignature` canónico SHA-256.
@@ -43,5 +51,9 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
 - **Closure Manifest Self-Reference**: Al incluir `specs/<feature>/closure.json` en los archivos de implementación de `tasks.md`, `closureContextHash` cambiaba cada vez que `closure.json` era escrito, provocando que la evidencia se marcara como `STALE` inmediatamente después de recolectarse. Se resolvió excluyendo explícitamente `closure.json` de la agregación de hashes de contexto de implementación (`implementationContextHash`).
 
 ## 5. Próximos pasos
-1. Completar la publicación y git tag de la versión minor `v1.3.0`.
-2. Proceder a Upgrade E (SPEC ONLY) una vez autorizada la fase siguiente.
+1. Implementar Sprint C (SDD Adaptable & Specs Incrementales):
+   - Cuatro niveles de rigor (quick, fix, feature, high-risk).
+   - Specs incrementales (declaración de cambios ADDED / MODIFIED / REMOVED).
+   - Resolución de colisiones y conflictos de contratos en specs (`gemstack spec merge`).
+   - Enmiendas auditables de contratos congelados (reemplazando mutaciones directas).
+2. Proceder a Sprint D (Contexto eficiente y memoria persistente).
