@@ -17,12 +17,14 @@ const REMOTE_URL_PATTERN = /^https?:\/\//i;
 function resolveEnvironmentTier(options = {}) {
   const env = options.env || process.env;
 
-  if (options.environment && VALID_ENV_TIERS.includes(options.environment)) {
-    return options.environment;
+  const rawEnv = (options.environment || '').toLowerCase().trim();
+  if (rawEnv && VALID_ENV_TIERS.includes(rawEnv)) {
+    return rawEnv;
   }
 
-  if (env.GEMSTACK_ENV && VALID_ENV_TIERS.includes(env.GEMSTACK_ENV)) {
-    return env.GEMSTACK_ENV;
+  const rawGemstackEnv = (env.GEMSTACK_ENV || '').toLowerCase().trim();
+  if (rawGemstackEnv && VALID_ENV_TIERS.includes(rawGemstackEnv)) {
+    return rawGemstackEnv;
   }
 
   // Detect CI first
