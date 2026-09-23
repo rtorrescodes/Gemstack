@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const { detectRigorLevel, validateRigorRequirements } = require('../src/lib/sdd-rigor');
 const { parseSpecDelta, applySpecDelta } = require('../src/lib/spec-delta');
 const { detectSpecConflicts, mergeSpecs } = require('../src/lib/spec-merge');
-const { computeAmendmentSignature, validateContractAmendments } = require('../src/lib/contract-amendments');
+const { computeAmendmentSignature, computeAmendmentIntegrityHash, validateContractAmendments } = require('../src/lib/contract-amendments');
 
 // ============================================================================
 // Group A: SDD Rigor Levels (TEST-RIGOR-A01 .. TEST-RIGOR-A04)
@@ -286,15 +286,17 @@ test('TEST-MERGE-C03: Spec merge succeeds cleanly when contract sets and test ID
 });
 
 // ============================================================================
-// Group D: Formal Contract Amendments (TEST-AMEND-D01 .. TEST-AMEND-D03)
+// Group D: Formal Contract Amendments (TEST-AMEND-D01 .. TEST-AMEND-D06)
 // ============================================================================
 
-test('TEST-AMEND-D01: Accepts contract modification only when accompanied by a valid formal amendment record', () => {
+const testAmendmentSecret = 'gemstack-amendment-boundary-secret-32b!';
+
+test('TEST-AMEND-D01: Accepts contract modification only when accompanied by a valid formal signed amendment record', () => {
   const upstream = [{ id: 'rate-limit', type: 'ENUM_SET', values: ['10rpm'] }];
   const current = [{ id: 'rate-limit', type: 'ENUM_SET', values: ['10rpm', '60rpm'] }];
 
   // 1. Without amendment -> fail closed
-  const failResult = validateContractAmendments(upstream, current, []);
+  const failResult = validateContractAmendments(upstream, current, [], { secret: testAmendmentSecret });
   assert.equal(failResult.valid, false);
   assert.equal(failResult.code, 'UNAUTHORIZED_CONTRACT_MUTATION');
 
@@ -306,9 +308,12 @@ test('TEST-AMEND-D01: Accepts contract modification only when accompanied by a v
     reason: 'Expand rate limit for batch processing',
     approved_by: 'lead-architect@gemstack.ai'
   };
-  amendment.signature = computeAmendmentSignature(amendment);
+  amendment.signature = computeAmendmentSignature(amendment, testAmendmentSecret, {
+    previousContract: upstream[0],
+    proposedContract: current[0]
+  });
 
-  const passResult = validateContractAmendments(upstream, current, [amendment]);
+  const passResult = validateContractAmendments(upstream, current, [amendment], { secret: testAmendmentSecret });
   assert.equal(passResult.valid, true);
   assert.equal(passResult.verified_amendments, 1);
 });
@@ -326,12 +331,12 @@ test('TEST-AMEND-D02: Rejects contract amendments that are unapproved or have in
     signature: 'fake_signature_hex_12345'
   };
 
-  const result = validateContractAmendments(upstream, current, [tamperedAmendment]);
+  const result = validateContractAmendments(upstream, current, [tamperedAmendment], { secret: testAmendmentSecret });
   assert.equal(result.valid, false);
   assert.equal(result.code, 'AMENDMENT_SIGNATURE_INVALID');
 });
 
-test('TEST-AMEND-D03: Verifies amendment integrity hash over amendment fields', () => {
+test('TEST-AMEND-D03: Verifies amendment integrity hash separate from human approval signature', () => {
   const amendment = {
     amendment_id: 'AMD-HASH-001',
     contract_id: 'sec-boundary',
@@ -340,16 +345,100 @@ test('TEST-AMEND-D03: Verifies amendment integrity hash over amendment fields', 
     approved_by: 'cso@gemstack.ai'
   };
 
-  const sig1 = computeAmendmentSignature(amendment);
+  // Integrity hash (unkeyed record digest)
+  const hash1 = computeAmendmentIntegrityHash(amendment);
+  assert.equal(typeof hash1, 'string');
+  assert.equal(hash1.length, 64);
+
+  // HMAC approval signature (requires trusted secret)
+  const sig1 = computeAmendmentSignature(amendment, testAmendmentSecret);
   assert.equal(typeof sig1, 'string');
-  assert.equal(sig1.length, 64); // SHA-256 hex length
+  assert.equal(sig1.length, 64);
+  assert.notEqual(hash1, sig1); // Integrity hash != approval signature
 
-  // Determinism
-  const sig2 = computeAmendmentSignature(amendment);
-  assert.equal(sig1, sig2);
-
-  // Field sensitivity: tampering any field changes hash
+  // Field sensitivity: tampering any field changes hash and signature
   const tampered = { ...amendment, reason: 'Tampered reason' };
-  const sigTampered = computeAmendmentSignature(tampered);
+  const hashTampered = computeAmendmentIntegrityHash(tampered);
+  assert.notEqual(hash1, hashTampered);
+  const sigTampered = computeAmendmentSignature(tampered, testAmendmentSecret);
   assert.notEqual(sig1, sigTampered);
+});
+
+test('TEST-AMEND-D04: Fails closed when trusted signing secret is missing for contract modification', () => {
+  const upstream = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: true }];
+  const current = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: false }];
+
+  const amendment = {
+    amendment_id: 'AMD-004',
+    contract_id: 'c1',
+    version: 2,
+    reason: 'Valid reason',
+    approved_by: 'architect@gemstack.ai',
+    signature: 'some_sig'
+  };
+
+  const oldEnv = process.env.GEMSTACK_AMENDMENT_SECRET;
+  delete process.env.GEMSTACK_AMENDMENT_SECRET;
+  try {
+    const res = validateContractAmendments(upstream, current, [amendment], {});
+    assert.equal(res.valid, false);
+    assert.equal(res.code, 'AMENDMENT_SECRET_MISSING');
+  } finally {
+    if (oldEnv) process.env.GEMSTACK_AMENDMENT_SECRET = oldEnv;
+  }
+});
+
+test('TEST-AMEND-D05: Detects subsequent contract modification or tampering after signature', () => {
+  const upstream = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: true }];
+  const approvedProposal = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: false }];
+  const attackerTamperedProposal = [{ id: 'c1', type: 'MALICIOUS_OVERRIDE', payload: 'rm -rf /' }];
+
+  const amendment = {
+    amendment_id: 'AMD-005',
+    contract_id: 'c1',
+    version: 2,
+    reason: 'Disable invariant for testing',
+    approved_by: 'lead@gemstack.ai'
+  };
+  amendment.signature = computeAmendmentSignature(amendment, testAmendmentSecret, {
+    previousContract: upstream[0],
+    proposedContract: approvedProposal[0]
+  });
+
+  // Validating against approved proposal -> passes
+  const validRes = validateContractAmendments(upstream, approvedProposal, [amendment], { secret: testAmendmentSecret });
+  assert.equal(validRes.valid, true);
+
+  // Validating against tampered proposal -> fails
+  const tamperedRes = validateContractAmendments(upstream, attackerTamperedProposal, [amendment], { secret: testAmendmentSecret });
+  assert.equal(tamperedRes.valid, false);
+  assert.equal(tamperedRes.code, 'AMENDMENT_SIGNATURE_INVALID');
+});
+
+test('TEST-AMEND-D06: Detects cross-feature signature replay attack', () => {
+  const upstream = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: true }];
+  const current = [{ id: 'c1', type: 'BOOLEAN_INVARIANT', value: false }];
+
+  const amendment = {
+    amendment_id: 'AMD-006',
+    feature_id: '010-feature-a',
+    contract_id: 'c1',
+    version: 2,
+    reason: 'Approved for feature A',
+    approved_by: 'lead@gemstack.ai'
+  };
+  amendment.signature = computeAmendmentSignature(amendment, testAmendmentSecret, {
+    feature_id: '010-feature-a',
+    previousContract: upstream[0],
+    proposedContract: current[0]
+  });
+
+  // Replay attempt on feature B -> fails closed
+  const replayRes = validateContractAmendments(upstream, current, [amendment], {
+    secret: testAmendmentSecret,
+    feature_id: '011-feature-b'
+  });
+
+  assert.equal(replayRes.valid, false);
+  assert.equal(replayRes.code, 'AMENDMENT_REPLAY_DETECTED');
 });

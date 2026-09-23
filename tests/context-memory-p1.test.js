@@ -245,29 +245,47 @@ Next.
 
 test('TEST-CAPSULE-D01: Context capsule projection excludes ephemeral conversation logs and noise', () => {
   const activeSpec = 'specs/013-gemstack-2.0-adaptable-sdd';
-  const genResult = generateContextCapsule(process.cwd(), activeSpec);
-  assert.ok(fs.existsSync(genResult.path));
+  const capsulePath = path.join(process.cwd(), activeSpec, 'context-capsule.json');
+  const original = fs.existsSync(capsulePath) ? fs.readFileSync(capsulePath, 'utf8') : null;
 
-  const capsule = JSON.parse(fs.readFileSync(genResult.path, 'utf8'));
-  assert.ok(capsule.project, 'Project state must be generated');
-  assert.equal(capsule.schema_version, 1);
-  // Ensure no chat history or ephemeral chat fields exist in projected capsule
-  assert.equal(capsule.chat_history, undefined);
-  assert.equal(capsule.messages, undefined);
+  try {
+    const genResult = generateContextCapsule(process.cwd(), activeSpec);
+    assert.ok(fs.existsSync(genResult.path));
+
+    const capsule = JSON.parse(fs.readFileSync(genResult.path, 'utf8'));
+    assert.ok(capsule.project, 'Project state must be generated');
+    assert.equal(capsule.schema_version, 1);
+    // Ensure no chat history or ephemeral chat fields exist in projected capsule
+    assert.equal(capsule.chat_history, undefined);
+    assert.equal(capsule.messages, undefined);
+  } finally {
+    if (original !== null) {
+      fs.writeFileSync(capsulePath, original, 'utf8');
+    }
+  }
 });
 
 test('TEST-CAPSULE-D02: Validates capsule determinism and size budget compliance (< 32KB)', () => {
   const activeSpec = 'specs/013-gemstack-2.0-adaptable-sdd';
-  const genResult1 = generateContextCapsule(process.cwd(), activeSpec);
-  const raw1 = fs.readFileSync(genResult1.path, 'utf8');
+  const capsulePath = path.join(process.cwd(), activeSpec, 'context-capsule.json');
+  const original = fs.existsSync(capsulePath) ? fs.readFileSync(capsulePath, 'utf8') : null;
 
-  const genResult2 = generateContextCapsule(process.cwd(), activeSpec);
-  const raw2 = fs.readFileSync(genResult2.path, 'utf8');
+  try {
+    const genResult1 = generateContextCapsule(process.cwd(), activeSpec);
+    const raw1 = fs.readFileSync(genResult1.path, 'utf8');
 
-  assert.equal(genResult1.source_set_hash, genResult2.source_set_hash);
-  const hash1 = computeCapsuleSemanticHash(JSON.parse(raw1));
-  const hash2 = computeCapsuleSemanticHash(JSON.parse(raw2));
+    const genResult2 = generateContextCapsule(process.cwd(), activeSpec);
+    const raw2 = fs.readFileSync(genResult2.path, 'utf8');
 
-  assert.equal(hash1, hash2, 'Capsule semantic hash must be 100% deterministic');
-  assert.ok(Buffer.byteLength(raw1, 'utf8') <= 32768, `Capsule size (${Buffer.byteLength(raw1, 'utf8')} bytes) exceeds 32KB budget`);
+    assert.equal(genResult1.source_set_hash, genResult2.source_set_hash);
+    const hash1 = computeCapsuleSemanticHash(JSON.parse(raw1));
+    const hash2 = computeCapsuleSemanticHash(JSON.parse(raw2));
+
+    assert.equal(hash1, hash2, 'Capsule semantic hash must be 100% deterministic');
+    assert.ok(Buffer.byteLength(raw1, 'utf8') <= 32768, `Capsule size (${Buffer.byteLength(raw1, 'utf8')} bytes) exceeds 32KB budget`);
+  } finally {
+    if (original !== null) {
+      fs.writeFileSync(capsulePath, original, 'utf8');
+    }
+  }
 });

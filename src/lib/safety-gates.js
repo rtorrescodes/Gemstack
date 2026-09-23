@@ -1,6 +1,16 @@
 const crypto = require('crypto');
 const { checkEnvironmentCommercialPolicy, resolveEnvironmentTier } = require('./provider-registry');
 
+/**
+ * IN-MEMORY SESSION-SCOPED TOKEN SPENDING LEDGER:
+ * Tracks cumulative spending against token IDs within the current Node.js process runtime.
+ *
+ * SCOPE & ARCHITECTURAL LIMITS:
+ * - This ledger is maintained strictly in volatile process memory (Map) for the active session.
+ * - It does NOT persist across separate CLI invocations, child processes, or machines.
+ * - It does NOT constitute a distributed, durable, or multi-tenant spending enforcement system.
+ * - Hard financial spending caps must always be enforced at the cloud provider API tier.
+ */
 const tokenSpendingLedger = new Map();
 
 function resetTokenSpendingLedger() {
@@ -11,7 +21,7 @@ function resetTokenSpendingLedger() {
  * Issues a cryptographically signed spending token from a trusted boundary.
  *
  * @param {object} params
- * @param {string} [params.secret]
+ * @param {string} params.secret - Mandatory signing secret (min 16 chars)
  * @param {string} [params.provider_id='*']
  * @param {string} [params.action_id='*']
  * @param {number} [params.max_budget_units=100]
@@ -19,22 +29,42 @@ function resetTokenSpendingLedger() {
  * @returns {object} Signed spending token
  */
 function issueSpendingToken({ secret, provider_id = '*', action_id = '*', max_budget_units = 100, ttl_seconds = 3600 } = {}) {
+  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET;
+  if (!effectiveSecret || typeof effectiveSecret !== 'string' || effectiveSecret.length < 16) {
+    const err = new Error('A trusted boundary secret with at least 16 characters is required to issue spending tokens.');
+    err.code = 'MISSING_BOUNDARY_SECRET';
+    throw err;
+  }
+
+  const numBudget = Number(max_budget_units);
+  if (!Number.isFinite(numBudget) || numBudget <= 0) {
+    const err = new Error('max_budget_units must be a strictly positive finite number.');
+    err.code = 'INVALID_BUDGET_UNITS';
+    throw err;
+  }
+
+  const numTtl = Number(ttl_seconds);
+  if (!Number.isFinite(numTtl)) {
+    const err = new Error('ttl_seconds must be a finite number.');
+    err.code = 'INVALID_TTL';
+    throw err;
+  }
+
   const tokenId = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
     ? crypto.randomUUID()
     : crypto.randomBytes(16).toString('hex');
   const now = Date.now();
   const issuedAt = new Date(now).toISOString();
-  const expiresAt = new Date(now + ttl_seconds * 1000).toISOString();
-  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET || 'gemstack-boundary-internal-signing-secret';
+  const expiresAt = new Date(now + numTtl * 1000).toISOString();
 
-  const payload = [tokenId, provider_id, action_id, String(max_budget_units), expiresAt].join(':');
+  const payload = [tokenId, provider_id, action_id, String(numBudget), expiresAt].join(':');
   const signature = crypto.createHmac('sha256', effectiveSecret).update(payload).digest('hex');
 
   return {
     token_id: tokenId,
     provider_id,
     action_id,
-    max_budget_units: Number(max_budget_units),
+    max_budget_units: numBudget,
     issued_at: issuedAt,
     expires_at: expiresAt,
     signature,
@@ -43,7 +73,7 @@ function issueSpendingToken({ secret, provider_id = '*', action_id = '*', max_bu
 }
 
 /**
- * Verifies a spending token signature and expiration.
+ * Verifies a spending token signature, expiration, and budget parameter integrity.
  *
  * @param {object} token
  * @param {string} [secret]
@@ -53,8 +83,22 @@ function verifySpendingToken(token, secret) {
   if (!token || typeof token !== 'object') return { valid: false, reason: 'TOKEN_INVALID_FORMAT' };
   if (!token.token_id || !token.signature || !token.expires_at) return { valid: false, reason: 'TOKEN_INCOMPLETE' };
 
-  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET || 'gemstack-boundary-internal-signing-secret';
-  const payload = [token.token_id, token.provider_id || '*', token.action_id || '*', String(token.max_budget_units), token.expires_at].join(':');
+  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET;
+  if (!effectiveSecret || typeof effectiveSecret !== 'string' || effectiveSecret.length < 16) {
+    return { valid: false, reason: 'MISSING_BOUNDARY_SECRET' };
+  }
+
+  const numBudget = Number(token.max_budget_units);
+  if (!Number.isFinite(numBudget) || numBudget <= 0) {
+    return { valid: false, reason: 'INVALID_BUDGET_UNITS' };
+  }
+
+  const expMs = Date.parse(token.expires_at);
+  if (Number.isNaN(expMs) || Date.now() > expMs) {
+    return { valid: false, reason: 'TOKEN_EXPIRED' };
+  }
+
+  const payload = [token.token_id, token.provider_id || '*', token.action_id || '*', String(numBudget), token.expires_at].join(':');
   const expectedSig = crypto.createHmac('sha256', effectiveSecret).update(payload).digest('hex');
 
   const bufA = Buffer.from(token.signature);
@@ -320,40 +364,25 @@ function evaluateBillableAction(request, ledger, options = {}) {
 
   const boundarySecret = options.boundarySecret || process.env.GEMSTACK_BOUNDARY_SECRET;
 
-  if (boundarySecret) {
-    const verified = verifySpendingToken(token, boundarySecret);
-    if (!verified.valid) {
-      return createGateDecision({
-        authorized: false,
-        decision: 'DENY',
-        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
-        message: 'Authorization token rejected by trusted boundary: ' + verified.reason,
-        context: { action_id: actionId, provider_id: providerId, reason: verified.reason }
-      });
-    }
-  } else if (token.signature && token.token_id) {
-    const verified = verifySpendingToken(token);
-    if (!verified.valid) {
-      return createGateDecision({
-        authorized: false,
-        decision: 'DENY',
-        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
-        message: 'Authorization token signature invalid.',
-        context: { action_id: actionId, provider_id: providerId }
-      });
-    }
-  } else {
-    // Legacy fallback only when no boundarySecret is active
-    const isTokenValid = token && (token.granted === true || token.granted_by || token.source === 'CLI_FLAG' || token.max_budget_units !== undefined);
-    if (!isTokenValid) {
-      return createGateDecision({
-        authorized: false,
-        decision: 'DENY',
-        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
-        message: 'Action "' + actionId + '" on provider "' + providerId + '" requires explicit spending authorization.',
-        context: { action_id: actionId, provider_id: providerId, capability_id: capabilityId, cost_state: costState, environment: envTier }
-      });
-    }
+  if (!boundarySecret) {
+    return createGateDecision({
+      authorized: false,
+      decision: 'DENY',
+      reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
+      message: 'Authorization token rejected: missing trusted boundary secret for billable action.',
+      context: { action_id: actionId, provider_id: providerId, reason: 'MISSING_BOUNDARY_SECRET' }
+    });
+  }
+
+  const verified = verifySpendingToken(token, boundarySecret);
+  if (!verified.valid) {
+    return createGateDecision({
+      authorized: false,
+      decision: 'DENY',
+      reasonCode: verified.reason === 'TOKEN_EXPIRED' ? 'TOKEN_EXPIRED' : 'BILLABLE_ACTION_UNAUTHORIZED',
+      message: 'Authorization token rejected by trusted boundary: ' + verified.reason,
+      context: { action_id: actionId, provider_id: providerId, reason: verified.reason }
+    });
   }
 
   // Expiration check

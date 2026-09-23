@@ -10,9 +10,17 @@ module.exports = {
         for (let i = 2; i < argv.length; i++) {
             const arg = argv[i];
             if (arg === '--dry-run') flags.dryRun = true;
+            else if (arg === '--inspect') flags.inspect = true;
             else if (arg === '--yes') flags.yes = true;
             else if (arg === '--force') flags.force = true;
+            else if (arg === '--update') flags.update = true;
             else if (arg === '--help' || arg === '-h') flags.help = true;
+            else if (arg === '--sha256' && i + 1 < argv.length) {
+                flags.sha256 = argv[++i];
+            }
+            else if (arg === '--allowed-sources' && i + 1 < argv.length) {
+                flags.allowedSources = argv[++i].split(',').map(s => s.trim());
+            }
             else if (arg === '--target' && i + 1 < argv.length) {
                 const targetPath = argv[++i];
                 if (!targetPath || targetPath.trim() === '') {

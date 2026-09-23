@@ -1,5 +1,45 @@
 # Gemstack Release Notes
 
+# Gemstack v2.0.1 — Security Closure & Hardening
+
+## Highlights
+
+### Security Closure & Guarantee Alignment
+Gemstack v2.0.1 is a targeted security closure release. It resolves edge cases where code execution paths permitted behavior contrary to announced security guarantees, bringing complete mechanical enforcement to spending authorization, skill ingestion, contract amendments, and supply-chain CI/CD:
+
+### 1. Spending Authorization Bypass Elimination
+- **Elimination of Unsigned Fallback**: `evaluateBillableAction` now strictly rejects unsigned tokens (`token.granted === true` without signature returns `DENIED`).
+- **Elimination of Hardcoded Default Secret**: Removed `'gemstack-boundary-internal-signing-secret'`. Both issuing and verifying tokens now mandate an explicit, trusted secret of at least 16 characters (`SECRET_CONFIGURATION_ERROR`).
+- **Validation of Positive Finite Units**: Rejects non-positive, zero, NaN, or non-finite budget parameters (`max_budget_units` and `requested_units`).
+- **Boundary Reality**: Formally documented that `tokenSpendingLedger` operates in Node.js process memory for the active execution session rather than as a global distributed quota system across arbitrary OS processes.
+
+### 2. Skill Ingestion Provenance & Overwrite Protection
+- **Mandatory Checksum Verification**: `gemstack install <url>` requires `--sha256 <expected-hash>` to write a remote skill to disk (`MISSING_EXPECTED_CHECKSUM`).
+- **Safe Metadata Inspection Mode**: Introduces `--inspect` to fetch, display metadata, author, and compute SHA-256 without writing files to disk.
+- **URL Credential Blocking**: URLs containing embedded basic auth credentials (`https://user:pass@host/...`) are rejected fail-closed (`CREDENTIALS_IN_URL_BLOCKED`).
+- **Extended SSRF & Loopback Defense**: Rejects loopback (`localhost`, `127.0.0.1`, `::1`), RFC 1918/4193 private IP ranges, link-local, and integer/hex/octal representations (`PRIVATE_IP_BLOCKED`).
+- **Allowed Sources Whitelist**: Restricts default downloads to trusted domains (`raw.githubusercontent.com`, `gist.githubusercontent.com`), configurable via `--allowed-sources`.
+- **Overwrite Protection & Timestamped Backups**: Refuses to overwrite existing skills without explicit `--update` or `--force`. When `--update` is used, the existing skill is backed up automatically to `.gemstack/backups/skills/<skill-name>-<timestamp>.md`.
+
+### 3. Contract Amendments Authorization & Replay Prevention
+- **Mandatory HMAC Secret**: Recording amendments requires an explicit HMAC secret with a minimum length of 16 characters (`AMENDMENT_SECRET_MISSING`).
+- **Cryptographic Binding of Signature Payload**: Binds `feature_id`, `contract_id`, `version`, `previous_contract_sha256`, `proposed_contract_sha256`, `approved_by`, and `reason` into the HMAC payload. Tampering with any field invalidates the signature.
+- **Timing-Safe Verification**: Enforces `crypto.timingSafeEqual` for signature comparisons.
+- **Honest Invariant**: Structural integrity (`computeAmendmentIntegrityHash`) is decoupled from authorization (`computeAmendmentSignature`), maintaining that *integrity hash ≠ human approval*.
+
+### 4. Reproducible CI/CD & Supply Chain Hardening
+- **Zero-Dependency Root Lockfile**: Committed `package-lock.json` locking 0 dependencies for deterministic, immutable `npm ci` runs.
+- **Deduplicated Multi-OS CI**: Pinned all GitHub Actions steps to `npm ci` and removed redundant matrix executions in `main-ci.yml`.
+- **Least-Privilege Token Permissions**: Split `publish.yml` into `publish-npm` (`permissions: { contents: read, id-token: write }`) and `release-github` (`permissions: { contents: write }`), with fail-closed NPM registry confirmation.
+
+## Acceptance & Regression Baseline
+- 194 physical tests passing across 24 suites with 0 failures and 0 skipped.
+- 100% pass on full CI suite (`npm run ci:all`).
+- Verified clean tarball installation in isolated scratch directory.
+- 0 runtime dependencies, 0 dev dependencies.
+
+---
+
 # Gemstack v2.0.0 — Security Hardening, Adaptable SDD & Persistent Memory
 
 ## Highlights
