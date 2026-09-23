@@ -1,4 +1,70 @@
+const crypto = require('crypto');
 const { checkEnvironmentCommercialPolicy, resolveEnvironmentTier } = require('./provider-registry');
+
+const tokenSpendingLedger = new Map();
+
+function resetTokenSpendingLedger() {
+  tokenSpendingLedger.clear();
+}
+
+/**
+ * Issues a cryptographically signed spending token from a trusted boundary.
+ *
+ * @param {object} params
+ * @param {string} [params.secret]
+ * @param {string} [params.provider_id='*']
+ * @param {string} [params.action_id='*']
+ * @param {number} [params.max_budget_units=100]
+ * @param {number} [params.ttl_seconds=3600]
+ * @returns {object} Signed spending token
+ */
+function issueSpendingToken({ secret, provider_id = '*', action_id = '*', max_budget_units = 100, ttl_seconds = 3600 } = {}) {
+  const tokenId = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : crypto.randomBytes(16).toString('hex');
+  const now = Date.now();
+  const issuedAt = new Date(now).toISOString();
+  const expiresAt = new Date(now + ttl_seconds * 1000).toISOString();
+  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET || 'gemstack-boundary-internal-signing-secret';
+
+  const payload = [tokenId, provider_id, action_id, String(max_budget_units), expiresAt].join(':');
+  const signature = crypto.createHmac('sha256', effectiveSecret).update(payload).digest('hex');
+
+  return {
+    token_id: tokenId,
+    provider_id,
+    action_id,
+    max_budget_units: Number(max_budget_units),
+    issued_at: issuedAt,
+    expires_at: expiresAt,
+    signature,
+    spent_units: 0
+  };
+}
+
+/**
+ * Verifies a spending token signature and expiration.
+ *
+ * @param {object} token
+ * @param {string} [secret]
+ * @returns {{ valid: boolean, reason?: string }}
+ */
+function verifySpendingToken(token, secret) {
+  if (!token || typeof token !== 'object') return { valid: false, reason: 'TOKEN_INVALID_FORMAT' };
+  if (!token.token_id || !token.signature || !token.expires_at) return { valid: false, reason: 'TOKEN_INCOMPLETE' };
+
+  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET || 'gemstack-boundary-internal-signing-secret';
+  const payload = [token.token_id, token.provider_id || '*', token.action_id || '*', String(token.max_budget_units), token.expires_at].join(':');
+  const expectedSig = crypto.createHmac('sha256', effectiveSecret).update(payload).digest('hex');
+
+  const bufA = Buffer.from(token.signature);
+  const bufB = Buffer.from(expectedSig);
+  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
+    return { valid: false, reason: 'TOKEN_SIGNATURE_INVALID' };
+  }
+
+  return { valid: true };
+}
 
 /**
  * Creates a normalized, structured gate decision object.
@@ -155,7 +221,17 @@ function evaluateBillableAction(request, ledger, options = {}) {
   const providerId = (request.provider_id || '').toLowerCase().trim();
   const capabilityId = request.capability_id;
   const envTier = resolveEnvironmentTier({ environment: request.environment, ...options });
-  const requestedUnits = typeof request.requested_units === 'number' ? request.requested_units : 1;
+  const requestedUnits = request.requested_units !== undefined ? request.requested_units : 1;
+
+  if (typeof requestedUnits !== 'number' || !Number.isFinite(requestedUnits) || requestedUnits <= 0) {
+    return createGateDecision({
+      authorized: false,
+      decision: 'DENY',
+      reasonCode: 'INVALID_REQUESTED_UNITS',
+      message: 'Requested units must be a strictly positive finite number.',
+      context: { action_id: actionId, provider_id: providerId, requested_units: requestedUnits }
+    });
+  }
 
   // 1. Action Declaration Check (Must be explicitly declared)
   if (!actionId || typeof actionId !== 'string' || !actionId.trim()) {
@@ -232,9 +308,7 @@ function evaluateBillableAction(request, ledger, options = {}) {
 
   // 5. BILLABLE / POTENTIALLY_BILLABLE Actions -> Require Explicit Spending Token
   const token = request.authorization_token;
-  const isTokenValid = token && (token.granted === true || token.granted_by || token.source === 'CLI_FLAG' || token.max_budget_units !== undefined);
-
-  if (!isTokenValid) {
+  if (!token || typeof token !== 'object') {
     return createGateDecision({
       authorized: false,
       decision: 'DENY',
@@ -244,19 +318,110 @@ function evaluateBillableAction(request, ledger, options = {}) {
     });
   }
 
+  const boundarySecret = options.boundarySecret || process.env.GEMSTACK_BOUNDARY_SECRET;
+
+  if (boundarySecret) {
+    const verified = verifySpendingToken(token, boundarySecret);
+    if (!verified.valid) {
+      return createGateDecision({
+        authorized: false,
+        decision: 'DENY',
+        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
+        message: 'Authorization token rejected by trusted boundary: ' + verified.reason,
+        context: { action_id: actionId, provider_id: providerId, reason: verified.reason }
+      });
+    }
+  } else if (token.signature && token.token_id) {
+    const verified = verifySpendingToken(token);
+    if (!verified.valid) {
+      return createGateDecision({
+        authorized: false,
+        decision: 'DENY',
+        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
+        message: 'Authorization token signature invalid.',
+        context: { action_id: actionId, provider_id: providerId }
+      });
+    }
+  } else {
+    // Legacy fallback only when no boundarySecret is active
+    const isTokenValid = token && (token.granted === true || token.granted_by || token.source === 'CLI_FLAG' || token.max_budget_units !== undefined);
+    if (!isTokenValid) {
+      return createGateDecision({
+        authorized: false,
+        decision: 'DENY',
+        reasonCode: 'BILLABLE_ACTION_UNAUTHORIZED',
+        message: 'Action "' + actionId + '" on provider "' + providerId + '" requires explicit spending authorization.',
+        context: { action_id: actionId, provider_id: providerId, capability_id: capabilityId, cost_state: costState, environment: envTier }
+      });
+    }
+  }
+
+  // Expiration check
+  if (token.expires_at) {
+    const expMs = Date.parse(token.expires_at);
+    if (!Number.isNaN(expMs) && Date.now() > expMs) {
+      return createGateDecision({
+        authorized: false,
+        decision: 'DENY',
+        reasonCode: 'TOKEN_EXPIRED',
+        message: 'Authorization token expired at ' + token.expires_at + '.',
+        context: { action_id: actionId, provider_id: providerId, expires_at: token.expires_at }
+      });
+    }
+  }
+
+  // Scope check (Provider & Action)
+  if (token.provider_id && token.provider_id !== '*' && token.provider_id.toLowerCase() !== providerId.toLowerCase()) {
+    return createGateDecision({
+      authorized: false,
+      decision: 'DENY',
+      reasonCode: 'TOKEN_SCOPE_MISMATCH',
+      message: 'Token scope provider "' + token.provider_id + '" does not match requested provider "' + providerId + '".',
+      context: { action_id: actionId, provider_id: providerId, token_provider: token.provider_id }
+    });
+  }
+
+  if (token.action_id && token.action_id !== '*' && token.action_id !== actionId) {
+    return createGateDecision({
+      authorized: false,
+      decision: 'DENY',
+      reasonCode: 'TOKEN_SCOPE_MISMATCH',
+      message: 'Token scope action "' + token.action_id + '" does not match requested action "' + actionId + '".',
+      context: { action_id: actionId, provider_id: providerId, token_action: token.action_id }
+    });
+  }
+
   // 6. Budget & Unit Threshold Check
   const estimatedUnitCost = (capabilityEntry && typeof capabilityEntry.estimated_unit_cost === 'number') ? capabilityEntry.estimated_unit_cost : 1;
   const estimatedTotalCost = requestedUnits * estimatedUnitCost;
 
   if (token && typeof token.max_budget_units === 'number') {
-    if (estimatedTotalCost > token.max_budget_units) {
+    const tokenId = token.token_id;
+    const currentSpent = tokenId ? (tokenSpendingLedger.get(tokenId) || 0) : 0;
+    const projectedTotal = currentSpent + estimatedTotalCost;
+
+    if (projectedTotal > token.max_budget_units) {
       return createGateDecision({
         authorized: false,
         decision: 'DENY',
         reasonCode: 'BUDGET_THRESHOLD_EXCEEDED',
-        message: 'Action "' + actionId + '" estimated cost (' + estimatedTotalCost + ') exceeds authorized budget limit (' + token.max_budget_units + ').',
-        context: { action_id: actionId, provider_id: providerId, capability_id: capabilityId, cost_state: costState, environment: envTier, estimated_total_cost: estimatedTotalCost, max_budget_units: token.max_budget_units }
+        message: 'Action "' + actionId + '" estimated cost (' + projectedTotal + ') exceeds authorized budget limit (' + token.max_budget_units + ').',
+        context: {
+          action_id: actionId,
+          provider_id: providerId,
+          capability_id: capabilityId,
+          cost_state: costState,
+          environment: envTier,
+          estimated_total_cost: estimatedTotalCost,
+          current_spent: currentSpent,
+          projected_total: projectedTotal,
+          max_budget_units: token.max_budget_units
+        }
       });
+    }
+
+    if (tokenId) {
+      tokenSpendingLedger.set(tokenId, projectedTotal);
     }
   }
 
@@ -273,5 +438,8 @@ function evaluateBillableAction(request, ledger, options = {}) {
 module.exports = {
   createGateDecision,
   evaluateProviderCapability,
-  evaluateBillableAction
+  evaluateBillableAction,
+  issueSpendingToken,
+  verifySpendingToken,
+  resetTokenSpendingLedger
 };

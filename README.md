@@ -7,7 +7,7 @@
   [![Release](https://img.shields.io/badge/release-v1.4.0-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v1.4.0)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-  [![Security Shield](https://img.shields.io/badge/Security-Military--Grade-red.svg?style=flat-square)](#military-grade-security-shield)
+  [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
 
 > **🚀 Current Stable Release: `v1.4.0`** — *Agent Swarm Planning & Visual QA Evidence Checkpoint*  
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
@@ -18,12 +18,12 @@
 
 Gemstack is a zero-dependency, local-first framework designed to supercharge your AI Coding Agents (like Google Antigravity, Claude, Cursor, or Aider). 
 
-Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and military-grade security into the AI's context.
+Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and rigorous security gates into the AI's context.
 
 ## ✨ Features (v1.4.0)
 
-- 🧠 **Spec-Driven Development (SDD)**: The AI is physically prevented from hallucinating code without writing and getting approval for a `spec.md`, `plan.md`, and `tasks.md` first.
-- 🛡️ **Military-Grade Security**: Includes a built-in Chief Security Officer (`gemstack-cso`) and immutable Constitution Rules that force the AI to respect OWASP, zero-trust secrets, and multi-tenant isolation.
+- 🧠 **Spec-Driven Development (SDD)**: The AI is mechanically verified against architectural specifications before coding through a strict sequence of `spec.md`, `plan.md`, and `tasks.md`.
+- 🛡️ **Active Security & Safety Gates**: Includes a built-in Chief Security Officer (`gemstack-cso`) and immutable Constitution Rules that guide the AI to respect OWASP, zero-trust secrets, and multi-tenant isolation.
 - 🐝 **Swarm Architecture**: Tag tasks with `[P]` and invoke `/swarm` to watch the AI spawn parallel subagents to code your app simultaneously.
 - 🏥 **Self-Healing CI/CD**: Run `/heal` when GitHub Actions fails. The AI will autonomously read the CI logs, write the patch, and push the fix.
 - 👁️ **Visual QA Automation**: The `/qa-visual` skill instructs the agent to write and execute ephemeral Playwright scripts in an isolated sandbox to visually verify UI criteria.
@@ -62,13 +62,24 @@ Gemstack works by providing an **Operating System** for your LLM via markdown fi
 5. `/review` -> The AI reviews the diffs against the `03-gemstack-security.md` rules.
 6. `/handoff` -> The AI saves its memory to `handoff.md` so you can close your laptop and resume flawlessly tomorrow.
 
-## 🛡️ Military-Grade Security Shield
+## 🛡️ Security Architecture & Safety Gates
 
-Gemstack ships with `03-gemstack-security.md` and `04-gemstack-infrastructure.md`, rulebooks extracted from high-compliance SaaS and Cloud Native environments (OWASP, NIST). When you run `/cso` or `/review`, the AI strictly checks for:
+Gemstack ships with `03-gemstack-security.md` and `04-gemstack-infrastructure.md`, rulebooks based on high-compliance SaaS and Cloud Native standards (OWASP, NIST). When you run `/cso` or `/review`, the AI systematically checks for:
 - **AppSec (Level 2)**: IDOR Protection, Race Condition prevention, CSRF/SSRF blocking, Rate Limiting, and Audit Trails.
 - **Zero Trust Secrets**: Hardcoded keys are blocked.
 - **DevSecOps & Infra**: Enforces Immutable Infrastructure (Docker/Terraform), Private Subnets (VPC), IAM Least Privilege, and Cloud Secret Managers.
 - **Server-Side Validation**: Complete distrust of frontend state.
+
+### Control & Verification Matrix
+
+| Control | Scope | Test Verification | Boundary Limit |
+|---|---|---|---|
+| **Spec-Driven Development (SDD)** | Architectural alignment and phase gating | Cryptographic phase hashes (`gemstack verify`) | Does not prevent human commit of unapproved manual diffs outside the CLI |
+| **Filesystem Traversal & Symlink Defense** | Scaffolding, backup, install, and visual QA writes | Realpath resolution and confined atomic writes (`tests/security-p0-hardening.test.js`) | Local OS processes with root privileges outside Gemstack CLI process boundaries |
+| **Secret Scanning & Hook Preservation** | Local git commits and CI pipelines | Multi-provider regex scanning and pre-commit wrapper chaining (`scripts/ci/check-secrets.js`) | Only inspects staged text files; does not inspect compiled binary blobs or external networks |
+| **Spending & Cost Safety Gates** | Billable agent API and model execution | HMAC token verification, cumulative budget tracking, positive unit bounds (`src/lib/safety-gates.js`) | Enforced on calls through ProviderBoundary; does not intercept direct outbound curl requests |
+| **Visual QA Evidence Verification** | UI screenshots and regression detection | Disk-computed SHA-256 and pluggable diff adapter; UNVERIFIED fallback (`src/lib/visual-qa.js`) | Diff accuracy depends on adapter engine; static hashes detect file modification only |
+| **Agent Rulebooks & AppSec Guidance** | Agent context prompts during review & planning | CSO audit scripts and rule templates (`.agents/rules/03-gemstack-security.md`) | Agent guidance is advisory; mechanical enforcement requires CLI verify and CI gates |
 
 ## 🔒 Architecture Consistency & Phase Freezing
 

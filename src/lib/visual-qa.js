@@ -10,8 +10,9 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { normalizePath } = require('./hasher');
+const { normalizePath, hashFile } = require('./hasher');
 const { createFinding } = require('./findings');
+const fssafe = require('./filesystem-safe');
 
 const VQA_SCHEMA_VERSION = '1.0.0';
 
@@ -266,14 +267,42 @@ function validateBaselineIntegrity(scenario, targetDir) {
 }
 
 /**
- * Compares live visual evidence against canonical baseline.
+ * Sanitizes and masks sensitive input fields and tokens before visual capture persistence.
+ *
+ * @param {string} content - HTML or DOM text
+ * @returns {string} Sanitized content with sensitive data masked
+ */
+function maskSensitiveFieldsBeforeCapture(content) {
+  if (!content || typeof content !== 'string') return content;
+  let masked = content;
+
+  // 1. Password input values
+  masked = masked.replace(/(<input\b[^>]*\btype\s*=\s*["']?password["']?[^>]*\bvalue\s*=\s*["'])([^"']*)(["'])/gi, '$1[MASKED_PASSWORD]$3');
+  masked = masked.replace(/(<input\b[^>]*\bvalue\s*=\s*["'])([^"']*)(["'][^>]*\btype\s*=\s*["']?password["']?[^>]*>)/gi, '$1[MASKED_PASSWORD]$3');
+
+  // 2. Sensitive ids or names (password, token, secret, key, credit_card, card)
+  masked = masked.replace(/(<input\b[^>]*(?:\bid|\bname)\s*=\s*["']?[^"']*(?:password|token|secret|key|credit_card|card)[^"']*["']?[^>]*\bvalue\s*=\s*["'])([^"']*)(["'])/gi, '$1[MASKED_SENSITIVE]$3');
+  masked = masked.replace(/(<input\b[^>]*\bvalue\s*=\s*["'])([^"']*)(["'][^>]*(?:\bid|\bname)\s*=\s*["']?[^"']*(?:password|token|secret|key|credit_card|card)[^"']*["']?[^>]*>)/gi, '$1[MASKED_SENSITIVE]$3');
+
+  // 3. API Keys and Tokens in attributes or text
+  masked = masked.replace(/sk-(?:live_|proj-)?[a-zA-Z0-9_-]{10,}/g, '[MASKED_KEY]');
+
+  // 4. Credit card numbers (13-19 consecutive digits or grouped with spaces/dashes)
+  masked = masked.replace(/\b(?:\d{4}[ -]?){3,4}\d{1,4}\b/g, '[MASKED_CARD]');
+
+  return masked;
+}
+
+/**
+ * Compares live visual evidence against canonical baseline with honest disk recomputation.
  *
  * @param {object} scenario - Scenario definition
  * @param {object} evidence - Submitted evidence object
  * @param {string} targetDir - Repository target directory
+ * @param {object} [options={}] - Additional options (e.g. diffAdapter)
  * @returns {{ status: string, passed: boolean, diff_percentage: number, findings: Array<object> }}
  */
-function compareVisualEvidence(scenario, evidence, targetDir) {
+function compareVisualEvidence(scenario, evidence, targetDir, options = {}) {
   const findings = [];
   const baseline = scenario.baseline;
 
@@ -299,8 +328,81 @@ function compareVisualEvidence(scenario, evidence, targetDir) {
     return { status: 'BASELINE_MISSING', passed: false, diff_percentage: 1.0, findings };
   }
 
-  // Fast-path: SHA-256 match
-  if (evidence.image_sha256 && baseline.image_sha256 && evidence.image_sha256 === baseline.image_sha256) {
+  let effectiveLiveHash = evidence.image_sha256;
+  let effectiveBaselineHash = baseline.image_sha256;
+
+  // Recompute hashes directly from disk files if targetDir and paths are available
+  if (targetDir) {
+    if (baseline.image_path) {
+      try {
+        const absBaselinePath = fssafe.resolveSafeStrict(targetDir, baseline.image_path);
+        if (fs.existsSync(absBaselinePath)) {
+          const diskBaselineHash = hashFile(absBaselinePath);
+          if (baseline.image_sha256 && diskBaselineHash !== baseline.image_sha256) {
+            findings.push(createFinding({
+              code: 'VQA_BASELINE_TAMPERED',
+              contractId: 'baseline-explicit-update-only',
+              phase: 'visual-qa',
+              location: baseline.image_path,
+              details: `Baseline image "${baseline.image_path}" was modified on disk. Recorded: ${baseline.image_sha256}, Actual: ${diskBaselineHash}.`
+            }));
+            return { status: 'BASELINE_TAMPERED', passed: false, diff_percentage: 1.0, findings };
+          }
+          effectiveBaselineHash = diskBaselineHash;
+        }
+      } catch (err) {
+        findings.push(createFinding({
+          code: 'VQA_BASELINE_TAMPERED',
+          contractId: 'baseline-explicit-update-only',
+          phase: 'visual-qa',
+          location: baseline.image_path,
+          details: `Error validating baseline path: ${err.message}`
+        }));
+        return { status: 'BASELINE_TAMPERED', passed: false, diff_percentage: 1.0, findings };
+      }
+    }
+
+    const livePathCandidate = evidence.live_screenshot_path || (evidence.image_path && fs.existsSync(fssafe.resolveSafe(targetDir, evidence.image_path)) ? evidence.image_path : null);
+    if (livePathCandidate) {
+      try {
+        const absLivePath = fssafe.resolveSafeStrict(targetDir, livePathCandidate);
+        if (!fs.existsSync(absLivePath)) {
+          findings.push(createFinding({
+            code: 'VQA_IMAGE_NOT_FOUND',
+            contractId: 'visual-evidence-subordinate',
+            phase: 'visual-qa',
+            location: scenario.scenario_id,
+            details: `Live screenshot file not found: ${livePathCandidate}`
+          }));
+          return { status: 'EVIDENCE_MISSING', passed: false, diff_percentage: 1.0, findings };
+        }
+        const diskLiveHash = hashFile(absLivePath);
+        if (evidence.image_sha256 && evidence.image_sha256 !== diskLiveHash) {
+          findings.push(createFinding({
+            code: 'VQA_EVIDENCE_HASH_MISMATCH',
+            contractId: 'visual-evidence-subordinate',
+            phase: 'visual-qa',
+            location: scenario.scenario_id,
+            details: `Submitted evidence image_sha256 (${evidence.image_sha256}) does not match disk file hash (${diskLiveHash}).`
+          }));
+          return { status: 'EVIDENCE_HASH_MISMATCH', passed: false, diff_percentage: 1.0, findings };
+        }
+        effectiveLiveHash = diskLiveHash;
+      } catch (err) {
+        findings.push(createFinding({
+          code: 'VQA_IMAGE_NOT_FOUND',
+          contractId: 'visual-evidence-subordinate',
+          phase: 'visual-qa',
+          location: scenario.scenario_id,
+          details: `Error validating live screenshot path: ${err.message}`
+        }));
+        return { status: 'EVIDENCE_MISSING', passed: false, diff_percentage: 1.0, findings };
+      }
+    }
+  }
+
+  // Fast-path: SHA-256 match from verified disk hashes
+  if (effectiveLiveHash && effectiveBaselineHash && effectiveLiveHash === effectiveBaselineHash) {
     return {
       status: 'PASS',
       passed: true,
@@ -309,11 +411,52 @@ function compareVisualEvidence(scenario, evidence, targetDir) {
     };
   }
 
-  // Evaluate tolerances
+  // Evaluate tolerances and real diff adapter
   const maxDiff = (scenario.tolerances && scenario.tolerances.max_diff_percentage !== undefined)
     ? scenario.tolerances.max_diff_percentage
     : 0.00;
 
+  const diffAdapter = (options && options.diffAdapter) || (evidence && evidence.diffAdapter);
+
+  if (diffAdapter && typeof diffAdapter.computeDiff === 'function') {
+    let baselineBuf = null;
+    let liveBuf = null;
+    if (targetDir && baseline.image_path) {
+      try { baselineBuf = fs.readFileSync(fssafe.resolveSafeStrict(targetDir, baseline.image_path)); } catch {}
+    }
+    const liveRel = evidence.live_screenshot_path || evidence.image_path;
+    if (targetDir && liveRel) {
+      try { liveBuf = fs.readFileSync(fssafe.resolveSafeStrict(targetDir, liveRel)); } catch {}
+    }
+
+    const diffResult = diffAdapter.computeDiff(baselineBuf, liveBuf, scenario.tolerances);
+    const observedDiff = typeof diffResult.diff_percentage === 'number' ? diffResult.diff_percentage : 0.0;
+
+    if (observedDiff > maxDiff) {
+      findings.push(createFinding({
+        code: 'VQA_VISUAL_REGRESSION',
+        contractId: 'visual-evidence-subordinate',
+        phase: 'visual-qa',
+        location: scenario.scenario_id,
+        details: `Visual regression on "${scenario.scenario_id}": observed diff ${observedDiff} exceeds maximum allowed ${maxDiff}.`
+      }));
+      return {
+        status: 'VISUAL_REGRESSION',
+        passed: false,
+        diff_percentage: observedDiff,
+        findings
+      };
+    }
+
+    return {
+      status: 'PASS',
+      passed: true,
+      diff_percentage: observedDiff,
+      findings: []
+    };
+  }
+
+  // If no diff adapter is provided:
   const observedDiff = typeof evidence.diff_percentage === 'number' ? evidence.diff_percentage : 0.05;
 
   if (observedDiff > maxDiff) {
@@ -332,11 +475,20 @@ function compareVisualEvidence(scenario, evidence, targetDir) {
     };
   }
 
+  // When live screenshot differs from baseline and caller claims low diff without adapter: FAIL-CLOSED UNVERIFIED
+  findings.push(createFinding({
+    code: 'VQA_DIFF_ENGINE_UNAVAILABLE',
+    contractId: 'visual-evidence-subordinate',
+    phase: 'visual-qa',
+    location: scenario.scenario_id,
+    details: `Visual deviation detected on "${scenario.scenario_id}" but no diff engine adapter is available. Status UNVERIFIED.`
+  }));
+
   return {
-    status: 'PASS',
-    passed: true,
+    status: 'UNVERIFIED',
+    passed: false,
     diff_percentage: observedDiff,
-    findings: []
+    findings
   };
 }
 
@@ -492,6 +644,7 @@ module.exports = {
   validateViewport,
   validateEnvironmentMetadata,
   applySelectorMasks,
+  maskSensitiveFieldsBeforeCapture,
   validateBaselineIntegrity,
   compareVisualEvidence,
   promoteVisualBaseline,

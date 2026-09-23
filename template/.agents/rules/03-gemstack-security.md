@@ -1,7 +1,7 @@
-# Gemstack Security Core (Military-Grade Shielding)
+# Gemstack Security Core (Architecture & Security Gates)
 
 ## Propósito
-Esta es la Ley de "Seguridad por Diseño". Todo código escrito, planificado o revisado por la IA bajo el marco Gemstack DEBE adherirse a estos principios de blindaje, independientemente del stack tecnológico utilizado. El objetivo es mitigar el 99% de las vulnerabilidades comunes (OWASP) desde el momento de la concepción del código.
+Esta es la Ley de "Seguridad por Diseño". Todo código escrito, planificado o revisado por la IA bajo el marco Gemstack DEBE adherirse a estos principios de blindaje, independientemente del stack tecnológico utilizado. El objetivo es establecer controles sistemáticos y verificables frente a vulnerabilidades comunes (OWASP Top 10) desde el momento de la concepción del código.
 
 ## 1. Cero Exposición de Credenciales (Zero Trust Secrets)
 - **Regla Estricta:** JAMÁS hardcodees contraseñas, llaves de API, secrets de Webhooks o URIs de bases de datos en el código fuente.

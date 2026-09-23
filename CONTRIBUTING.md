@@ -1,6 +1,6 @@
 # Contributing to Gemstack
 
-First off, thank you for considering contributing to Gemstack! Gemstack is an open-source, local-first framework designed to supercharge AI coding agents with Spec-Driven Development (SDD) and military-grade security out of the box.
+First off, thank you for considering contributing to Gemstack! Gemstack is an open-source, local-first framework designed to supercharge AI coding agents with Spec-Driven Development (SDD) and verifiable architectural and security gates out of the box.
 
 ## Code of Conduct
 By participating in this project, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).

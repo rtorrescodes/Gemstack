@@ -34,13 +34,17 @@ function normalizeProviderId(rawId) {
  * @param {object} [tokenPayload={}]
  * @returns {string} SHA-256 bound token
  */
-function createBoundToken(providerId, capabilityId, actionId, tokenPayload = {}) {
+function createBoundToken(providerId, capabilityId, actionId, tokenPayload = {}, secret = null) {
   const payload = JSON.stringify({
     providerId,
     capabilityId,
     actionId,
     token: tokenPayload
   });
+  const effectiveSecret = secret || process.env.GEMSTACK_BOUNDARY_SECRET;
+  if (effectiveSecret) {
+    return crypto.createHmac('sha256', effectiveSecret).update(payload, 'utf8').digest('hex');
+  }
   return crypto.createHash('sha256').update(payload, 'utf8').digest('hex');
 }
 
