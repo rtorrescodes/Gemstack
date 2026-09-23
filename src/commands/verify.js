@@ -87,6 +87,16 @@ module.exports = async (flags) => {
         } else {
             logger.ok('Sección inmutable "4. Intentos fallidos" preservada.');
         }
+
+        // Cross-Audit con Git Log (Gemstack 2.0 Sprint D)
+        const { crossAuditMemoryWithGit } = require('../lib/memory-audit');
+        const memAudit = crossAuditMemoryWithGit(targetDir);
+        if (!memAudit.valid && memAudit.unrecorded_commits.length > 0) {
+            logger.warn(`Detectados commits recientes no registrados en handoff.md: ${memAudit.unrecorded_commits.map(c => c.hash).join(', ')}`);
+            totalWarnings++;
+        } else {
+            logger.ok('Memoria cruzada (handoff.md <-> git log) verificada.');
+        }
     }
 
     // 3. Consistencia de Estado Local (.gemstack/state.json)

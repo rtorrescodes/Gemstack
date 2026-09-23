@@ -1,0 +1,227 @@
+{
+  "$schema": "https://gemstack.dev/schemas/context-capsule-v1.json",
+  "acceptance_matrix": {
+    "canonical_ids": [
+      "TEST-AMEND-D01",
+      "TEST-AMEND-D02",
+      "TEST-AMEND-D03",
+      "TEST-DELTA-B01",
+      "TEST-DELTA-B02",
+      "TEST-DELTA-B03",
+      "TEST-MERGE-C01",
+      "TEST-MERGE-C02",
+      "TEST-MERGE-C03",
+      "TEST-RIGOR-A01",
+      "TEST-RIGOR-A02",
+      "TEST-RIGOR-A03",
+      "TEST-RIGOR-A04"
+    ],
+    "signature": "6ae546034e43677a9ce51b451415db890d27b57e36df3163286897fcd6720e07",
+    "total_required": 13
+  },
+  "architecture_summary": {
+    "core_purpose": "Deterministic context compression and safe continuation for AI-assisted engineering.",
+    "critical_boundaries": [
+      "Capsule is strictly derived, never authoritative",
+      "Semantic constraint losslessness: MUST/MUST NOT survive compression",
+      "Verification is read-only and never regenerates capsules"
+    ]
+  },
+  "canonical_invariants": [
+    {
+      "id": "INV-001",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-002",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-003",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-004",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-005",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-006",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-007",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-008",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-009",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-010",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-011",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-012",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    },
+    {
+      "id": "INV-013",
+      "normative": "MUST",
+      "rule": "\"gate\": \"REQUIRED\"",
+      "source_ref": "spec.md#4"
+    }
+  ],
+  "deferred_items": [
+    "Autonomous cross-repo capsule federations (out of scope)",
+    "LLM narrative fine-tuning (non-authoritative)"
+  ],
+  "frozen_contracts": [
+    {
+      "id": "formal-contract-amendment",
+      "type": "ENUM_SET",
+      "value": true
+    },
+    {
+      "id": "incremental-spec-deltas",
+      "type": "ENUM_SET",
+      "value": true
+    },
+    {
+      "id": "sdd-rigor-levels",
+      "type": "ENUM_SET",
+      "value": true
+    },
+    {
+      "id": "spec-conflict-detector",
+      "type": "BOOLEAN_INVARIANT",
+      "value": true
+    }
+  ],
+  "generated_at": "2026-09-23T02:09:43.614Z",
+  "generator": {
+    "name": "gemstack",
+    "version": "1.2.0"
+  },
+  "historical_context": [
+    {
+      "feature": "specs/006-architecture-consistency-engine",
+      "key_guarantees": [
+        "Anti-loop findings",
+        "Deterministic hashing",
+        "Frozen contracts"
+      ],
+      "status": "CLOSED"
+    },
+    {
+      "feature": "specs/007-mechanical-test-matrix-closure-evidence",
+      "key_guarantees": [
+        "Mechanical test matrix",
+        "VERIFY = VALIDATE",
+        "closure.json evidence"
+      ],
+      "status": "CLOSED"
+    },
+    {
+      "feature": "specs/008-cost-provider-safety-gates",
+      "key_guarantees": [
+        "Fail-closed gates",
+        "NO PROOF = NO EXECUTION",
+        "Zero network verify"
+      ],
+      "status": "CLOSED"
+    }
+  ],
+  "project": {
+    "active_feature": "specs/013-gemstack-2.0-adaptable-sdd",
+    "current_phase": "shipped",
+    "lifecycle_status": "SHIPPED",
+    "name": "gemstack-ai",
+    "next_permitted_phase": "PLAN"
+  },
+  "provenance": {
+    "source_set_hash": "d4707b57238b7461acbd3809b03d09a676ca98b796108ec60da512ed51f61275",
+    "sources": [
+      {
+        "hash": "eaf7d2b071dccf4422b57109ef6ee76637e40c0a7d27e2868c3f26f76ea681cb",
+        "path": ".gemstack/state.json",
+        "role": "LIFECYCLE_STATE"
+      },
+      {
+        "hash": "484cdcb089ee6a2950ddd3e7a9d7ebe22585c058566a8699392f97f2753e8737",
+        "path": "specs/013-gemstack-2.0-adaptable-sdd/closure.json",
+        "role": "CLOSURE_EVIDENCE"
+      },
+      {
+        "hash": "8be9cb72e649dbdc53819c8fac9029fc73241d7c267e3ff596e0104927a1b5c1",
+        "path": "specs/013-gemstack-2.0-adaptable-sdd/plan.md",
+        "role": "PLAN"
+      },
+      {
+        "hash": "32f326f279a7083e67bd3b386597718c203abbcca99f71d8426b50ca3616d93d",
+        "path": "specs/013-gemstack-2.0-adaptable-sdd/spec.md",
+        "role": "SPECIFICATION"
+      },
+      {
+        "hash": "843f2d12bf20c0ba844f0b7979aeb9b829faba32b2bcc04aa67f254126ceb9c4",
+        "path": "specs/013-gemstack-2.0-adaptable-sdd/tasks.md",
+        "role": "TASKS"
+      }
+    ]
+  },
+  "relevant_files": [
+    "src/commands/context.js",
+    "src/lib/context-capsule.js",
+    "tests/context-determinism.test.js"
+  ],
+  "schema_version": 1,
+  "tasks_state": {
+    "active_task_ids": [
+      "TASK-001",
+      "TASK-002",
+      "TASK-003",
+      "TASK-004",
+      "TASK-005",
+      "TASK-006"
+    ],
+    "completed": 0,
+    "in_progress": "TASK-001",
+    "total": 6
+  },
+  "unresolved_blockers": []
+}

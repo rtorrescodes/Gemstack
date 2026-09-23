@@ -28,20 +28,25 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
   - Redacción previa de secretos y credenciales en evidencias antes de persistir en disco.
   - Eliminación de declaraciones superlativas sin evidencia; publicación de matriz 4-columnas `Control / Scope / Test / Limit` en README y reglas.
   - Pinned GitHub Actions a commit SHAs de 40 dígitos con least-privilege `contents: read`.
+- **Gemstack 2.0 Sprint C (SDD Adaptable & Specs Incrementales)**: CERRADO Y ENVIADO (commit `443ae6c`).
+  - 13/13 pruebas canónicas aprobadas en `tests/adaptable-sdd-p1.test.js`.
+  - Cuatro niveles de rigor formalizados: `quick`, `fix`, `feature`, `high-risk`.
+  - Declaración y aplicación de deltas incrementales `ADDED`, `MODIFIED`, `REMOVED`.
+  - Detección offline de colisiones de contratos y duplicados de tests (`gemstack spec merge`).
+  - Enmiendas auditables y firmadas criptográficamente para contratos congelados (`src/lib/contract-amendments.js`).
+- **Gemstack 2.0 Sprint D (Contexto Eficiente y Memoria Persistente)**: CERRADO Y VERIFICADO.
+  - 12/12 pruebas canónicas aprobadas en `tests/context-memory-p1.test.js` (180 tests totales en 23 suites).
+  - Detección de fatiga de contexto y poda determinista de ruido (`src/lib/context-fatigue.js`).
+  - Auditoría offline de dependencias huérfanas, no declaradas y ciclos circulares en `gemstack doctor` (`src/lib/dependency-audit.js`).
+  - Verificación cruzada entre commits de Git y secciones de `handoff.md` en `gemstack verify` (`src/lib/memory-audit.js`).
+  - Eliminación estricta de ruido conversacional y presupuesto determinista (< 32KB) en context capsules.
 
 ## 3. Archivos y cambios
-- `src/lib/test-matrix.js`: Parser de `gemstack-test-matrix`, validación de esquema de 20 tests canónicos y cálculo de `acceptanceSignature` canónico SHA-256.
-- `src/lib/closure-context.js`: Parser de bindings y gates de `plan.md`, metadatos de `tasks.md`, trazabilidad bidireccional, resolución de `RelevantClosureFiles`, `computeContentAggregateHash` y cálculo de `closureContextHash`.
-- `src/lib/runner-adapters.js`: Adaptador nativo seguro de runner `node:test`, parser TAP de resultados, motor de reconciliación aritmética canónica, ejecutor seguro de compuertas `PACKAGE_SCRIPT` y serializador atómico de `closure.json`.
-- `src/commands/collect.js`: Comando mutador dedicado que ejecuta tests y gates para generar `specs/<feature>/closure.json`.
-- `src/commands/ship.js`: Compuerta de transición a `SHIPPED` que exige evidencia de cierre fresca y verificada.
-- `src/commands/verify.js`: Etapa 5/6 agregada de verificación de evidencia mecánica de cierre en modo estrictamente de solo lectura (0 mutaciones en disco).
-- `src/cli.js`: Registro de comandos `collect` y `ship`.
-- `specs/007-mechanical-test-matrix-closure-evidence/`: Artefactos congelados `spec.md`, `plan.md`, `tasks.md` y evidencia de cierre generada `closure.json`.
-- `tests/`: 6 nuevas suites de prueba (`test-matrix.test.js`, `reconciliation.test.js`, `runner-adapter.test.js`, `traceability.test.js`, `closure-manifest.test.js`, `closure-gates.test.js`).
-- `specs/templates/`: Actualizadas plantillas de `spec.md`, `plan.md` y `tasks.md` con bloques canónicos de Upgrade B.
-- `.agents/skills/`: Actualizados skills (`gemstack-spec`, `gemstack-plan`, `gemstack-tasks`, `gemstack-qa`, `gemstack-ship`).
-- `docs/`, `README.md`, `package.json`: Documentación técnica y script de test con enumeración explícita de las 11 suites físicas.
+- `src/lib/sdd-rigor.js`, `src/lib/spec-delta.js`, `src/lib/spec-merge.js`, `src/lib/contract-amendments.js`, `src/commands/spec.js`: Motores de rigor adaptable, deltas incrementales, fusión de especificaciones y enmiendas de contratos.
+- `src/lib/context-fatigue.js`, `src/lib/dependency-audit.js`, `src/lib/memory-audit.js`: Motores de fatiga de contexto, auditoría offline de dependencias y auditoría cruzada de memoria con Git.
+- `src/commands/doctor.js`, `src/commands/verify.js`, `src/cli.js`: Integración de auditoría offline de dependencias, verificación de memoria y registro de CLI `spec`.
+- `tests/adaptable-sdd-p1.test.js`, `tests/context-memory-p1.test.js`: Suites de prueba canónicas P1 para Sprint C y Sprint D.
+- `specs/013-gemstack-2.0-adaptable-sdd/`, `specs/014-gemstack-2.0-context-memory/`: Especificaciones formales, planes, tareas y manifiestos de cierre verificados mecánicamente.
 
 ## 4. Intentos fallidos
 - Se confirmó en proyectos reales que scripts de prueba con sintaxis `2>nul` en `package.json` provocan que PowerShell/Bash enmascaren errores y retornen código de salida 0 con 0 tests ejecutados. Ahora esto es detectado como error por `gemstack verify` y prohibido en la Constitución.
@@ -49,11 +54,8 @@ Evolucionar Gemstack incorporando el feedback de producción real de proyectos a
 - **Node 20+ Subprocess Recursion**: Al ejecutar `node --test` como subproceso desde un proceso de test runner, `process.env.NODE_TEST_CONTEXT` suprimía la ejecución de archivos hijos con warning de recursión. Se resolvió sanitizando las variables `NODE_TEST_CONTEXT` y `NODE_TEST_WORKER_ID` en el entorno del proceso hijo.
 - **Windows spawn 'npm.cmd' EINVAL**: Node 22+ en Windows genera `EINVAL` al invocar `spawn('npm.cmd', ..., { shell: false })`. Se resolvió ejecutando directamente el binario `npm-cli.js` vía `process.execPath` cuando se detecta en Windows, respetando la regla constitucional de `shell: false`.
 - **Closure Manifest Self-Reference**: Al incluir `specs/<feature>/closure.json` en los archivos de implementación de `tasks.md`, `closureContextHash` cambiaba cada vez que `closure.json` era escrito, provocando que la evidencia se marcara como `STALE` inmediatamente después de recolectarse. Se resolvió excluyendo explícitamente `closure.json` de la agregación de hashes de contexto de implementación (`implementationContextHash`).
+- **Memory Cross-Audit Missing Section Handling**: En `crossAuditMemoryWithGit`, lanzar un `Error` no capturado interrumpía la secuencia de verificación de `verify.js`. Se resolvió retornando un objeto de resultado `{ valid: false, handoff_intact: false, error }`, permitiendo que el framework acumule los fallos según el protocolo constitucional sin abortar abruptamente.
 
 ## 5. Próximos pasos
-1. Implementar Sprint C (SDD Adaptable & Specs Incrementales):
-   - Cuatro niveles de rigor (quick, fix, feature, high-risk).
-   - Specs incrementales (declaración de cambios ADDED / MODIFIED / REMOVED).
-   - Resolución de colisiones y conflictos de contratos en specs (`gemstack spec merge`).
-   - Enmiendas auditables de contratos congelados (reemplazando mutaciones directas).
-2. Proceder a Sprint D (Contexto eficiente y memoria persistente).
+1. Preparar la release `v2.0.0-alpha` unificando las 4 etapas de hardening de Gemstack 2.0 (Sprints A, B, C, D).
+2. Publicación de notas de release destacando las nuevas garantías de seguridad, rigores adaptables y auditorías offline.

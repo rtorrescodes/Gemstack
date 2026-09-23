@@ -46,5 +46,23 @@ module.exports = async (flags) => {
     } else {
         logger.warn('.gitignore is not patched.');
     }
+
+    // Offline Dependency Audit (Gemstack 2.0 Sprint D)
+    const { auditDependencies } = require('../lib/dependency-audit');
+    const depAudit = auditDependencies(targetDir);
+    if (depAudit.orphans.length > 0) {
+        logger.warn(`Orphan dependencies detected in package.json: ${depAudit.orphans.join(', ')}`);
+    } else {
+        logger.ok('Zero orphan dependencies detected.');
+    }
+    if (depAudit.undeclared.length > 0) {
+        logger.warn(`Undeclared dependencies used in source: ${depAudit.undeclared.join(', ')}`);
+    }
+    if (depAudit.circularCycles.length > 0) {
+        logger.warn(`Circular import cycles detected: ${depAudit.circularCycles.map(c => c.join(' -> ')).join('; ')}`);
+    } else {
+        logger.ok('Zero circular import cycles detected.');
+    }
+
     logger.ok('Doctor checks completed.');
 };

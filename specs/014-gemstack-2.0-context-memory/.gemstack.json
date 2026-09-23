@@ -1,0 +1,9 @@
+{
+  "phase_hashes": {
+    "spec": "408e0d0aebfc6ac65cb07bbaf694b573571489d2da8aa4314ee7c36d65bbe951",
+    "plan": "845bbb28f699b642f17be9462a3fac71c112d51fb9f23b4b9ad48d665a0f17d2",
+    "tasks": "53c19462e3ec4a7c95c126c0af0fe379ff45f610c32d1bcaad79550b58783a0e"
+  },
+  "historical_findings": [],
+  "accepted_exceptions": []
+}
