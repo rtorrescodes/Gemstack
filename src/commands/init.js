@@ -34,8 +34,8 @@ module.exports = async (flags) => {
         const destPath = fssafe.resolveSafeStrict(targetDir, relativePath);
 
         if (fs.existsSync(destPath)) {
-            if (['handoff.md', 'handoff_archive.md', '.gemstack/learnings.md', '.gemstack/state.json'].includes(relativePath)) {
-                // Safe ignore
+            if (manifestLib.isOperationalFile(relativePath)) {
+                // Safe ignore operational/instance files
             } else {
                 conflicts.push(relativePath);
             }
@@ -72,11 +72,18 @@ module.exports = async (flags) => {
         fs.copyFileSync(src, dest);
         logger.ok(`Created ${rel}`);
         
-        const content = fs.readFileSync(dest);
-        const ex = manifest.files.find(f => f.path === rel);
-        if (ex) ex.checksum = manifestLib.getChecksum(content);
-        else manifest.files.push({ path: rel, checksum: manifestLib.getChecksum(content) });
+        // Only track framework-owned files in manifest, not operational instance files
+        if (!manifestLib.isOperationalFile(rel)) {
+            const content = fs.readFileSync(dest);
+            const ex = manifest.files.find(f => f.path === rel);
+            if (ex) ex.checksum = manifestLib.getChecksum(content);
+            else manifest.files.push({ path: rel, checksum: manifestLib.getChecksum(content) });
+        }
     }
+
+    // Clean operational entries from manifest if any existed previously
+    manifest.version = manifestLib.getVersion();
+    manifest.files = manifestLib.sanitizeManifestFiles(manifest.files);
 
     gitignoreLib.patchGitignore(targetDir, flags.dryRun);
     manifestLib.saveManifest(targetDir, manifest, flags.dryRun);

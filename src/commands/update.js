@@ -24,8 +24,13 @@ module.exports = async (flags) => {
 
     walkDir(templateDir, (filePath) => {
         const relativePath = path.relative(templateDir, filePath).replace(/\\/g, '/');
-        const destPath = fssafe.resolveSafeStrict(targetDir, relativePath);
         
+        // Never update or overwrite operational/instance files
+        if (manifestLib.isOperationalFile(relativePath)) {
+            return;
+        }
+
+        const destPath = fssafe.resolveSafeStrict(targetDir, relativePath);
         const tmplContent = fs.readFileSync(filePath);
         const tmplCheck = manifestLib.getChecksum(tmplContent);
         
@@ -51,6 +56,12 @@ module.exports = async (flags) => {
     });
 
     if (toUpdate.length === 0) {
+        if (!flags.dryRun) {
+            // Even if files are up to date, sanitize operational entries from legacy manifests and update version
+            manifest.version = manifestLib.getVersion();
+            manifest.files = manifestLib.sanitizeManifestFiles(manifest.files);
+            manifestLib.saveManifest(targetDir, manifest, flags.dryRun);
+        }
         logger.ok('Everything is up to date.');
         return;
     }
@@ -68,6 +79,10 @@ module.exports = async (flags) => {
     }
 
     const sessionTimestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+    // Clean operational entries from manifest before applying updates
+    manifest.version = manifestLib.getVersion();
+    manifest.files = manifestLib.sanitizeManifestFiles(manifest.files);
 
     for (const rel of toUpdate) {
         backupLib.backupFile(targetDir, rel, flags.dryRun, sessionTimestamp);

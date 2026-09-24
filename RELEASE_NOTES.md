@@ -1,5 +1,30 @@
 # Gemstack Release Notes
 
+# Gemstack v2.0.2 — Operational Data Preservation & Updater Hardening
+
+## Highlights
+
+### Updater Hardening & Instance Data Protection
+Gemstack v2.0.2 addresses real-world updater regressions identified during downstream project pilot upgrades (e.g. Eventalus). It guarantees that active operational state, session memory, specifications, and reports are never overwritten or treated as update candidates, while restoring accurate manifest semantics and diagnostic reporting.
+
+### 1. Operational Data Preservation
+- **Strict Exclusion**: `gemstack update` strictly skips all operational and instance files (`handoff.md`, `handoff_archive.md`, `.gemstack/state.json`, `.gemstack/learnings.md`, `specs/current/**`, and `docs/{qa,reviews,security}/latest-*.md`).
+- **Byte-for-Byte Invariance**: Historical memory, active spec drafts, and audit logs remain 100% untouched across dry-run, interactive, and force update workflows.
+
+### 2. Accurate Dry-Run Diagnostics
+- `--dry-run` now accurately previews only framework files that will actually be replaced.
+- Unforced user modifications and preserved operational files are never shown as pending updates.
+
+### 3. Manifest Version & Schema Migration
+- Updates update `.gemstack/manifest.json` with the installed package version (`v2.0.2`).
+- Legacy manifests containing operational files are automatically sanitized upon update, stripping false attribution of instance files to framework ownership.
+
+### 4. Diagnostic & Health Auditor Clarity (`gemstack doctor`)
+- `gemstack doctor` distinguishes framework-owned files from operational files.
+- Accurately reports legacy operational entries in manifests with clear guidance to run `gemstack update`.
+
+---
+
 # Gemstack v2.0.1 — Security Closure & Hardening
 
 ## Highlights
