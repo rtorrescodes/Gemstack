@@ -39,8 +39,8 @@ El comando `gemstack install <url>` incorpora controles estrictos para prevenir 
 - **Modo Inspección Seguro (`--inspect`)**: Permite previsualizar el autor, versión, descripción y hash del skill remoto sin escribir archivos en el repositorio.
 - **Bloqueo de Credenciales en URL**: URLs con formato `https://usuario:password@host/...` son rechazadas de inmediato (`CREDENTIALS_IN_URL_BLOCKED`).
 - **Defensa SSRF y Filtrado de Red**: Se rechazan esquemas inseguros (`http://`), hosts loopback (`localhost`, `127.0.0.1`), direcciones privadas RFC 1918 / RFC 4193, direcciones link-local, y representaciones ofuscadas (hexadecimal, octal, dword, IPv6 mapping).
-- **Lista Blanca de Fuentes**: Por defecto solo se permiten fuentes públicas seguras (`raw.githubusercontent.com`, `gist.githubusercontent.com`), configurable mediante `--allowed-sources`.
-- **Protección contra Sobrescritura**: Si el skill ya existe en el proyecto, `gemstack install` se detiene salvo que se especifique `--update` (creando un respaldo automático con timestamp en `.gemstack/backups/skills/`) o `--force`.
+- **Lista Blanca de Fuentes**: Por defecto solo se permiten fuentes públicas seguras (`DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`), configurable mediante `--allowed-sources`.
+- **Protección contra Sobrescritura**: Si el skill ya existe en el proyecto, `gemstack install` se detiene salvo que se especifique `--update` (validando contención contra symlinks y creando un respaldo automático con timestamp en `.gemstack/backups/skills/<name>_<timestamp>.bak`) o `--force`.
 
 ---
 
