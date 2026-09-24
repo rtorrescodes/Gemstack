@@ -9,7 +9,7 @@
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
  
-> **🚀 Upcoming Release: `v2.0.1`** — *Security Closure & Hardening Checkpoint (Candidate for Release)*  
+> **🛡️ Gemstack v2.0.1** — *Security Closure & Hardening Checkpoint*  
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
@@ -20,12 +20,12 @@ Gemstack is a zero-dependency, local-first framework designed to supercharge you
 
 Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and rigorous security gates into the AI's context.
 
-## ✨ Features (v2.0.0)
+## ✨ Core Features & Guarantees (v2.0.1)
 
 - 🧠 **Adaptable Spec-Driven Development (SDD)**: Four rigor levels (`quick`, `fix`, `feature`, `high-risk`) tailoring validation rigor to change impact without unnecessary friction.
 - 🛡️ **Hardened Trust Boundaries & Safety Gates**: Authenticated HMAC spending tokens (`BillableActionGate`), realpath symlink enforcement, pre-commit secret blocking, and automated credential masking.
 - 🔄 **Incremental Specs & Conflict Detection**: Structured `ADDED`/`MODIFIED`/`REMOVED` declarations and offline `gemstack spec merge` to mechanically detect contract collisions before merging branches.
-- 📜 **Formal Contract Amendments**: Replaces silent contract tampering with signed, auditable amendment records (`src/lib/contract-amendments.js`).
+- 📜 **Formal Contract Amendments & Decoupled Integrity**: Replaces silent contract tampering with signed, auditable amendment records (`src/lib/contract-amendments.js`) cryptographically decoupled from frozen document artifacts.
 - 🩺 **Offline Health & Dependency Auditor**: `gemstack doctor` scans for orphans, undeclared packages, and local circular imports in milliseconds without network calls.
 - 🧠 **Context Fatigue Detection & Persistent Memory**: Monitors token accumulation, prunes ephemeral noise, and cross-verifies `handoff.md` against git commit history.
 - 🐝 **Agent Swarm Planning**: Compiles tasks into deterministic execution waves with disjoint write partition ownership.
@@ -34,7 +34,7 @@ Instead of letting AI write code blindly in a chaotic chat window, Gemstack inst
 
 ## 🚀 Quickstart
 
-Start a new project or upgrade an existing one in seconds with **Gemstack v2.0.0**:
+Start a new project or upgrade an existing one in seconds with **Gemstack**:
 
 ```bash
 # Initialize Gemstack in your current repository
@@ -261,8 +261,8 @@ Gemstack tracks every architectural enhancement through verifiable milestones:
 
 | Version | Milestone & Core Highlights | Canonical Tests | Status |
 | :--- | :--- | :--- | :--- |
-| **`v2.0.1`** | **Security Closure & Hardening**<br/>• Elimination of unsigned spending token bypass & removal of default signing secrets.<br/>• Mandatory `--sha256` checksum verification & safe `--inspect` for remote skill installs.<br/>• URL credential blocking & extended SSRF protection (private IP/loopback/hex/octal/dword).<br/>• Automatic skill overwrite backup to `.gemstack/backups/skills/<name>_<timestamp>.bak`.<br/>• Mandatory HMAC secret (min 16 chars) & full payload cryptographic binding for contract amendments.<br/>• Zero-dependency root `package-lock.json` and workflow least-privilege permissions. | **203 physical tests / 24 suites** | **Prepared Release Candidate** |
-| **`v2.0.0`** | **Security Hardening, Adaptable SDD & Persistent Memory**<br/>• Strict symlink realpath confinement & remote skill SHA-256 verification.<br/>• HMAC-authenticated spending tokens & disk-recomputed visual evidence.<br/>• 4 SDD Rigor levels (`quick`, `fix`, `feature`, `high-risk`) & incremental spec deltas.<br/>• Signed contract amendments & offline collision detection (`gemstack spec merge`).<br/>• Context fatigue detection, offline dependency auditor, & git-memory cross-audit. | **180 physical tests / 23 suites** | Current Published (npm) |
+| **`v2.0.1`** | **Security Closure & Hardening**<br/>• Elimination of unsigned spending token bypass & removal of default signing secrets.<br/>• Mandatory `--sha256` checksum verification & safe `--inspect` for remote skill installs.<br/>• URL credential blocking & extended SSRF protection (private IP/loopback/hex/octal/dword).<br/>• Automatic skill overwrite backup to `.gemstack/backups/skills/<name>_<timestamp>.bak`.<br/>• Mandatory HMAC secret (min 16 chars) & full payload cryptographic binding for contract amendments.<br/>• Zero-dependency root `package-lock.json` and workflow least-privilege permissions. | **203 physical tests / 24 suites** | **Security Closure Release** |
+| **`v2.0.0`** | **Security Hardening, Adaptable SDD & Persistent Memory**<br/>• Strict symlink realpath confinement & remote skill SHA-256 verification.<br/>• HMAC-authenticated spending tokens & disk-recomputed visual evidence.<br/>• 4 SDD Rigor levels (`quick`, `fix`, `feature`, `high-risk`) & incremental spec deltas.<br/>• Signed contract amendments & offline collision detection (`gemstack spec merge`).<br/>• Context fatigue detection, offline dependency auditor, & git-memory cross-audit. | **180 physical tests / 23 suites** | Baseline Architecture |
 | **`v1.4.0`** | **Agent Swarm Planning & Visual QA Evidence Checkpoint**<br/>• Multi-worker wave planning with disjoint write partitions (`swarm.json`).<br/>• Separation of duties gate (`author != reviewer`) and subagent limits.<br/>• Offline Visual QA manifest, deterministic viewports, & auto-secret masking. | **126 physical tests / 14 suites** | Superseded by v2.0.0 |
 | **`v1.3.0`** | **Cost & Provider Safety Gates + Context Capsule**<br/>• `ProviderCapabilityGate` and `BillableActionGate` (NO PROOF = NO EXECUTION).<br/>• Deterministic context capsule compression with 32KB budget. | **100 physical tests / 25 suites** | Superseded by v1.4.0 |
 | **`v1.2.0`** | **Mechanical Test Matrix & Closure Evidence**<br/>• Canonical acceptance matrices, mutating collector (`gemstack collect`), & `closure.json`.<br/>• Zero-shell TAP test runner & exact reconciliation arithmetic. | **53 physical tests / 11 suites** | Superseded by v1.3.0 |
