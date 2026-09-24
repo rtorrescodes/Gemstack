@@ -15,23 +15,27 @@ Gemstack 2.0.1 closes verification gaps between announced security guarantees an
   - Documented in-process boundary model: `tokenSpendingLedger` operates in Node.js process memory for the active execution session rather than a global distributed quota system.
 - **Remote Skill Ingestion Provenance & Overwrite Protection (`src/commands/install.js`)**:
   - Enforced mandatory `--sha256 <hash>` verification on `gemstack install <url>`. Installations lacking an expected checksum are blocked fail-closed (`MISSING_EXPECTED_CHECKSUM`).
-  - Added safe inspection mode (`--inspect`) allowing developers to preview remote skill metadata, author, and checksum without touching disk.
+  - Added safe inspection mode (`--inspect`) allowing developers to preview remote skill name and SHA-256 checksum without touching disk.
   - Blocked embedded credentials in URLs (`https://user:pass@host/...`) to prevent credential exfiltration and SSRF bypass (`CREDENTIALS_IN_URL_BLOCKED`).
   - Extended SSRF protections: blocks RFC 1918/4193 private IPs, IPv4 representations in hex/octal/dword format, loopback addresses (`127.0.0.1`, `localhost`, `::1`), link-local, and zero addresses (`PRIVATE_IP_BLOCKED`).
-  - Added whitelist enforcement against `DEFAULT_ALLOWED_SOURCES` (`raw.githubusercontent.com`, `gist.githubusercontent.com`), configurable via `--allowed-sources`.
-  - Enforced overwrite protection: existing skills cannot be silently replaced. Overwriting requires `--update` (which creates an automatic timestamped backup in `.gemstack/backups/skills/`) or `--force`.
-- **Contract Amendments Cryptographic Authorization (`src/lib/contract-amendments.js`)**:
+  - Added whitelist enforcement against `DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`, configurable via `--allowed-sources`.
+  - Enforced overwrite protection: existing skills cannot be silently replaced. Overwriting requires `--update` (which strictly verifies symlinks against escapes before reading, and creates an automatic timestamped backup in `.gemstack/backups/skills/<skill-name>_<timestamp>.bak`) or `--force`.
+- **Contract Amendments Authorization & Frozen Artifact Decoupling (`src/lib/contract-amendments.js`)**:
   - Made HMAC secret configuration mandatory (minimum 16 characters) for approving and recording contract amendments (`AMENDMENT_SECRET_MISSING`).
   - Cryptographically bound the amendment signature payload to `feature_id + contract_id + version + previous_contract_sha256 + proposed_contract_sha256 + approved_by + reason`.
   - Enforced timing-safe signature comparison using `crypto.timingSafeEqual` against timing attacks.
+  - Decoupled contract-level amendments from frozen document artifacts (`spec.md`, `plan.md`, `tasks.md`). Document modifications require a separate, signed artifact amendment (`validateArtifactAmendment`).
   - Separated structural integrity hashing (`computeAmendmentIntegrityHash`) from human authorization signatures (`computeAmendmentSignature`), maintaining the core invariant: *integrity hash ≠ human approval*.
+- **Confined Writes & Read-Only Verify Pure Mode (`src/commands/verify.js`, `src/lib/filesystem-safe.js`)**:
+  - Enforced symlink realpath containment on atomic writes (`withConfinedAtomicWrite`), manifest saves (`saveManifest`), and skill installations (`install`).
+  - Guaranteed `gemstack verify` runs purely in-memory across all 6 stages without mutating feature sidecars (`.gemstack.json`) or creating temporary files.
 - **Reproducible CI/CD & Supply Chain Hardening**:
   - Generated and committed a root `package-lock.json` locking 0 runtime and 0 dev dependencies, enabling deterministic `npm ci`.
   - Optimized `.github/workflows/main-ci.yml` by migrating all matrix jobs to `npm ci` and deduplicating redundant test and demo runs.
-  - Hardened `.github/workflows/publish.yml` with least-privilege token separation: split into `publish-npm` (`permissions: { contents: read, id-token: write }`) with fail-closed NPM registry verification, and `release-github` (`permissions: { contents: write }`).
+  - Hardened `.github/workflows/publish.yml` with least-privilege token separation: split into `publish-npm` (`permissions: { contents: read }` using `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`) with fail-closed NPM registry verification, and `release-github` (`permissions: { contents: write }`).
 
 ### Validation
-- 194 physical tests passing across 24 suites with 0 failures and 0 skipped (+14 new tests covering provenance, spend limits, and amendment binding).
+- 203 physical tests passing across 24 suites with 0 failures and 0 skipped (+23 new tests covering provenance, spend limits, amendment decoupling, symlink containment, and verify read-only assurance).
 - Full CI test suite (`npm run ci:all`) passing cleanly with exit code 0.
 - Clean tarball package installation verified in isolated scratch environment.
 - Zero runtime and zero dev npm dependencies maintained.

@@ -15,25 +15,30 @@ Gemstack v2.0.1 is a targeted security closure release. It resolves edge cases w
 
 ### 2. Skill Ingestion Provenance & Overwrite Protection
 - **Mandatory Checksum Verification**: `gemstack install <url>` requires `--sha256 <expected-hash>` to write a remote skill to disk (`MISSING_EXPECTED_CHECKSUM`).
-- **Safe Metadata Inspection Mode**: Introduces `--inspect` to fetch, display metadata, author, and compute SHA-256 without writing files to disk.
+- **Safe Metadata Inspection Mode**: Introduces `--inspect` to fetch, display the skill name, and compute SHA-256 without writing files to disk.
 - **URL Credential Blocking**: URLs containing embedded basic auth credentials (`https://user:pass@host/...`) are rejected fail-closed (`CREDENTIALS_IN_URL_BLOCKED`).
 - **Extended SSRF & Loopback Defense**: Rejects loopback (`localhost`, `127.0.0.1`, `::1`), RFC 1918/4193 private IP ranges, link-local, and integer/hex/octal representations (`PRIVATE_IP_BLOCKED`).
-- **Allowed Sources Whitelist**: Restricts default downloads to trusted domains (`raw.githubusercontent.com`, `gist.githubusercontent.com`), configurable via `--allowed-sources`.
-- **Overwrite Protection & Timestamped Backups**: Refuses to overwrite existing skills without explicit `--update` or `--force`. When `--update` is used, the existing skill is backed up automatically to `.gemstack/backups/skills/<skill-name>-<timestamp>.md`.
+- **Allowed Sources Whitelist**: Restricts default downloads to trusted sources (`DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`), configurable via `--allowed-sources`.
+- **Overwrite Protection & Timestamped Backups**: Refuses to overwrite existing skills without explicit `--update` or `--force`. When `--update` is used, the existing skill is strictly validated against symlink escapes before read, and backed up automatically to `.gemstack/backups/skills/<skill-name>_<timestamp>.bak`.
 
-### 3. Contract Amendments Authorization & Replay Prevention
+### 3. Contract Amendments Authorization & Frozen Artifact Decoupling
 - **Mandatory HMAC Secret**: Recording amendments requires an explicit HMAC secret with a minimum length of 16 characters (`AMENDMENT_SECRET_MISSING`).
 - **Cryptographic Binding of Signature Payload**: Binds `feature_id`, `contract_id`, `version`, `previous_contract_sha256`, `proposed_contract_sha256`, `approved_by`, and `reason` into the HMAC payload. Tampering with any field invalidates the signature.
 - **Timing-Safe Verification**: Enforces `crypto.timingSafeEqual` for signature comparisons.
+- **Frozen Artifact Decoupling**: Amendments to individual architectural contracts no longer lift file-level hash checks on `spec.md`, `plan.md`, or `tasks.md`. Any document-level change requires a separate, cryptographically signed artifact amendment (`validateArtifactAmendment`).
 - **Honest Invariant**: Structural integrity (`computeAmendmentIntegrityHash`) is decoupled from authorization (`computeAmendmentSignature`), maintaining that *integrity hash ≠ human approval*.
 
-### 4. Reproducible CI/CD & Supply Chain Hardening
-- **Zero-Dependency Root Lockfile**: Committed `package-lock.json` locking 0 dependencies for deterministic, immutable `npm ci` runs.
+### 4. Confined Writes & Strictly Read-Only Verify Audit
+- **Confined Atomic Writes & Symlink Containment**: `manifest.saveManifest()`, `withConfinedAtomicWrite()`, and `install` validate all target paths and intermediate symlinks (`resolveSafeStrict`), ensuring zero files are created or mutated outside project roots.
+- **Read-Only Verify Pure Mode**: `gemstack verify` runs purely in-memory across all 6 stages, never writing feature sidecars (`.gemstack.json`) or temporary files to disk. Optional `--run-tests` explicitly delegates to `npm test`.
+
+### 5. Reproducible CI/CD & Supply Chain Hardening
+- **Zero-Dependency Root Lockfile**: Committed `package-lock.json` locking 0 runtime and 0 dev dependencies for deterministic, immutable `npm ci` runs.
 - **Deduplicated Multi-OS CI**: Pinned all GitHub Actions steps to `npm ci` and removed redundant matrix executions in `main-ci.yml`.
-- **Least-Privilege Token Permissions**: Split `publish.yml` into `publish-npm` (`permissions: { contents: read, id-token: write }`) and `release-github` (`permissions: { contents: write }`), with fail-closed NPM registry confirmation.
+- **Least-Privilege Token Permissions**: Split `publish.yml` into `publish-npm` (`permissions: { contents: read }` using `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`) with fail-closed NPM registry confirmation, and `release-github` (`permissions: { contents: write }`).
 
 ## Acceptance & Regression Baseline
-- 194 physical tests passing across 24 suites with 0 failures and 0 skipped.
+- 203 physical tests passing across 24 suites with 0 failures and 0 skipped (+23 new tests covering provenance, spend limits, amendment decoupling, symlink containment, and verify read-only assurance).
 - 100% pass on full CI suite (`npm run ci:all`).
 - Verified clean tarball installation in isolated scratch directory.
 - 0 runtime dependencies, 0 dev dependencies.
