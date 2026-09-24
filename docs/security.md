@@ -36,7 +36,7 @@ Para proteger contra ejecuciones comerciales imprevistas o bucles descontrolados
 
 El comando `gemstack install <url>` incorpora controles estrictos para prevenir inyección de código y SSRF:
 - **Hash SHA-256 Obligatorio**: No se permite escribir ningún skill en disco sin verificar `--sha256 <hash>`.
-- **Modo Inspección Seguro (`--inspect`)**: Permite previsualizar el autor, versión, descripción y hash del skill remoto sin escribir archivos en el repositorio.
+- **Modo Inspección Seguro (`--inspect`)**: Permite previsualizar el nombre y hash SHA-256 del skill remoto sin escribir archivos en el repositorio.
 - **Bloqueo de Credenciales en URL**: URLs con formato `https://usuario:password@host/...` son rechazadas de inmediato (`CREDENTIALS_IN_URL_BLOCKED`).
 - **Defensa SSRF y Filtrado de Red**: Se rechazan esquemas inseguros (`http://`), hosts loopback (`localhost`, `127.0.0.1`), direcciones privadas RFC 1918 / RFC 4193, direcciones link-local, y representaciones ofuscadas (hexadecimal, octal, dword, IPv6 mapping).
 - **Lista Blanca de Fuentes**: Por defecto solo se permiten fuentes públicas seguras (`DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`), configurable mediante `--allowed-sources`.

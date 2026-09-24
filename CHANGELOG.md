@@ -15,7 +15,7 @@ Gemstack 2.0.1 closes verification gaps between announced security guarantees an
   - Documented in-process boundary model: `tokenSpendingLedger` operates in Node.js process memory for the active execution session rather than a global distributed quota system.
 - **Remote Skill Ingestion Provenance & Overwrite Protection (`src/commands/install.js`)**:
   - Enforced mandatory `--sha256 <hash>` verification on `gemstack install <url>`. Installations lacking an expected checksum are blocked fail-closed (`MISSING_EXPECTED_CHECKSUM`).
-  - Added safe inspection mode (`--inspect`) allowing developers to preview remote skill metadata, author, and checksum without touching disk.
+  - Added safe inspection mode (`--inspect`) allowing developers to preview remote skill name and SHA-256 checksum without touching disk.
   - Blocked embedded credentials in URLs (`https://user:pass@host/...`) to prevent credential exfiltration and SSRF bypass (`CREDENTIALS_IN_URL_BLOCKED`).
   - Extended SSRF protections: blocks RFC 1918/4193 private IPs, IPv4 representations in hex/octal/dword format, loopback addresses (`127.0.0.1`, `localhost`, `::1`), link-local, and zero addresses (`PRIVATE_IP_BLOCKED`).
   - Added whitelist enforcement against `DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`, configurable via `--allowed-sources`.

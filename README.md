@@ -8,9 +8,9 @@
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
- 
-> **🛡️ Gemstack v2.0.1** — *Security Closure & Hardening Checkpoint*  
-> **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
+
+> **🛡️ Gemstack v2.0.1** — *Security Closure & Hardening Checkpoint*
+> **💡 ¿No sabes por dónde empezar o cómo funciona esto?**
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
 

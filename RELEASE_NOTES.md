@@ -15,7 +15,7 @@ Gemstack v2.0.1 is a targeted security closure release. It resolves edge cases w
 
 ### 2. Skill Ingestion Provenance & Overwrite Protection
 - **Mandatory Checksum Verification**: `gemstack install <url>` requires `--sha256 <expected-hash>` to write a remote skill to disk (`MISSING_EXPECTED_CHECKSUM`).
-- **Safe Metadata Inspection Mode**: Introduces `--inspect` to fetch, display metadata, author, and compute SHA-256 without writing files to disk.
+- **Safe Metadata Inspection Mode**: Introduces `--inspect` to fetch, display the skill name, and compute SHA-256 without writing files to disk.
 - **URL Credential Blocking**: URLs containing embedded basic auth credentials (`https://user:pass@host/...`) are rejected fail-closed (`CREDENTIALS_IN_URL_BLOCKED`).
 - **Extended SSRF & Loopback Defense**: Rejects loopback (`localhost`, `127.0.0.1`, `::1`), RFC 1918/4193 private IP ranges, link-local, and integer/hex/octal representations (`PRIVATE_IP_BLOCKED`).
 - **Allowed Sources Whitelist**: Restricts default downloads to trusted sources (`DEFAULT_ALLOWED_SOURCES = ['https://raw.githubusercontent.com/']`), configurable via `--allowed-sources`.
