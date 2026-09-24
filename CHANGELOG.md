@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.2] - 2026-09-24
+
+### Operational Data Preservation & Updater Hardening
+Gemstack 2.0.2 resolves real-world updater regressions identified during downstream pilot adoption, ensuring that operational and instance data are strictly immutable during updates while restoring clean manifest semantics.
+
+### Fixes & Hardening
+- **Operational Data Preservation (`src/commands/update.js`, `src/lib/manifest.js`)**:
+  - Excluded all operational and instance data (`handoff.md`, `handoff_archive.md`, `.gemstack/state.json`, `.gemstack/learnings.md`, `specs/current/**`, and `docs/{qa,reviews,security}/latest-*.md`) from update candidate discovery.
+  - Guaranteed byte-for-byte immutability of session memory, active specifications, and historical reports across all update execution modes.
+- **Accurate Dry-Run Reporting**:
+  - Configured `--dry-run` to strictly display files eligible for replacement, eliminating false-positive reports on operational files and unforced customizations.
+- **Manifest Semantics & Migration (`src/lib/manifest.js`)**:
+  - Automatically records the active package version (`2.0.2`) upon successful update.
+  - Automatically sanitizes legacy manifests by pruning operational entries, preventing spurious checksum collisions and false attribution of instance files.
+- **Doctor Diagnostic Clarity (`src/commands/doctor.js`)**:
+  - Separates framework-owned files from operational files in integrity checks.
+  - Diagnoses legacy operational entries with actionable guidance (`run 'gemstack update' to sanitize manifest`).
+- **Mid-Update Protection & Verification**:
+  - Validates that atomic backups are created prior to file mutation.
+  - Added full regression coverage for operational byte-for-byte preservation, dry-run precision, manifest migration, and idempotent re-execution.
+
 ## [v2.0.1] - 2026-09-23
 
 ### Security Closure & Hardening Checkpoint

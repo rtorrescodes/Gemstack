@@ -17,9 +17,16 @@ module.exports = async (flags) => {
     
     let missing = 0;
     let modified = 0;
+    let operationalEntries = 0;
     const manifestLib = require('../lib/manifest');
 
     (manifest.files || []).forEach(f => {
+        if (manifestLib.isOperationalFile(f.path)) {
+            operationalEntries++;
+            logger.info(`Operational file recorded in manifest (legacy): ${f.path}`);
+            return;
+        }
+
         const p = fssafe.resolveSafe(targetDir, f.path);
         if (!fs.existsSync(p)) {
             logger.error(`Missing owned file: ${f.path}`);
@@ -35,9 +42,13 @@ module.exports = async (flags) => {
     });
 
     if (missing === 0 && modified === 0) {
-        logger.ok('All owned files are present and unmodified.');
+        if (operationalEntries > 0) {
+            logger.ok(`All framework-owned files are present and unmodified. (${operationalEntries} legacy operational manifest entries detected; run 'gemstack update' to sanitize manifest).`);
+        } else {
+            logger.ok('All owned files are present and unmodified.');
+        }
     } else {
-        logger.info(`Summary: ${missing} missing, ${modified} modified. Use 'gemstack update' if you want to restore defaults.`);
+        logger.info(`Summary: ${missing} missing, ${modified} modified framework file(s). Use 'gemstack update' if you want to restore defaults.`);
     }
 
     const giPath = fssafe.resolveSafe(targetDir, '.gitignore');

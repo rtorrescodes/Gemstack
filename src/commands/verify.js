@@ -35,6 +35,9 @@ module.exports = async (flags) => {
             let missing = 0;
             let modified = 0;
             (manifest.files || []).forEach(f => {
+                if (manifestLib.isOperationalFile(f.path)) {
+                    return; // Operational/instance files are governed by memory/state checks, not framework manifest
+                }
                 const p = fssafe.resolveSafe(targetDir, f.path);
                 if (!fs.existsSync(p)) {
                     logger.error(`Archivo requerido faltante: ${f.path}`);
