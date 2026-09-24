@@ -1,6 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { evaluateBillableAction } = require('../src/lib/safety-gates');
+const { evaluateBillableAction, issueSpendingToken } = require('../src/lib/safety-gates');
+
+const testBoundarySecret = 'gemstack-boundary-test-secret-32b!';
 
 const testLedger = {
   version: 1,
@@ -69,22 +71,26 @@ test('TEST-COST-A02: Rejects billable action when explicit spending authorizatio
 });
 
 test('TEST-COST-A03: Authorizes billable action when explicit valid spending token is supplied', () => {
+  const token = issueSpendingToken({
+    secret: testBoundarySecret,
+    provider_id: 'gemini-cloud',
+    action_id: 'summarize-report',
+    max_budget_units: 5.00
+  });
+
   const req = {
     action_id: 'summarize-report',
     provider_id: 'gemini-cloud',
     capability_id: 'inference.generate_text',
     environment: 'development',
     requested_units: 10,
-    authorization_token: {
-      source: 'CLI_FLAG',
-      granted: true,
-      max_budget_units: 5.00
-    }
+    authorization_token: token
   };
 
   const decision = evaluateBillableAction(req, testLedger, {
     declaredActions: ['summarize-report'],
-    allowBillable: true
+    allowBillable: true,
+    boundarySecret: testBoundarySecret
   });
 
   assert.strictEqual(decision.authorized, true);
@@ -112,22 +118,26 @@ test('TEST-COST-A04: Rejects action when cost state is UNKNOWN without falling b
 });
 
 test('TEST-COST-G01: Blocks action execution when estimated unit cost exceeds granted budget limit', () => {
+  const token = issueSpendingToken({
+    secret: testBoundarySecret,
+    provider_id: 'gemini-cloud',
+    action_id: 'summarize-report',
+    max_budget_units: 2.00 // Budget limit 2.00 < estimated 5.00
+  });
+
   const req = {
     action_id: 'summarize-report',
     provider_id: 'gemini-cloud',
     capability_id: 'inference.generate_text',
     environment: 'development',
     requested_units: 100, // 100 * 0.05 = 5.00
-    authorization_token: {
-      source: 'CLI_FLAG',
-      granted: true,
-      max_budget_units: 2.00 // Budget limit 2.00 < estimated 5.00
-    }
+    authorization_token: token
   };
 
   const decision = evaluateBillableAction(req, testLedger, {
     declaredActions: ['summarize-report'],
-    allowBillable: true
+    allowBillable: true,
+    boundarySecret: testBoundarySecret
   });
 
   assert.strictEqual(decision.authorized, false);

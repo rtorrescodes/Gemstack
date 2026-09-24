@@ -235,6 +235,108 @@ describe('Gemstack 2.0 Sprint B: Honest Evidence & Reliable Metrics (P1)', () =>
       assert.strictEqual(dec2.reasonCode, 'BUDGET_THRESHOLD_EXCEEDED');
     });
 
+    it('TEST-EVID-A05: Fails closed when trusted boundary secret is missing for billable action', () => {
+      const validToken = safetyGates.issueSpendingToken({
+        secret: trustedSecret,
+        provider_id: 'commercial_llm',
+        action_id: 'generate_summary',
+        max_budget_units: 50,
+        ttl_seconds: 300
+      });
+
+      const request = {
+        action_id: 'generate_summary',
+        provider_id: 'commercial_llm',
+        capability_id: 'text_generation',
+        environment: 'DEVELOPMENT',
+        requested_units: 1,
+        authorization_token: validToken
+      };
+
+      // No boundarySecret provided in options, and no GEMSTACK_BOUNDARY_SECRET env
+      const oldEnv = process.env.GEMSTACK_BOUNDARY_SECRET;
+      delete process.env.GEMSTACK_BOUNDARY_SECRET;
+      try {
+        const decision = safetyGates.evaluateBillableAction(request, mockLedger, { allowBillable: true });
+        assert.strictEqual(decision.authorized, false);
+        assert.strictEqual(decision.decision, 'DENY');
+        assert.strictEqual(decision.reasonCode, 'BILLABLE_ACTION_UNAUTHORIZED');
+        assert.strictEqual(decision.context.reason, 'MISSING_BOUNDARY_SECRET');
+      } finally {
+        if (oldEnv) process.env.GEMSTACK_BOUNDARY_SECRET = oldEnv;
+      }
+    });
+
+    it('TEST-EVID-A06: Rejects forged signature or signature computed with wrong secret', () => {
+      const forgedToken = safetyGates.issueSpendingToken({
+        secret: 'wrong-attacker-secret-32-chars-long!',
+        provider_id: 'commercial_llm',
+        action_id: 'generate_summary',
+        max_budget_units: 50,
+        ttl_seconds: 300
+      });
+
+      const request = {
+        action_id: 'generate_summary',
+        provider_id: 'commercial_llm',
+        capability_id: 'text_generation',
+        environment: 'DEVELOPMENT',
+        requested_units: 1,
+        authorization_token: forgedToken
+      };
+
+      const decision = safetyGates.evaluateBillableAction(request, mockLedger, { allowBillable: true, boundarySecret: trustedSecret });
+      assert.strictEqual(decision.authorized, false);
+      assert.strictEqual(decision.decision, 'DENY');
+      assert.strictEqual(decision.reasonCode, 'BILLABLE_ACTION_UNAUTHORIZED');
+      assert.strictEqual(decision.context.reason, 'TOKEN_SIGNATURE_INVALID');
+    });
+
+    it('TEST-EVID-A07: Rejects malformed or non-positive budget limits and invalid expiration dates', () => {
+      // Non-positive budget rejection in issueSpendingToken
+      assert.throws(
+        () => safetyGates.issueSpendingToken({ secret: trustedSecret, max_budget_units: -10 }),
+        (err) => err.code === 'INVALID_BUDGET_UNITS'
+      );
+      assert.throws(
+        () => safetyGates.issueSpendingToken({ secret: trustedSecret, max_budget_units: 0 }),
+        (err) => err.code === 'INVALID_BUDGET_UNITS'
+      );
+      assert.throws(
+        () => safetyGates.issueSpendingToken({ secret: trustedSecret, max_budget_units: NaN }),
+        (err) => err.code === 'INVALID_BUDGET_UNITS'
+      );
+
+      // Malformed expires_at in token evaluated by verifySpendingToken
+      const validToken = safetyGates.issueSpendingToken({
+        secret: trustedSecret,
+        provider_id: 'commercial_llm',
+        action_id: 'generate_summary',
+        max_budget_units: 50,
+        ttl_seconds: 300
+      });
+
+      const malformedExpToken = { ...validToken, expires_at: 'invalid-date-string' };
+      const resExp = safetyGates.verifySpendingToken(malformedExpToken, trustedSecret);
+      assert.strictEqual(resExp.valid, false);
+      assert.strictEqual(resExp.reason, 'TOKEN_EXPIRED');
+    });
+
+    it('TEST-EVID-A08: MOCK and FREE actions execute without spending token or boundary secret', () => {
+      const freeRequest = {
+        action_id: 'mock_generation',
+        provider_id: 'free_mock',
+        capability_id: 'mock_generate',
+        environment: 'DEVELOPMENT',
+        requested_units: 10
+      };
+
+      const decision = safetyGates.evaluateBillableAction(freeRequest, mockLedger, {});
+      assert.strictEqual(decision.authorized, true);
+      assert.strictEqual(decision.decision, 'ALLOW');
+      assert.strictEqual(decision.reasonCode, 'ACTION_AUTHORIZED_FREE');
+    });
+
   });
 
   // --- Group B: Honest Visual QA & Evidence Calculation (TEST-EVID-B01 .. B04) ---

@@ -231,6 +231,82 @@ describe('Gemstack 2.0 Sprint A: Trust Boundaries Hardening', () => {
       }
     });
 
+    it('TEST-HARDEN-B05: Blocks manifest.saveManifest when .gemstack is a symlink escaping root and modifies zero external files', () => {
+      const tempBase = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-harden-b05-'));
+      const projDir = path.join(tempBase, 'project');
+      const outsideDir = path.join(tempBase, 'outside');
+      fs.mkdirSync(projDir);
+      fs.mkdirSync(outsideDir);
+
+      const gemstackLink = path.join(projDir, '.gemstack');
+      try {
+        fs.symlinkSync(outsideDir, gemstackLink, 'junction');
+      } catch {
+        try { fs.symlinkSync(outsideDir, gemstackLink, 'dir'); } catch { return; }
+      }
+
+      const manifestLib = require('../src/lib/manifest');
+      assert.throws(
+        () => {
+          manifestLib.saveManifest(projDir, { version: '2.0.1', files: [] }, false);
+        },
+        (err) => {
+          assert.strictEqual(err.code, 'SYMLINK_ESCAPE_DETECTED');
+          return true;
+        }
+      );
+
+      // Verify zero files created in external directory
+      const outsideFiles = fs.readdirSync(outsideDir);
+      assert.strictEqual(outsideFiles.length, 0, `Expected 0 files in outsideDir, but found: ${outsideFiles.join(', ')}`);
+      fs.rmSync(tempBase, { recursive: true, force: true });
+    });
+
+    it('TEST-HARDEN-B06: Blocks withConfinedAtomicWrite and writeStateAtomic when .gemstack escapes root', () => {
+      const tempBase = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-harden-b06-'));
+      const projDir = path.join(tempBase, 'project');
+      const outsideDir = path.join(tempBase, 'outside');
+      fs.mkdirSync(projDir);
+      fs.mkdirSync(outsideDir);
+
+      const gemstackLink = path.join(projDir, '.gemstack');
+      try {
+        fs.symlinkSync(outsideDir, gemstackLink, 'junction');
+      } catch {
+        try { fs.symlinkSync(outsideDir, gemstackLink, 'dir'); } catch { return; }
+      }
+
+      // 1. withConfinedAtomicWrite
+      assert.throws(
+        () => {
+          fssafe.withConfinedAtomicWrite(projDir, 'some-output.txt', (tmpFile) => {
+            fs.writeFileSync(tmpFile, 'payload', 'utf8');
+          });
+        },
+        (err) => {
+          assert.strictEqual(err.code, 'SYMLINK_ESCAPE_DETECTED');
+          return true;
+        }
+      );
+
+      // 2. writeStateAtomic
+      const { writeStateAtomic } = require('../src/lib/state');
+      assert.throws(
+        () => {
+          writeStateAtomic(projDir, { current_phase: 'plan' });
+        },
+        (err) => {
+          assert.strictEqual(err.code, 'SYMLINK_ESCAPE_DETECTED');
+          return true;
+        }
+      );
+
+      // Verify zero files created in external directory
+      const outsideFiles = fs.readdirSync(outsideDir);
+      assert.strictEqual(outsideFiles.length, 0, `Expected 0 files in outsideDir, but found: ${outsideFiles.join(', ')}`);
+      fs.rmSync(tempBase, { recursive: true, force: true });
+    });
+
   });
 
   // --- Group C: Git Hooks Preservation & Secret Detection ---

@@ -9,11 +9,11 @@ permissions:
   contents: read
 
 jobs:
-  publish:
-    name: Publish to NPM and GitHub Releases
+  publish-npm:
+    name: Publish Package to NPM
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required for GitHub Releases
+      contents: read
 
     steps:
       - name: Checkout code
@@ -26,13 +26,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
-        shell: bash
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install --no-audit --no-fund
-          fi
+        run: npm ci
 
       - name: Security Gate - Run CI All
         run: npm run ci:all
@@ -48,15 +42,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ github.ref_name }} \
-            --title "Release ${{ github.ref_name }}" \
-            --notes-file RELEASE_NOTES.md \
-            "$TARBALL"
-
       - name: Verify NPM Availability
         run: |
           echo "Waiting for NPM registry to reflect publication..."
@@ -71,4 +56,36 @@ jobs:
             fi
             sleep 5
           done
-          echo "Notice: npm publish completed; edge CDN still replicating."
+          echo "Error: NPM registry did not reflect target version $TARGET_VERSION within timeout."
+          exit 1
+
+  release-github:
+    name: Create GitHub Release
+    needs: publish-npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Granted strictly to GitHub release creation
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+
+      - name: Pack Tarball
+        id: pack
+        run: |
+          TARBALL=$(npm pack)
+          echo "TARBALL=$TARBALL" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "Release ${{ github.ref_name }}" \
+            --notes-file RELEASE_NOTES.md \
+            "${{ env.TARBALL }}"

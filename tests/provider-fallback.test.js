@@ -52,6 +52,10 @@ const testLedger = {
   }
 };
 
+const { issueSpendingToken } = require('../src/lib/safety-gates');
+
+const testBoundarySecret = 'gemstack-boundary-test-secret-32b!';
+
 test('Execution boundary passes only when both gates approve', () => {
   let executionCount = 0;
   const mockAdapter = {
@@ -63,18 +67,26 @@ test('Execution boundary passes only when both gates approve', () => {
     }
   };
 
+  const token = issueSpendingToken({
+    secret: testBoundarySecret,
+    provider_id: 'gemini-cloud',
+    action_id: 'generate-summary',
+    max_budget_units: 10
+  });
+
   const req = {
     action_id: 'generate-summary',
     provider_id: 'gemini-cloud',
     capability_id: 'inference.generate_text',
     environment: 'development',
-    authorization_token: { granted: true }
+    authorization_token: token
   };
 
   const result = executeProviderAction(req, mockAdapter, {
     registry: testRegistry,
     ledger: testLedger,
-    allowBillable: true
+    allowBillable: true,
+    boundarySecret: testBoundarySecret
   });
 
   assert.strictEqual(result.output, 'success');
@@ -108,18 +120,25 @@ test('TEST-COST-D01: Fallback candidate triggers independent gate re-evaluation'
     environment: 'development'
   };
 
+  const token = issueSpendingToken({
+    secret: testBoundarySecret,
+    provider_id: 'gemini-cloud',
+    action_id: 'generate-summary',
+    max_budget_units: 10
+  });
+
   const fallbackReq = {
     action_id: 'generate-summary',
     provider_id: 'gemini-cloud',
     capability_id: 'inference.generate_text',
     environment: 'development',
-    authorization_token: { granted: true } // Independent spending token for fallback
+    authorization_token: token // Independent spending token for fallback
   };
 
   const res = executeWithFallback(
     { request: primaryReq, adapter: failingPrimaryAdapter },
     [{ request: fallbackReq, adapter: workingFallbackAdapter }],
-    { registry: testRegistry, ledger: testLedger, allowBillable: true }
+    { registry: testRegistry, ledger: testLedger, allowBillable: true, boundarySecret: testBoundarySecret }
   );
 
   assert.strictEqual(primaryExecuted, true);

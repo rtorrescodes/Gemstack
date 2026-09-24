@@ -36,12 +36,15 @@ Commands:
   show      Show content of a skill
   handoff   Show content of handoff.md
   hooks     Install native Git pre-commit hooks for active security
-  install   Install a remote skill via URL
+  install   Install a remote skill via URL (requires --sha256 or --inspect)
   mcp       Start the Gemstack MCP (Model Context Protocol) server over stdio
 Options:
+  --sha256    Expected SHA-256 checksum of the remote skill payload
+  --inspect   Inspect remote skill metadata without installing to disk
+  --update    Update an existing skill with automatic timestamped backup
   --dry-run   Show changes without writing
   --yes       Skip confirmations
-  --force     Force overwrite (update only)
+  --force     Force overwrite
   --target    Specify target directory
   --run-tests Run test suite during verify`);
         return;

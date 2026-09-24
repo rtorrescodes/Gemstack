@@ -1,15 +1,15 @@
 <div align="center">
   <img src="assets/logo.jpg" alt="Gemstack Logo" width="200" style="border-radius: 20px" />
-  <h1>Gemstack v2.0.0</h1>
+  <h1>Gemstack v2.0.1</h1>
   <p><b>The Local-First Agentic Framework for Spec-Driven Development</b></p>
 
   [![npm version](https://img.shields.io/npm/v/gemstack-ai.svg?style=flat-square)](https://www.npmjs.com/package/gemstack-ai)
-  [![Release](https://img.shields.io/badge/release-v2.0.0-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v2.0.0)
+  [![Release](https://img.shields.io/badge/release-v2.0.1-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v2.0.1)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
 
-> **🚀 Current Stable Release: `v2.0.0`** — *Security Hardening, Adaptable SDD & Persistent Memory Checkpoint*  
+> **🚀 Current Stable Release: `v2.0.1`** — *Security Closure & Hardening Checkpoint*  
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**  
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
@@ -80,7 +80,9 @@ Gemstack ships with `03-gemstack-security.md` and `04-gemstack-infrastructure.md
 | **Spec-Driven Development (SDD)** | Architectural alignment and phase gating | Cryptographic phase hashes (`gemstack verify`) | Does not prevent human commit of unapproved manual diffs outside the CLI |
 | **Filesystem Traversal & Symlink Defense** | Scaffolding, backup, install, and visual QA writes | Realpath resolution and confined atomic writes (`tests/security-p0-hardening.test.js`) | Local OS processes with root privileges outside Gemstack CLI process boundaries |
 | **Secret Scanning & Hook Preservation** | Local git commits and CI pipelines | Multi-provider regex scanning and pre-commit wrapper chaining (`scripts/ci/check-secrets.js`) | Only inspects staged text files; does not inspect compiled binary blobs or external networks |
-| **Spending & Cost Safety Gates** | Billable agent API and model execution | HMAC token verification, cumulative budget tracking, positive unit bounds (`src/lib/safety-gates.js`) | Enforced on calls through ProviderBoundary; does not intercept direct outbound curl requests |
+| **Spending & Cost Safety Gates** | Billable agent API and model execution | HMAC token verification (min 16 chars), cumulative session budget tracking, positive unit bounds (`src/lib/safety-gates.js`) | Enforced on calls through ProviderBoundary within Node process memory; does not intercept external network processes |
+| **Skill Installation Provenance & Safe Mode** | Remote skill ingestion via HTTPS | Checksum pinning (`--sha256`), URL credential blocking, private IP/loopback filtering, and `--inspect` dry preview (`tests/skill-install-provenance.test.js`) | Requires user verification of expected sha256; `--inspect` mode previews without writing |
+| **Contract Amendments Authorization** | Specification contract modifications | Minimum 16-character HMAC signature over feature, contract, versions, and payload digests (`src/lib/contract-amendments.js`) | Amendment integrity hash checks structure; mechanical authorization requires valid HMAC key |
 | **Visual QA Evidence Verification** | UI screenshots and regression detection | Disk-computed SHA-256 and pluggable diff adapter; UNVERIFIED fallback (`src/lib/visual-qa.js`) | Diff accuracy depends on adapter engine; static hashes detect file modification only |
 | **Agent Rulebooks & AppSec Guidance** | Agent context prompts during review & planning | CSO audit scripts and rule templates (`.agents/rules/03-gemstack-security.md`) | Agent guidance is advisory; mechanical enforcement requires CLI verify and CI gates |
 
@@ -197,7 +199,7 @@ Gemstack provides a focused, deterministic CLI surface:
 
 ```bash
 # Core verification & collection
-gemstack verify [--json] [--target <dir>]     # 6-stage read-only audit (0 mutations, 0 network)
+gemstack verify [--json] [--target <dir>]     # 6-stage read-only audit (0 mutations; --run-tests delegates to npm test)
 gemstack collect [--target <dir>]             # Executes test runner & records closure.json
 gemstack ship [--target <dir>]                # Transitions lifecycle to SHIPPED if closure is VERIFIED
 
@@ -224,9 +226,16 @@ Gemstack ships with native, zero-dependency Git hooks. Run `npx gemstack-ai hook
 
 ## 🔌 Ecosystem & Plugins (Skill Market)
 
-You can install agent skills created by the community directly into your project using the `install` command. Gemstack will fetch the `SKILL.md`, parse its metadata, and integrate it into your AI's brain automatically:
+You can install agent skills created by the community directly into your project using the `install` command. Gemstack enforces fail-closed provenance verification: remote skills require either `--inspect` (dry metadata inspection) or `--sha256` (cryptographic integrity check):
 ```bash
-npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md
+# Safe inspection: preview remote skill metadata without writing to disk
+npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md --inspect
+
+# Cryptographically verified installation
+npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md --sha256 <64-char-sha256>
+
+# Update existing skill with automatic timestamped backup (.gemstack/backups/skills/)
+npx gemstack-ai install https://raw.githubusercontent.com/community/gemstack-skills/main/django-expert/SKILL.md --sha256 <64-char-sha256> --update
 ```
 
 
@@ -252,7 +261,8 @@ Gemstack tracks every architectural enhancement through verifiable milestones:
 
 | Version | Milestone & Core Highlights | Canonical Tests | Status |
 | :--- | :--- | :--- | :--- |
-| **`v2.0.0`** | **Security Hardening, Adaptable SDD & Persistent Memory**<br/>• Strict symlink realpath confinement & remote skill SHA-256 verification.<br/>• HMAC-authenticated spending tokens & disk-recomputed visual evidence.<br/>• 4 SDD Rigor levels (`quick`, `fix`, `feature`, `high-risk`) & incremental spec deltas.<br/>• Signed contract amendments & offline collision detection (`gemstack spec merge`).<br/>• Context fatigue detection, offline dependency auditor, & git-memory cross-audit. | **180 physical tests / 23 suites** | **Current Stable** |
+| **`v2.0.1`** | **Security Closure & Hardening**<br/>• Elimination of unsigned spending token bypass & removal of default signing secrets.<br/>• Mandatory `--sha256` checksum verification & safe `--inspect` for remote skill installs.<br/>• URL credential blocking & extended SSRF protection (private IP/loopback/hex/octal/dword).<br/>• Automatic skill overwrite backup to `.gemstack/backups/skills/`.<br/>• Mandatory HMAC secret (min 16 chars) & full payload cryptographic binding for contract amendments.<br/>• Zero-dependency root `package-lock.json` and workflow least-privilege permissions. | **194 physical tests / 24 suites** | **Current Stable** |
+| **`v2.0.0`** | **Security Hardening, Adaptable SDD & Persistent Memory**<br/>• Strict symlink realpath confinement & remote skill SHA-256 verification.<br/>• HMAC-authenticated spending tokens & disk-recomputed visual evidence.<br/>• 4 SDD Rigor levels (`quick`, `fix`, `feature`, `high-risk`) & incremental spec deltas.<br/>• Signed contract amendments & offline collision detection (`gemstack spec merge`).<br/>• Context fatigue detection, offline dependency auditor, & git-memory cross-audit. | **180 physical tests / 23 suites** | Superseded by v2.0.1 |
 | **`v1.4.0`** | **Agent Swarm Planning & Visual QA Evidence Checkpoint**<br/>• Multi-worker wave planning with disjoint write partitions (`swarm.json`).<br/>• Separation of duties gate (`author != reviewer`) and subagent limits.<br/>• Offline Visual QA manifest, deterministic viewports, & auto-secret masking. | **126 physical tests / 14 suites** | Superseded by v2.0.0 |
 | **`v1.3.0`** | **Cost & Provider Safety Gates + Context Capsule**<br/>• `ProviderCapabilityGate` and `BillableActionGate` (NO PROOF = NO EXECUTION).<br/>• Deterministic context capsule compression with 32KB budget. | **100 physical tests / 25 suites** | Superseded by v1.4.0 |
 | **`v1.2.0`** | **Mechanical Test Matrix & Closure Evidence**<br/>• Canonical acceptance matrices, mutating collector (`gemstack collect`), & `closure.json`.<br/>• Zero-shell TAP test runner & exact reconciliation arithmetic. | **53 physical tests / 11 suites** | Superseded by v1.3.0 |

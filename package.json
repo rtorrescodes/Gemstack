@@ -1,6 +1,6 @@
 {
   "name": "gemstack-ai",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Agentic Spec-Driven Development framework for Gemini/Antigravity",
   "main": "src/cli.js",
   "bin": {
@@ -10,7 +10,7 @@
     "node": ">=18.18.0"
   },
   "scripts": {
-    "test": "node --test tests/contracts.test.js tests/hasher.test.js tests/findings.test.js tests/init.test.js tests/verify.test.js tests/test-matrix.test.js tests/reconciliation.test.js tests/runner-adapter.test.js tests/traceability.test.js tests/closure-manifest.test.js tests/closure-gates.test.js tests/cost-ledger.test.js tests/environment-provider-safety.test.js tests/provider-capability-gate.test.js tests/billable-action-gate.test.js tests/provider-fallback.test.js tests/verification-purity-cost.test.js tests/context-determinism.test.js tests/context-authority.test.js tests/context-freshness.test.js tests/context-constraints.test.js tests/context-secrets.test.js tests/context-size-budget.test.js tests/context-purity.test.js tests/context-legacy.test.js tests/swarm-partitioning.test.js tests/swarm-review.test.js tests/visual-manifest.test.js tests/visual-diff.test.js tests/swarm-visual-purity.test.js tests/security-p0-hardening.test.js tests/honest-evidence-p1.test.js tests/adaptable-sdd-p1.test.js tests/context-memory-p1.test.js",
+    "test": "node --test tests/contracts.test.js tests/hasher.test.js tests/findings.test.js tests/init.test.js tests/verify.test.js tests/test-matrix.test.js tests/reconciliation.test.js tests/runner-adapter.test.js tests/traceability.test.js tests/closure-manifest.test.js tests/closure-gates.test.js tests/cost-ledger.test.js tests/environment-provider-safety.test.js tests/provider-capability-gate.test.js tests/billable-action-gate.test.js tests/provider-fallback.test.js tests/verification-purity-cost.test.js tests/context-determinism.test.js tests/context-authority.test.js tests/context-freshness.test.js tests/context-constraints.test.js tests/context-secrets.test.js tests/context-size-budget.test.js tests/context-purity.test.js tests/context-legacy.test.js tests/swarm-partitioning.test.js tests/swarm-review.test.js tests/visual-manifest.test.js tests/visual-diff.test.js tests/swarm-visual-purity.test.js tests/security-p0-hardening.test.js tests/honest-evidence-p1.test.js tests/adaptable-sdd-p1.test.js tests/context-memory-p1.test.js tests/skill-install-provenance.test.js",
     "gemstack:verify": "node src/cli.js verify",
     "pack:dry": "npm pack --dry-run",
     "ci:frontmatter": "node scripts/ci/check-frontmatter.js",
@@ -22,6 +22,21 @@
     "ci:demo": "npm --prefix demo-app install && npm --prefix demo-app run smoke",
     "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:secrets && npm run ci:smoke && npm run ci:demo"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtorrescodes/Gemstack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rtorrescodes/Gemstack/issues"
+  },
+  "homepage": "https://github.com/rtorrescodes/Gemstack#readme",
+  "dependencies": {}
 }
