@@ -49,15 +49,20 @@ test('gemstack ops: assesses production health accurately and strictly read-only
 
         const protectedReport = assessOperationalHealth(tempDir);
         assert.strictEqual(protectedReport.summary.requiereAtencion, 0);
-        assert.ok(protectedReport.summary.verificado >= 4);
-        assert.ok(protectedReport.summary.noComprobado >= 1); // Cost ledger and remote Sentry DSN not added
+        assert.ok(protectedReport.summary.noComprobado >= 2); // Cloud backups and remote Sentry DSN not available
 
         // Verify finding metadata
-        const recoveryFinding = protectedReport.findings.find(f => f.pillar === 'Recuperación DB & Storage');
+        const recoveryFinding = protectedReport.findings.find(f => f.pillar === 'Recuperación DB & Storage' && f.source.includes('restore-drill-dryrun.mjs'));
         assert.ok(recoveryFinding);
+        assert.strictEqual(recoveryFinding.status, 'PROBADO LOCALMENTE');
         assert.strictEqual(recoveryFinding.evidenceType, 'PROBADO_LOCALMENTE');
         assert.strictEqual(recoveryFinding.freshness, 'VIGENTE');
         assert.ok(recoveryFinding.evidenceDate);
+
+        // Verify cloud backup finding is NO COMPROBADO
+        const cloudBackupFinding = protectedReport.findings.find(f => f.pillar === 'Recuperación DB & Storage' && f.name.includes('PITR'));
+        assert.ok(cloudBackupFinding);
+        assert.strictEqual(cloudBackupFinding.status, 'NO COMPROBADO');
 
         // Verify read-only guarantee: nothing extraneous was written
         assert.strictEqual(fs.existsSync(path.join(tempDir, '.gemstack.json')), false);

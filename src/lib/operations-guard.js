@@ -77,26 +77,45 @@ function assessOperationalHealth(targetDir = process.cwd()) {
         const { fresh, mtime } = checkFreshness(restoreDrillScript);
         addFinding({
             pillar: 'Recuperación DB & Storage',
-            name: 'Simulacro no destructivo de reconstrucción topológica',
-            status: fresh === 'CADUCADO' ? 'REQUIERE ATENCIÓN' : 'VERIFICADO',
+            name: 'Simulacro no destructivo de reconstrucción topológica (Dry-Run)',
+            status: fresh === 'CADUCADO' ? 'REQUIERE ATENCIÓN' : 'PROBADO LOCALMENTE',
             source: 'scripts/ops/restore-drill-dryrun.mjs',
             evidenceType: 'PROBADO_LOCALMENTE',
-            evidence: 'Script de simulacro topológico dry-run presente y ejecutable en memoria sin alterar producción.',
+            evidence: 'Script de simulacro topológico dry-run ejecutado en memoria (31 modelos). AVISO: Valida dependencias de esquemas pero NO certifica existencia física ni frescura de respaldos en la nube.',
             evidenceDate: mtime,
             freshness: fresh,
-            recommendation: fresh === 'CADUCADO' ? 'Re-ejecutar simulacro de recuperación para actualizar evidencia.' : null
+            recommendation: fresh === 'CADUCADO' ? 'Re-ejecutar simulacro de recuperación para actualizar evidencia.' : 'Comprobar existencia de respaldos PITR y versionado en nube mediante acceso de lectura autorizado.'
+        });
+        addFinding({
+            pillar: 'Recuperación DB & Storage',
+            name: 'Respaldos automatizados PITR y persistencia física de Storage',
+            status: 'NO COMPROBADO',
+            source: 'Supabase Management API / Cloud Storage',
+            evidenceType: 'NO_DISPONIBLE',
+            evidence: 'No se dispone de permisos de lectura sobre la API de infraestructura del proyecto Supabase desde este entorno. Sin evidencia de snapshots o respaldos independientes de buckets.',
+            freshness: 'SIN_EVIDENCIA',
+            recommendation: 'Comprobar vía Supabase Management API o CLI la política PITR y snapshots diarios.'
         });
     } else if (fs.existsSync(backupDbScript) && fs.existsSync(cloneStagingScript)) {
         const { fresh, mtime } = checkFreshness(backupDbScript);
         addFinding({
             pillar: 'Recuperación DB & Storage',
             name: 'Scripts de respaldo y clonación a réplica de Staging',
-            status: fresh === 'CADUCADO' ? 'REQUIERE ATENCIÓN' : 'VERIFICADO',
+            status: fresh === 'CADUCADO' ? 'REQUIERE ATENCIÓN' : 'PROBADO LOCALMENTE',
             source: 'scripts/backup-db.ts, scripts/clone-db-to-staging.ts',
             evidenceType: 'PROBADO_LOCALMENTE',
             evidence: 'Herramientas de volcado inmutable gzip y restauración con bypass foráneo y RLS en staging.',
             evidenceDate: mtime,
             freshness: fresh
+        });
+        addFinding({
+            pillar: 'Recuperación DB & Storage',
+            name: 'Respaldos automatizados PITR y persistencia física de Storage',
+            status: 'NO COMPROBADO',
+            source: 'Supabase Management API / Cloud Storage',
+            evidenceType: 'NO_DISPONIBLE',
+            evidence: 'Existencia de snapshots automáticos en la nube no verificada en producción.',
+            freshness: 'SIN_EVIDENCIA'
         });
     } else {
         addFinding({
@@ -267,10 +286,10 @@ function assessOperationalHealth(targetDir = process.cwd()) {
             addFinding({
                 pillar: 'Monitoreo & Sentry',
                 name: 'Integración de Sentry y saneamiento de PII/credenciales',
-                status: 'VERIFICADO',
+                status: isMainBranch ? 'VERIFICADO' : 'CONFIGURADO EN RAMA',
                 source: 'sentry.client.config.ts, sentry.server.config.ts',
-                evidenceType: 'PROBADO_LOCALMENTE',
-                evidence: 'Filtros beforeSend probados unitariamente: eliminan cookies, authorization headers y anonimizan emails.',
+                evidenceType: isMainBranch ? 'PROBADO_LOCALMENTE' : 'CONFIGURADO_EN_RAMA',
+                evidence: `Filtros beforeSend probados unitariamente: eliminan cookies, authorization headers y anonimizan emails. Estado en rama: ${currentBranch}.`,
                 evidenceDate: mtime,
                 freshness: fresh
             });
@@ -322,12 +341,13 @@ function assessOperationalHealth(targetDir = process.cwd()) {
         addFinding({
             pillar: 'Vulnerabilidades & Dependencias',
             name: 'Clasificador de vulnerabilidades Trivy y compuerta de despliegue',
-            status: 'VERIFICADO',
+            status: isMainBranch ? 'VERIFICADO' : 'CONFIGURADO EN RAMA',
             source: 'scripts/ops/scan-container-security.mjs',
-            evidenceType: 'PROBADO_LOCALMENTE',
-            evidence: 'Script procesador de reportes Trivy en JSON con bloqueo automático de hallazgos CRITICAL con exploit activo.',
+            evidenceType: isMainBranch ? 'VERIFICADO_EN_PRODUCCION' : 'CONFIGURADO_EN_RAMA',
+            evidence: `Script procesador de reportes Trivy en JSON con bloqueo automático de hallazgos CRITICAL con exploit activo. Estado en rama: ${currentBranch}.`,
             evidenceDate: mtime,
-            freshness: fresh
+            freshness: fresh,
+            recommendation: isMainBranch ? null : 'Hacer merge a main para activar el bloqueo de contenedor en despliegues reales.'
         });
     } else if (fs.existsSync(pkgJsonPath)) {
         try {
