@@ -19,11 +19,19 @@ function readState(rootPath) {
   }
   if (!fs.existsSync(statePath)) {
     return {
-      version: '0.1',
+      schemaVersion: '0.3.0',
+      version: '0.3.0',
+      frameworkVersion: '2.0.3',
       current_phase: null,
       status: null,
       stop_reason: null,
       active_spec: null,
+      activeMilestone: null,
+      activeTaskId: null,
+      activeModule: null,
+      lastCompletedTaskId: null,
+      nextTaskId: null,
+      blocked: false,
       completed_phases: [],
       phase_hashes: null,
       consistency: null,
@@ -35,17 +43,38 @@ function readState(rootPath) {
     const raw = fs.readFileSync(statePath, 'utf8');
     const parsed = JSON.parse(raw);
     const { findings, accepted_exceptions, ...cleanParsed } = parsed;
+
+    // Infer activeMilestone if missing
+    let activeMilestone = cleanParsed.activeMilestone ?? null;
+    if (!activeMilestone && cleanParsed.active_spec) {
+      const match = cleanParsed.active_spec.match(/(?:specs\/)?(\d+)-/);
+      if (match) {
+        activeMilestone = `MVP-${parseInt(match[1], 10)}`;
+      }
+    }
+
     return {
-      version: cleanParsed.version || '0.1',
+      schemaVersion: '0.3.0',
+      version: '0.3.0',
+      frameworkVersion: '2.0.3',
       current_phase: cleanParsed.current_phase ?? null,
       status: cleanParsed.status ?? null,
       stop_reason: cleanParsed.stop_reason ?? null,
       active_spec: cleanParsed.active_spec ?? null,
+      activeMilestone,
+      activeTaskId: cleanParsed.activeTaskId ?? null,
+      activeModule: cleanParsed.activeModule ?? null,
+      lastCompletedTaskId: cleanParsed.lastCompletedTaskId ?? null,
+      nextTaskId: cleanParsed.nextTaskId ?? null,
+      blocked: cleanParsed.blocked ?? false,
       completed_phases: Array.isArray(cleanParsed.completed_phases) ? cleanParsed.completed_phases : [],
       phase_hashes: cleanParsed.phase_hashes ?? null,
       consistency: cleanParsed.consistency ?? null,
       guard_mode: cleanParsed.guard_mode || { careful: false, freeze: false, allowed_paths: [] },
-      ...cleanParsed // preserve any extra operational fields (excluding findings / accepted_exceptions)
+      ...cleanParsed, // preserve any extra operational fields (excluding findings / accepted_exceptions)
+      schemaVersion: '0.3.0',
+      version: '0.3.0',
+      frameworkVersion: '2.0.3'
     };
   } catch (err) {
     throw new Error(`Failed to parse .gemstack/state.json: ${err.message}`);
@@ -100,6 +129,9 @@ function writeJsonAtomic(filePath, data) {
 function writeStateAtomic(rootPath, stateObj) {
   const fssafe = require('./filesystem-safe');
   const { findings, accepted_exceptions, ...operationalState } = stateObj;
+  operationalState.schemaVersion = '0.3.0';
+  operationalState.version = '0.3.0';
+  operationalState.frameworkVersion = '2.0.3';
   fssafe.withConfinedAtomicWrite(rootPath, '.gemstack/state.json', (tempFile) => {
     fs.writeFileSync(tempFile, JSON.stringify(operationalState, null, 2) + '\n', 'utf8');
   });

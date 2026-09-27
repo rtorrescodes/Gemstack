@@ -64,3 +64,22 @@ Si el usuario interactúa en lenguaje natural sin usar un `/comando` explícito,
    - Si pide revisar seguridad, permisos, tokens o vulnerabilidades, activa `gemstack-cso`.
 6. **Entrega o preparación de release:**
    - Si pide preparar el merge, PR o entrega formal de la feature terminada, activa `gemstack-ship`.
+
+## Ejecución Acotada y Localidad de Tarea (v2.0.3)
+1. **Flujo de Ejecución Predeterminado:**
+   `state.json` -> active task capsule (`.gemstack/task-context/<TASK-ID>.json`) -> module manifest (`.gemstack/modules/<module>.json`) -> archivos de alcance (`readFiles`/`writeFiles`) -> tests acotados (`scopedTestCommand`) -> state update -> STOP.
+2. **Niveles Progresivos de Contexto:**
+   - **Level 0 (Frontera):** Lee únicamente `.gemstack/state.json`, cápsula de la tarea activa y `context-capsule.json`.
+   - **Level 1 (Módulo):** Carga exclusivamente los archivos declarados en `readFiles`/`writeFiles` y contratos del módulo.
+   - **Level 2 (Dependencias directas):** Carga contratos de módulos de los que dependa (`dependsOn`).
+   - **Level 3 (Artefactos del hito activo):** Lectura acotada de secciones de `spec.md`/`plan.md` SOLO si la cápsula presenta contradicción.
+   - **Level 4 (Repositorio global / Historia):** PROHIBIDO en tareas ordinarias. Requiere justificación explícita (`UNRESOLVED_CONTRACT`, `SECURITY_BOUNDARY`, `EXPLICIT_AUDIT`).
+3. **Presupuesto de Contexto:**
+   - Límite máximo: 12,000 tokens (meta óptima: <8,000 tokens).
+   - Prohibido expandir contexto silenciosamente.
+4. **Protección contra Archivos Voluminosos:**
+   - Archivos > 500 LOC: utilizar lectura por rangos o símbolos. PROHIBIDO volcar archivos de > 800 LOC completos en el prompt conversacional.
+5. **Aislamiento de Specs Históricas:**
+   - En tareas ordinarias de implementación queda estrictamente prohibida la lectura de `specs/<non-active-milestone>/**`.
+6. **Tests Acotados:**
+   - El ciclo de desarrollo ejecuta únicamente `scopedTestCommand`. La suite completa del repositorio solo se corre al cerrar hitos o en pre-PR.

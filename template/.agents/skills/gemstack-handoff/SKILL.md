@@ -13,10 +13,13 @@ Esta habilidad se ejecuta cuando el usuario pide terminar la sesión, invoca `/h
 1. Lee el archivo `handoff.md` actual en la raíz del proyecto.
 2. Actualiza las secciones "1. Objetivo" y "2. Estado actual" basado en lo logrado en esta sesión.
 3. Enumera en "3. Archivos y cambios" los archivos modificados.
-4. **CRÍTICO:** NO borres las entradas existentes bajo "4. Intentos fallidos". Si hiciste nuevos descubrimientos de enfoques que no funcionan, añádelos.
-5. **ARCHIVADO SEGURO:** Si "Intentos fallidos" en `handoff.md` tiene demasiados puntos (más de 10-15), CORTA los elementos más antiguos y pégalos en `handoff_archive.md` bajo su lista, conservando solo los 3-5 intentos recientes en `handoff.md`.
-6. Define los "5. Próximos pasos" exactos para la próxima sesión.
+4. **CRÍTICO:** NO borres las entradas recientes de "4. Intentos fallidos". Mantén solo los 3-5 intentos más recientes en `handoff.md`.
+5. **ARCHIVADO Y COMPACTACIÓN OBLIGATORIA (v2.0.3):**
+   - El archivo `handoff.md` debe mantenerse estrictamente en **<= 100 líneas** (preferiblemente `<1,500 tokens`).
+   - Mueve todo el histórico de intentos fallidos antiguos, bitácoras extensas y cambios anteriores a `handoff_archive.md`.
+   - `handoff.md` representa ÚNICAMENTE la frontera activa: hito, fase, última tarea, siguiente tarea, bloqueos, rama y comando exacto para retomar (`gemstack context <TASK-ID>`).
+6. Define los "5. Próximos pasos" exactos para la próxima sesión con el comando preciso de reanudación.
 7. Guarda los cambios en `handoff.md` (y `handoff_archive.md` si fue necesario).
-8. **Sincronización de Estado:** Verifica `.gemstack/state.json` asegurando que `current_phase` refleje con precisión si hay una spec activa o en espera, y actualiza `last_update` con la marca temporal actual.
+8. **Sincronización de Estado:** Verifica `.gemstack/state.json` asegurando que `schemaVersion` sea `0.3.0`, `current_phase`, `activeMilestone`, `activeTaskId` y `nextTaskId` reflejen la frontera.
 9. Despídete del usuario indicando que el handoff está listo.
 

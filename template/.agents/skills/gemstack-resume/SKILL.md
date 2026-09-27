@@ -10,9 +10,10 @@ triggers:
 Esta habilidad se ejecuta cuando el usuario inicia una sesión y escribe `/resume`.
 
 ## Instrucciones:
-1. Lee `handoff.md`.
-2. Lee `.gemstack/state.json` para restaurar el estado, el spec activo y si hay guard/freeze activado.
-3. Haz un breve resumen de 2-3 líneas para el usuario.
-4. Si hay "Intentos fallidos" relevantes en `handoff.md`, menciónalos brevemente.
-5. Pregunta al usuario si debes proceder con el primer paso o si hay algún cambio de prioridad.
+1. Lee `handoff.md` (máximo 100 líneas). **PROHIBIDO** leer `handoff_archive.md` durante la reanudación normal.
+2. Lee `.gemstack/state.json` para restaurar la frontera activa (`activeMilestone`, `activeTaskId`, `nextTaskId`, `guard_mode`).
+3. Si existe `activeTaskId`, ejecuta la verificación de contexto: `gemstack context <activeTaskId>`.
+4. Haz un breve resumen de 2-3 líneas para el usuario con el objetivo de la tarea activa y los archivos de alcance.
+5. Si hay "Intentos fallidos" relevantes en `handoff.md`, menciónalos brevemente.
+6. Pregunta al usuario si debes proceder con la tarea activa acotada.
 

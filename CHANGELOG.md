@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.3] - 2026-09-27
+
+### Context Budgeting & Task Locality
+Gemstack 2.0.3 introduces bounded task execution contexts, module boundaries, deterministic state schema migration, and granular dependency freshness, reducing agent token overhead by 80%+ while preserving 100% of operational project data.
+
+### Features & Enhancements
+- **Task Context Capsules (`src/lib/task-capsule.js`)**:
+  - Structured `.gemstack/task-context/<TASK-ID>.json` capsules with machine-readable objective, scope, and tests.
+  - State machine supporting `CURRENT`, `STALE_SPEC`, `STALE_PLAN`, `STALE_TASK`, `STALE_MODULE`, `MISSING_DEPENDENCY`, `INVALID_PATH`, `MILESTONE_MISMATCH`.
+  - Machine-side SHA-256 dependency fingerprinting without LLM text bloat.
+- **Module Manifests (`src/lib/module-manifest.js`)**:
+  - Explicit module boundaries in `.gemstack/modules/<module>.json` with static boundary violation and drift detection.
+- **State Schema Migration (`src/lib/state.js`)**:
+  - Separated `schemaVersion` (`0.3.0`) from `frameworkVersion` (`2.0.3`), preserving legacy operational state.
+- **Context Command & Budgeting (`src/commands/context.js`, `src/lib/context-budget.js`)**:
+  - `gemstack context <TASK-ID>` for bounded task execution without rereading full spec trees.
+  - Large-file range-reading warnings for files >500, >800, >1200 LOC.
+- **Direct Multi-Version Upgrade Matrix (`tests/upgrade-matrix.test.js`)**:
+  - Automated fixtures validating non-destructive upgrades from v1.0.1, v1.0.2, v1.4.0, and v2.0.2.
+- **Doctor Diagnostics (`src/commands/doctor.js`)**:
+  - Extended read-only verification for stale capsules, module drift, branch hygiene, and boundary violations.
+
 ## [v2.0.2] - 2026-09-24
 
 ### Operational Data Preservation & Updater Hardening
