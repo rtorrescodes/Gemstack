@@ -204,7 +204,7 @@ describe('Wave 1 / Suite 3: Findings, Anti-Loop, Exceptions & Atomic State (P1-D
     fs.writeFileSync(path.join(stateDir, 'state.json'), JSON.stringify(legacyState, null, 2), 'utf8');
 
     const loaded = readState(tempDir);
-    assert.equal(loaded.version, '0.1');
+    assert.equal(loaded.schemaVersion, '0.3.0');
     assert.equal(loaded.current_phase, 'spec');
     assert.equal(loaded.phase_hashes, null);
     assert.deepEqual(loaded.completed_phases, []);

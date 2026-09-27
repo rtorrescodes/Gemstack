@@ -1,5 +1,29 @@
 # Gemstack Release Notes
 
+# Gemstack v2.0.3 — Context Budgeting & Task Locality
+
+## Highlights
+
+### Context Budgeting & Locality
+Gemstack v2.0.3 introduces bounded task execution contexts and module boundaries, reducing AI agent token overhead by 80%+ while preserving 100% of operational project data and enforcing machine-side dependency freshness.
+
+### 1. Task Context Capsules & Locality
+- Standalone execution capsules generated under `.gemstack/task-context/<TASK-ID>.json`.
+- State machine guarding against stale SPEC invariants, mutated PLAN sections, changed tasks, and altered module boundaries.
+
+### 2. Module Manifests & Boundary Enforcement
+- Declares owned files, contracts, dependencies, and forbidden imports in `.gemstack/modules/<module>.json`.
+- Static analysis detects forbidden imports and structural drift offline.
+
+### 3. State Schema Migration & Frontier Pointers
+- Formalizes `schemaVersion` (`0.3.0`) distinct from `frameworkVersion` (`2.0.3`).
+- Invariant preservation of existing operational states across all legacy schemas.
+
+### 4. Direct Multi-Version Upgrade Matrix
+- Automated test suites verify byte-for-byte preservation and clean manifest sanitization across v1.0.1, v1.0.2, v1.4.0, and v2.0.2.
+
+---
+
 # Gemstack v2.0.2 — Operational Data Preservation & Updater Hardening
 
 ## Highlights

@@ -6,6 +6,7 @@ const os = require('os');
 const initCommand = require('../src/commands/init');
 const updateCommand = require('../src/commands/update');
 const fssafe = require('../src/lib/filesystem-safe');
+const manifestLib = require('../src/lib/manifest');
 
 function createTempDir() {
     return fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-test-'));
@@ -146,7 +147,7 @@ test('Update preserves operational files byte-for-byte and prunes them from mani
 
     // Verify manifest was migrated
     const updatedManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    assert.equal(updatedManifest.version, '2.0.2');
+    assert.equal(updatedManifest.version, manifestLib.getVersion());
     assert.equal(updatedManifest.files.some(f => f.path === 'handoff.md'), false);
     assert.equal(updatedManifest.files.some(f => f.path === '.gemstack/state.json'), false);
     assert.equal(updatedManifest.files.some(f => f.path.startsWith('specs/current/')), false);

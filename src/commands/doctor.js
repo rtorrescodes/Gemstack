@@ -75,5 +75,58 @@ module.exports = async (flags) => {
         logger.ok('Zero circular import cycles detected.');
     }
 
+    // v2.0.3 Context Locality & Module Drift Diagnostics (Read-Only)
+    const { readState } = require('../lib/state');
+    const state = readState(targetDir);
+
+    // Branch context check
+    try {
+        const { execSync } = require('node:child_process');
+        const currentBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: targetDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+        if (state.activeMilestone && currentBranch && !currentBranch.includes(state.activeMilestone.toLowerCase()) && !currentBranch.includes(state.activeMilestone)) {
+            logger.warn(`BRANCH_CONTEXT_STALE: Active milestone is "${state.activeMilestone}" but current git branch is "${currentBranch}".`);
+        }
+    } catch (_) {}
+
+    // Check modules
+    const modulesDir = fssafe.resolveSafe(targetDir, '.gemstack/modules');
+    if (fs.existsSync(modulesDir)) {
+        const { validateModuleDrift } = require('../lib/module-manifest');
+        for (const file of fs.readdirSync(modulesDir)) {
+            if (file.endsWith('.json')) {
+                try {
+                    const mod = JSON.parse(fs.readFileSync(path.join(modulesDir, file), 'utf8'));
+                    const drift = validateModuleDrift(targetDir, mod);
+                    if (!drift.valid) {
+                        for (const df of drift.findings) {
+                            logger.warn(`Module [${mod.module || file}] ${df.code}: ${df.message}`);
+                        }
+                    }
+                } catch (e) {
+                    logger.warn(`Malformed module manifest: ${file} (${e.message})`);
+                }
+            }
+        }
+    }
+
+    // Check task capsules
+    const tasksDir = fssafe.resolveSafe(targetDir, '.gemstack/task-context');
+    if (fs.existsSync(tasksDir)) {
+        const { validateTaskFreshness } = require('../lib/task-capsule');
+        for (const file of fs.readdirSync(tasksDir)) {
+            if (file.endsWith('.json')) {
+                try {
+                    const capsule = JSON.parse(fs.readFileSync(path.join(tasksDir, file), 'utf8'));
+                    const fresh = validateTaskFreshness(targetDir, capsule, state.activeMilestone);
+                    if (!fresh.valid) {
+                        logger.warn(`Task capsule [${capsule.taskId || file}] ${fresh.state}: ${fresh.reason}`);
+                    }
+                } catch (e) {
+                    logger.warn(`Malformed task capsule: ${file} (${e.message})`);
+                }
+            }
+        }
+    }
+
     logger.ok('Doctor checks completed.');
 };

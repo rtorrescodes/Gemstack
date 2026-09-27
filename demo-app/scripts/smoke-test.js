@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const http = require('http');
 const path = require('path');
 
-const PORT = 3001;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 const API_URL = `http://localhost:${PORT}/api`;
 
 async function fetchApi(path, options = {}) {
@@ -123,23 +123,35 @@ async function main() {
     console.log('[INFO] Spawning server...');
     const server = spawn('node', ['server.js'], { 
         cwd: path.resolve(__dirname, '..'),
-        stdio: ['ignore', 'ignore', 'pipe'] 
+        stdio: ['ignore', 'ignore', 'pipe'],
+        env: { ...process.env, PORT: String(PORT) }
     });
     server.stderr.on('data', d => {
         process.stderr.write(`[SERVER_ERR] ${d}`);
     });
     
+    const killServer = () => {
+        try {
+            if (process.platform === 'win32' && server.pid) {
+                const { execSync } = require('child_process');
+                execSync(`taskkill /pid ${server.pid} /T /F`, { stdio: 'ignore' });
+            } else {
+                server.kill();
+            }
+        } catch (_) {}
+    };
+
     const isHealthy = await checkHealth();
     if (!isHealthy) {
         console.error('[FAIL] Server did not start properly or healthcheck failed');
-        server.kill();
+        killServer();
         process.exit(1);
     }
     console.log('[OK] Server is healthy');
 
     const failed = await runTests();
 
-    server.kill();
+    killServer();
     console.log(`[INFO] Server stopped. Smoke tests completed.`);
     process.exit(failed ? 1 : 0);
 }

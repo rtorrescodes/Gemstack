@@ -19,7 +19,10 @@ const OPERATIONAL_PATTERNS = [
     /^specs\/current\//,
     /^docs\/qa\/latest-qa\.md$/,
     /^docs\/reviews\/latest-review\.md$/,
-    /^docs\/security\/latest-security-audit\.md$/
+    /^docs\/security\/latest-security-audit\.md$/,
+    /^\.gemstack\/modules\//,
+    /^\.gemstack\/task-context\//,
+    /^\.gemstack\/metrics\//
 ];
 
 function isOperationalFile(relativePath) {

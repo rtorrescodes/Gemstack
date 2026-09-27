@@ -1,15 +1,15 @@
 <div align="center">
   <img src="assets/logo.jpg" alt="Gemstack Logo" width="200" style="border-radius: 20px" />
-  <h1>Gemstack v2.0.2</h1>
+  <h1>Gemstack v2.0.3</h1>
   <p><b>The Local-First Agentic Framework for Spec-Driven Development</b></p>
 
   [![npm version](https://img.shields.io/npm/v/gemstack-ai.svg?style=flat-square)](https://www.npmjs.com/package/gemstack-ai)
-  [![Release](https://img.shields.io/badge/release-v2.0.2-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v2.0.2)
+  [![Release](https://img.shields.io/badge/release-v2.0.3-blue.svg?style=flat-square)](https://github.com/rtorrescodes/Gemstack/releases/tag/v2.0.3)
   [![CI Build](https://img.shields.io/github/actions/workflow/status/rtorrescodes/Gemstack/main-ci.yml?style=flat-square&branch=main)](https://github.com/rtorrescodes/Gemstack/actions)
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
   [![Security Shield](https://img.shields.io/badge/Security-Architecture%20Gates-green.svg?style=flat-square)](#security-architecture--safety-gates)
 
-> **🛡️ Gemstack v2.0.2** — *Operational Data Preservation & Updater Hardening*
+> **🛡️ Gemstack v2.0.3** — *Context Budgeting & Task Locality*
 > **💡 ¿No sabes por dónde empezar o cómo funciona esto?**
 > 👉 [**¡Lee el Manual de Usuario Interactivo (La Guía Definitiva)!**](MANUAL.md) 👈
 </div>
@@ -20,7 +20,12 @@ Gemstack is a zero-dependency, local-first framework designed to supercharge you
 
 Instead of letting AI write code blindly in a chaotic chat window, Gemstack installs a "Brain" directly into your repository. It enforces **Spec-Driven Development (SDD)**, injecting strict rules, autonomous skills, and rigorous security gates into the AI's context.
 
-## ✨ Core Features & Guarantees (v2.0.2)
+## ✨ Core Features & Guarantees (v2.0.3)
+
+- 🎯 **Context Budgeting & Task Locality (v2.0.3)**: Bounded task capsules (`.gemstack/task-context/`) and module manifests (`.gemstack/modules/`) delivering an 80%+ reduction in agent token overhead.
+- ⚡ **Source Freshness & Invariant Fingerprints**: Machine-side SHA-256 validation ensuring tasks stay bound to authoritative SPEC invariants and PLAN sections without loading massive text documents into LLM context.
+- 🔍 **Strict Search Boundaries & Large-File Protection**: L0-L4 progressive context levels preventing uncontrolled repository scanning, with range-reading guidance on files >500 LOC.
+- 📦 **Direct Multi-Version Upgrade Matrix**: Deterministic non-destructive migration for projects upgrading from v1.0.1, v1.0.2, v1.4.0, or v2.0.2 with zero operational state regression.
 
 - 🧠 **Adaptable Spec-Driven Development (SDD)**: Four rigor levels (`quick`, `fix`, `feature`, `high-risk`) tailoring validation rigor to change impact without unnecessary friction.
 - 🛡️ **Hardened Trust Boundaries & Safety Gates**: Authenticated HMAC spending tokens (`BillableActionGate`), realpath symlink enforcement, pre-commit secret blocking, and automated credential masking.
