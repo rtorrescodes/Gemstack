@@ -6,6 +6,7 @@ const os = require('node:os');
 const crypto = require('node:crypto');
 const updateCommand = require('../src/commands/update');
 const doctorCommand = require('../src/commands/doctor');
+const verifyCommand = require('../src/commands/verify');
 const manifestLib = require('../src/lib/manifest');
 const { readState } = require('../src/lib/state');
 
@@ -39,7 +40,19 @@ describe('Gemstack v2.0.3 Direct Upgrade Safety Matrix (1.0.1, 1.0.2, 1.4.0, 2.0
     fs.mkdirSync(path.join(projDir, '.agents', 'rules'), { recursive: true });
 
     // Operational files
-    fs.writeFileSync(path.join(projDir, 'handoff.md'), `# Operational Handoff\n- Milestone: MVP-38\n- Critical notes preserved\n`, 'utf8');
+    const validHandoff = `# Operational Handoff
+## 1. Objetivo
+Milestone MVP-38
+## 2. Estado actual
+In progress
+## 3. Archivos y cambios
+Active changes
+## 4. Intentos fallidos
+None
+## 5. Próximos pasos
+Finish tasks
+`;
+    fs.writeFileSync(path.join(projDir, 'handoff.md'), validHandoff, 'utf8');
     fs.writeFileSync(path.join(projDir, 'handoff_archive.md'), `# Handoff Archive\n- Old log 1\n- Old log 2\n`, 'utf8');
     fs.writeFileSync(path.join(projDir, '.gemstack', 'learnings.md'), `# Learnings\n- Invariant 1\n`, 'utf8');
     fs.writeFileSync(path.join(projDir, 'specs', 'current', 'spec.md'), `# Active Spec\nInvariants here\n`, 'utf8');
@@ -56,6 +69,13 @@ describe('Gemstack v2.0.3 Direct Upgrade Safety Matrix (1.0.1, 1.0.2, 1.4.0, 2.0
 
     // Framework file with user modification
     fs.writeFileSync(path.join(projDir, '.agents', 'rules', '01-gemstack-core.md'), `# Custom User Core Rule\nDo not overwrite me\n`, 'utf8');
+
+    // Feature specs matching active_spec
+    const activeSpecDir = path.join(projDir, 'specs', '038-graphics-engine');
+    fs.mkdirSync(activeSpecDir, { recursive: true });
+    fs.writeFileSync(path.join(activeSpecDir, 'spec.md'), `# Active Spec\nInvariants here\n`, 'utf8');
+    fs.writeFileSync(path.join(activeSpecDir, 'plan.md'), `# Active Plan\nArchitecture plan\n`, 'utf8');
+    fs.writeFileSync(path.join(activeSpecDir, 'tasks.md'), `# Active Tasks\n- [ ] TASK-1\n`, 'utf8');
 
     // State file
     const stateObj = {
@@ -108,6 +128,7 @@ describe('Gemstack v2.0.3 Direct Upgrade Safety Matrix (1.0.1, 1.0.2, 1.4.0, 2.0
         '.gemstack/modules/graphics.json',
         '.gemstack/task-context/TASK-1.json',
         '.gemstack/metrics/TASK-1.json',
+        '.gemstack/state.json',
         '.agents/rules/01-gemstack-core.md'
       ];
       const preHashes = {};
@@ -167,17 +188,60 @@ describe('Gemstack v2.0.3 Direct Upgrade Safety Matrix (1.0.1, 1.0.2, 1.4.0, 2.0
     }
 
     const preHandoff = fs.readFileSync(path.join(projDir, 'handoff.md'), 'utf8');
+    const statePath = path.join(projDir, '.gemstack', 'state.json');
+    const preStateHash = hashFile(statePath);
 
     // Run update
     await updateCommand({ target: projDir, yes: true });
 
-    // Ensure working tree and handoff intact
+    // Ensure working tree, handoff and state file are byte-for-byte intact
     const postHandoff = fs.readFileSync(path.join(projDir, 'handoff.md'), 'utf8');
     assert.strictEqual(postHandoff, preHandoff);
+    assert.strictEqual(hashFile(statePath), preStateHash, 'Vektorcast state.json must remain byte-for-byte unchanged after update');
 
-    // Verify state
+    // Manifest is 2.0.3
+    const manifest = JSON.parse(fs.readFileSync(path.join(projDir, '.gemstack', 'manifest.json'), 'utf8'));
+    assert.strictEqual(manifest.version, '2.0.3');
+
+    // Verify doctor is strictly read-only
+    await doctorCommand({ target: projDir });
+    assert.strictEqual(hashFile(statePath), preStateHash, 'Doctor must not mutate state.json');
+
+    // Verify verify is strictly read-only
+    try {
+      await verifyCommand({ target: projDir });
+    } catch (_) {}
+    assert.strictEqual(hashFile(statePath), preStateHash, 'Verify must not mutate state.json');
+
+    // Verify in-memory normalized read
     const state = readState(projDir);
     assert.strictEqual(state.activeMilestone, 'MVP-38');
     assert.strictEqual(state.schemaVersion, '0.3.0');
+    assert.strictEqual(state.frameworkVersion, '2.0.3');
+    assert.strictEqual(hashFile(statePath), preStateHash, 'readState must not mutate state.json on disk');
+
+    // First mutating operational command (e.g. state mutation via writeStateAtomic)
+    const { writeStateAtomic } = require('../src/lib/state');
+    state.current_phase = 'shipped';
+    state.status = 'SHIPPED';
+    writeStateAtomic(projDir, state);
+
+    // Now disk state is migrated to 0.3.0
+    const rawSaved = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    assert.strictEqual(rawSaved.schemaVersion, '0.3.0');
+    assert.strictEqual(rawSaved.version, '0.3.0');
+    assert.strictEqual(rawSaved.frameworkVersion, '2.0.3');
+    assert.strictEqual(rawSaved.current_phase, 'shipped');
+    assert.strictEqual(rawSaved.activeMilestone, 'MVP-38');
+    assert.strictEqual(rawSaved.custom_extension_data.foo, 'bar');
+
+    // Already migrated: second mutation remains 0.3.0 without destructive loss
+    const postMigrationHash = hashFile(statePath);
+    state.current_phase = 'maintenance';
+    writeStateAtomic(projDir, state);
+    const rawSecond = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+    assert.strictEqual(rawSecond.schemaVersion, '0.3.0');
+    assert.strictEqual(rawSecond.current_phase, 'maintenance');
+    assert.strictEqual(rawSecond.custom_extension_data.foo, 'bar');
   });
 });

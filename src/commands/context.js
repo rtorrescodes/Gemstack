@@ -20,8 +20,7 @@ const {
   computeTaskContextUsage
 } = require('../lib/context-budget');
 const {
-  readState,
-  writeStateAtomic
+  readState
 } = require('../lib/state');
 
 async function contextCommand(args = [], flags = {}) {
