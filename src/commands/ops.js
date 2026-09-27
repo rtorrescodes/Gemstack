@@ -21,30 +21,37 @@ module.exports = async (flags) => {
 
     console.log('\n' + '='.repeat(75));
     console.log('🛡️ GEMSTACK OPERATIONS — REPORTE DE SALUD OPERATIVA (PRODUCCIÓN)');
-    console.log(`Fecha de auditoría: ${report.timestamp}`);
+    console.log(`Fecha de auditoría: ${report.auditTimestamp}`);
     console.log(`Directorio evaluado: ${report.targetDir}`);
+    console.log(`Rama detectada:      ${report.currentBranch} (${report.isMainBranch ? 'PRODUCCIÓN PRINCIPAL' : 'RAMA AISLADA'})`);
     console.log('='.repeat(75) + '\n');
 
     for (const finding of report.findings) {
         let badge = '⚪';
         if (finding.status === 'VERIFICADO') badge = '✅ VERIFICADO';
+        else if (finding.status === 'CONFIGURADO EN RAMA') badge = '🌿 CONFIGURADO EN RAMA';
         else if (finding.status === 'REQUIERE ATENCIÓN') badge = '⚠️ REQUIERE ATENCIÓN';
         else badge = '❓ NO COMPROBADO';
 
         console.log(`[${finding.pillar}] ${finding.name}`);
-        console.log(`  Estado:    ${badge}`);
-        console.log(`  Evidencia: ${finding.evidence}`);
+        console.log(`  Estado:         ${badge}`);
+        console.log(`  Tipo Evidencia: ${finding.evidenceType}`);
+        console.log(`  Fuente:         ${finding.source}`);
+        console.log(`  Fecha:          ${finding.evidenceDate}`);
+        console.log(`  Frescura:       ${finding.freshness}`);
+        console.log(`  Detalle:        ${finding.evidence}`);
         if (finding.recommendation) {
-            console.log(`  Acción:    ${finding.recommendation}`);
+            console.log(`  Acción:         ${finding.recommendation}`);
         }
         console.log('');
     }
 
     console.log('-'.repeat(75));
     console.log(`📊 BALANCE FINAL DE OPERACIONES:`);
-    console.log(`   - VERIFICADO:        ${report.summary.verificado}`);
-    console.log(`   - REQUIERE ATENCIÓN: ${report.summary.requiereAtencion}`);
-    console.log(`   - NO COMPROBADO:     ${report.summary.noComprobado}`);
+    console.log(`   - VERIFICADO:          ${report.summary.verificado}`);
+    console.log(`   - CONFIGURADO EN RAMA: ${report.summary.configuradoEnRama || 0}`);
+    console.log(`   - REQUIERE ATENCIÓN:   ${report.summary.requiereAtencion}`);
+    console.log(`   - NO COMPROBADO:       ${report.summary.noComprobado}`);
     console.log('-'.repeat(75) + '\n');
 
     if (flags.json) {
