@@ -22,13 +22,14 @@ module.exports = async (flags) => {
     console.log('\n' + '='.repeat(75));
     console.log('🛡️ GEMSTACK OPERATIONS — REPORTE DE SALUD OPERATIVA (PRODUCCIÓN)');
     console.log(`Fecha de auditoría: ${report.auditTimestamp}`);
-    console.log(`Directorio evaluado: ${report.targetDir}`);
+    console.log(`Proyecto evaluado:  ${report.projectName}`);
     console.log(`Rama detectada:      ${report.currentBranch} (${report.isMainBranch ? 'PRODUCCIÓN PRINCIPAL' : 'RAMA AISLADA'})`);
     console.log('='.repeat(75) + '\n');
 
     for (const finding of report.findings) {
         let badge = '⚪';
         if (finding.status === 'VERIFICADO') badge = '✅ VERIFICADO';
+        else if (finding.status === 'PROBADO LOCALMENTE') badge = '🔬 PROBADO LOCALMENTE';
         else if (finding.status === 'CONFIGURADO EN RAMA') badge = '🌿 CONFIGURADO EN RAMA';
         else if (finding.status === 'REQUIERE ATENCIÓN') badge = '⚠️ REQUIERE ATENCIÓN';
         else badge = '❓ NO COMPROBADO';
@@ -49,6 +50,7 @@ module.exports = async (flags) => {
     console.log('-'.repeat(75));
     console.log(`📊 BALANCE FINAL DE OPERACIONES:`);
     console.log(`   - VERIFICADO:          ${report.summary.verificado}`);
+    console.log(`   - PROBADO LOCALMENTE:  ${report.summary.probadoLocalmente || 0}`);
     console.log(`   - CONFIGURADO EN RAMA: ${report.summary.configuradoEnRama || 0}`);
     console.log(`   - REQUIERE ATENCIÓN:   ${report.summary.requiereAtencion}`);
     console.log(`   - NO COMPROBADO:       ${report.summary.noComprobado}`);

@@ -94,3 +94,22 @@ test('gemstack ops: detects expired evidence when artifact is older than 7 days'
         fs.rmSync(tempDir, { recursive: true, force: true });
     }
 });
+
+test('gemstack ops: emits stable, privacy-safe JSON schema for Nexus and never assigns VERIFICADO_EN_PRODUCCION to static files', (t) => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gemstack-ops-nexus-'));
+
+    try {
+        const report = assessOperationalHealth(tempDir);
+        assert.strictEqual(report.schemaVersion, '1.0.0');
+        assert.ok(report.projectName);
+        assert.ok(report.auditTimestamp);
+        assert.ok(Array.isArray(report.findings));
+        assert.ok(typeof report.summary === 'object');
+
+        // Verify zero false positives for VERIFICADO_EN_PRODUCCION
+        const prodVerifiedFindings = report.findings.filter(f => f.evidenceType === 'VERIFICADO_EN_PRODUCCION');
+        assert.strictEqual(prodVerifiedFindings.length, 0);
+    } finally {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+});

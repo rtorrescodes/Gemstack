@@ -203,13 +203,13 @@ function assessOperationalHealth(targetDir = process.cwd()) {
             addFinding({
                 pillar: 'Controles de CI/CD & Rollback',
                 name: 'Pipeline con pre-deploy gate, escaneo Trivy y smoke check',
-                status: isMainBranch ? 'VERIFICADO' : 'CONFIGURADO EN RAMA',
+                status: isMainBranch ? 'PROBADO LOCALMENTE' : 'CONFIGURADO EN RAMA',
                 source: '.github/workflows/deploy.yml',
-                evidenceType: isMainBranch ? 'VERIFICADO_EN_PRODUCCION' : 'CONFIGURADO_EN_RAMA',
-                evidence: `Workflow (.github/workflows/deploy.yml) endurecido con quality gate, escaneo Trivy y verificación post-deploy. Estado en rama: ${currentBranch}.`,
+                evidenceType: isMainBranch ? 'PROBADO_LOCALMENTE' : 'CONFIGURADO_EN_RAMA',
+                evidence: `Workflow (.github/workflows/deploy.yml) configurado con quality gate, escaneo Trivy y verificación post-deploy. Ámbito: ${currentBranch}.`,
                 evidenceDate: mtime,
                 freshness: fresh,
-                recommendation: isMainBranch ? null : 'Hacer merge a main para activar el pipeline en despliegues reales.'
+                recommendation: isMainBranch ? 'Validar ejecución exitosa en GitHub Actions en el último commit.' : 'Hacer merge a main para activar el pipeline en despliegues reales.'
             });
         } else if (hasPreDeploy && hasSmokeCheck) {
             addFinding({
@@ -341,13 +341,13 @@ function assessOperationalHealth(targetDir = process.cwd()) {
         addFinding({
             pillar: 'Vulnerabilidades & Dependencias',
             name: 'Clasificador de vulnerabilidades Trivy y compuerta de despliegue',
-            status: isMainBranch ? 'VERIFICADO' : 'CONFIGURADO EN RAMA',
+            status: isMainBranch ? 'PROBADO LOCALMENTE' : 'CONFIGURADO EN RAMA',
             source: 'scripts/ops/scan-container-security.mjs',
-            evidenceType: isMainBranch ? 'VERIFICADO_EN_PRODUCCION' : 'CONFIGURADO_EN_RAMA',
-            evidence: `Script procesador de reportes Trivy en JSON con bloqueo automático de hallazgos CRITICAL con exploit activo. Estado en rama: ${currentBranch}.`,
+            evidenceType: isMainBranch ? 'PROBADO_LOCALMENTE' : 'CONFIGURADO_EN_RAMA',
+            evidence: `Script procesador de reportes Trivy en JSON con bloqueo automático de hallazgos CRITICAL y fallos del escáner. Ámbito: ${currentBranch}.`,
             evidenceDate: mtime,
             freshness: fresh,
-            recommendation: isMainBranch ? null : 'Hacer merge a main para activar el bloqueo de contenedor en despliegues reales.'
+            recommendation: isMainBranch ? 'Verificar ejecución de escaneo sobre imagen en Artifact Registry.' : 'Hacer merge a main para activar el bloqueo de contenedor en despliegues reales.'
         });
     } else if (fs.existsSync(pkgJsonPath)) {
         try {
@@ -412,15 +412,20 @@ function assessOperationalHealth(targetDir = process.cwd()) {
         });
     }
 
+    // Clean targetDir basename for privacy-safe telemetry (Nexus connector)
+    const sanitizedProjectName = path.basename(targetDir);
+
     return {
+        schemaVersion: '1.0.0',
         auditTimestamp,
-        targetDir,
+        projectName: sanitizedProjectName,
         currentBranch,
         isMainBranch,
         findings,
         summary: {
             total: findings.length,
             verificado: findings.filter(f => f.status === 'VERIFICADO').length,
+            probadoLocalmente: findings.filter(f => f.status === 'PROBADO LOCALMENTE').length,
             configuradoEnRama: findings.filter(f => f.status === 'CONFIGURADO EN RAMA').length,
             requiereAtencion: findings.filter(f => f.status === 'REQUIERE ATENCIÓN').length,
             noComprobado: findings.filter(f => f.status === 'NO COMPROBADO').length
