@@ -15,6 +15,7 @@ const contextCommand = require('./commands/context');
 const swarmCommand = require('./commands/swarm');
 const visualCommand = require('./commands/visual');
 const specCommand = require('./commands/spec');
+const opsCommand = require('./commands/ops');
 
 async function main() {
     const { command, args, flags } = parser.parse(process.argv);
@@ -26,6 +27,7 @@ Commands:
   update    Update Gemstack-owned files
   doctor    Check health of the installation
   verify    Run complete integrity, state, memory and security audit (alias: audit)
+  ops       Run Gemstack Operations production guardian and health assessment
   collect   Collect mechanical test matrix and closure evidence
   ship      Verify closure gates and transition feature to shipped
   context   Generate, show, or verify context capsule
@@ -57,6 +59,7 @@ Options:
             case 'doctor': await doctorCommand(flags); break;
             case 'verify':
             case 'audit': await verifyCommand(flags); break;
+            case 'ops': await opsCommand(flags); break;
             case 'collect': await collectCommand(flags); break;
             case 'ship': await shipCommand(flags); break;
             case 'context': await contextCommand(args, flags); break;
