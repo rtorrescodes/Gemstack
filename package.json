@@ -20,7 +20,8 @@
     "ci:secrets": "node scripts/ci/check-secrets.js",
     "ci:smoke": "node scripts/ci/smoke-cli.js",
     "ci:demo": "npm --prefix demo-app install && npm --prefix demo-app run smoke",
-    "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:secrets && npm run ci:smoke && npm run ci:demo"
+    "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:secrets && npm run ci:smoke && npm run ci:demo",
+    "graft:sync": "cd tools/graft && npm run cli -- build ../../"
   },
   "directories": {
     "doc": "docs",
