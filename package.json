@@ -21,7 +21,8 @@
     "ci:smoke": "node scripts/ci/smoke-cli.js",
     "ci:demo": "npm --prefix demo-app install && npm --prefix demo-app run smoke",
     "ci:all": "npm test && npm run ci:frontmatter && npm run ci:template && npm run ci:mojibake && npm run ci:package && npm run ci:secrets && npm run ci:smoke && npm run ci:demo",
-    "graft:sync": "cd tools/graft && npm run cli -- build ../../"
+    "graft:sync": "powershell C:\\\\CODES\\\\shared-tools\\\\graft-sync.ps1",
+    "security:audit": "powershell C:\\\\CODES\\\\shared-tools\\\\trivy-scan.ps1"
   },
   "directories": {
     "doc": "docs",
